@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34616.47
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RSSFeedifyRunner", "RSSFeedifyRunner\RSSFeedifyRunner.csproj", "{7806380C-63B3-4E77-A00E-ABD6D126B33B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RSSFeedify", "RSSFeedify\RSSFeedify.csproj", "{5D57D481-1254-4F2E-927E-B23AF3D512D7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7806380C-63B3-4E77-A00E-ABD6D126B33B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7806380C-63B3-4E77-A00E-ABD6D126B33B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7806380C-63B3-4E77-A00E-ABD6D126B33B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7806380C-63B3-4E77-A00E-ABD6D126B33B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5D57D481-1254-4F2E-927E-B23AF3D512D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5D57D481-1254-4F2E-927E-B23AF3D512D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5D57D481-1254-4F2E-927E-B23AF3D512D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5D57D481-1254-4F2E-927E-B23AF3D512D7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B1266C0D-FE96-417E-8E29-3320FBC476FB}
+	EndGlobalSection
+EndGlobal
