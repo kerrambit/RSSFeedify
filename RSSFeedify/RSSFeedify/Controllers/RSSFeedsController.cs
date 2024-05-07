@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PostgreSQL.Data;
 using RSSFeedify.Models;
@@ -89,10 +84,9 @@ namespace RSSFeedify.Controllers
                 PollingInterval = rSSFeedDTO.PollingInterval
             };
 
-            _context.RSSFeeds.Add(rSSFeed);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetRSSFeed", new { guid = rSSFeed.Guid }, rSSFeed);
+            var result = _repository.InsertRSSFeed(rSSFeed);
+            await _repository.SaveAsync();
+            return RepositoryResultToActionResultConvertor.Convert(result);
         }
 
         // DELETE: api/RSSFeeds/5

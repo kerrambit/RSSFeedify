@@ -52,14 +52,15 @@ namespace RSSFeedify.Repositories
             throw new NotImplementedException();
         }
 
-        public IEnumerable<RSSFeed> GetStudents()
+        public IEnumerable<RSSFeed> GetRSSFeeds()
         {
             throw new NotImplementedException();
         }
 
-        public void InsertRSSFeed(RSSFeed student)
+        public RepositoryResult InsertRSSFeed(RSSFeed feed)
         {
-            throw new NotImplementedException();
+            _data.Add(feed);
+            return new Created("GetRSSFeed", feed, feed.Guid);
         }
 
         public async Task SaveAsync()
