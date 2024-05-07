@@ -1,13 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using RSSFeedify.Repository;
 
 namespace RSSFeedify.Models
 {
-    public class RSSFeed
+    public class RSSFeed : Reposable
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Key]
-        public Guid Guid { get; set; }
         public string Name { get; set; }
         public string? Description { get; set; }
         public Uri SourceUrl {  get; set; }

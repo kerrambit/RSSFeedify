@@ -13,7 +13,7 @@ namespace RSSFeedify.Services
             {
                 case Success<T> success:
                     return new OkObjectResult(success.Data);
-                case Models.Created<T> create:
+                case Created<T> create:
                     return new CreatedAtActionResult(create.GetEndPoint, Controllername, new { guid = create.Guid }, create.Data);
                 default:
                     return new NotFoundResult();
