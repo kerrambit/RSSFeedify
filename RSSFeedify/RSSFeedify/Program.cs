@@ -14,7 +14,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<ApplicationDbContext>();
 
 // Register IRSSFeedRepository implementation
-builder.Services.AddScoped<IRSSFeedRepository, RSSFeedRepository>(); // Assuming RSSFeedRepository is your implementation
+builder.Services.AddScoped<IRSSFeedRepository, RSSFeedRepository>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

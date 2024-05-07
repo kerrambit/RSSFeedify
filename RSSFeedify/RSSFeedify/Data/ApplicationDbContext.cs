@@ -18,8 +18,6 @@ namespace PostgreSQL.Data
             options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
         }
 
-        public DbSet<TodoItem> TodoItems { get; set; }
-
         public DbSet<RSSFeed> RSSFeeds { get; set; }
     }
 }
