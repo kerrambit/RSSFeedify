@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PostgreSQL.Data;
@@ -12,9 +13,11 @@ using PostgreSQL.Data;
 namespace RSSFeedify.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240507173733_test-migration5")]
+    partial class testmigration5
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -87,9 +90,6 @@ namespace RSSFeedify.Migrations
                     b.Property<DateTime>("PublishDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("RSSFeedId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Summary")
                         .IsRequired()
                         .HasColumnType("text");
@@ -100,20 +100,7 @@ namespace RSSFeedify.Migrations
 
                     b.HasKey("Guid");
 
-                    b.HasIndex("RSSFeedId");
-
                     b.ToTable("RSSFeedsItems");
-                });
-
-            modelBuilder.Entity("RSSFeedify.Models.RSSFeedItem", b =>
-                {
-                    b.HasOne("RSSFeedify.Models.RSSFeed", "RSSFeed")
-                        .WithMany()
-                        .HasForeignKey("RSSFeedId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("RSSFeed");
                 });
 #pragma warning restore 612, 618
         }
