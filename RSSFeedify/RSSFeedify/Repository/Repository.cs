@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileSystemGlobbing;
 using PostgreSQL.Data;
 using RSSFeedify.Repository.Types;
 
@@ -6,8 +7,8 @@ namespace RSSFeedify.Repositories
 {
     public class Repository<T> : IRepository<T> where T : Reposable
     {
-        private DbContext _context;
-        private DbSet<T> _data;
+        protected DbContext _context;
+        protected DbSet<T> _data;
 
         public Repository(ApplicationDbContext context, DbSet<T> data)
         {
@@ -15,40 +16,40 @@ namespace RSSFeedify.Repositories
             _data = data;
         }
 
-        public async Task<RepositoryResult<T>> DeleteAsync(Guid studentGUID)
+        public async Task<RepositoryResult<T>> DeleteAsync(Guid guid)
         {
-            var result = await GetAsync(studentGUID);
-            var rSSFeed = result.Data;
+            var result = await GetAsync(guid);
+            var batch = result.Data;
 
-            if (rSSFeed == null)
+            if (batch == null)
             {
                 return new NotFoundError<T>();
             }
 
-            _data.Remove(rSSFeed);
-            return new Success<T>(rSSFeed);
+            _data.Remove(batch);
+            return new Success<T>(batch);
         }
 
-        public async Task<RepositoryResult<T>> GetAsync(Guid studentGUID)
+        public async Task<RepositoryResult<T>> GetAsync(Guid guid)
         {
-            var rSSFeed = await _data.FindAsync(studentGUID);
-            if (rSSFeed == null)
+            var batch = await _data.FindAsync(guid);
+            if (batch == null)
             {
                 return new NotFoundError<T>();
             }
-            return new Success<T>(rSSFeed);
+            return new Success<T>(batch);
         }
 
         public async Task<RepositoryResult<IEnumerable<T>>> GetAsync()
         {
-            var rSSFeeds = await _data.ToListAsync();
-            return new Success<IEnumerable<T>>(rSSFeeds);
+            var batches = await _data.ToListAsync();
+            return new Success<IEnumerable<T>>(batches);
         }
 
-        public RepositoryResult<T> Insert(T feed)
+        public RepositoryResult<T> Insert(T batch)
         {
-            _data.Add(feed);
-            return new Created<T>("GetRSSFeed", feed, feed.Guid);
+            _data.Add(batch);
+            return new Created<T>("GetRSSFeed", batch, batch.Guid);
         }
 
         public async Task SaveAsync()
@@ -56,15 +57,15 @@ namespace RSSFeedify.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public async Task<RepositoryResult<T>> UpdateAsync(Guid feedGUID, T feed)
+        public async Task<RepositoryResult<T>> UpdateAsync(Guid guid, T batch)
         {
             using (var dbContextTransaction = _context.Database.BeginTransaction())
             {
-                var original = await DeleteAsync(feedGUID);
-                Guid guid = original.Data.Guid;
-                feed.Guid = guid;
+                var original = await DeleteAsync(guid);
+                Guid originalGuid = original.Data.Guid;
+                batch.Guid = originalGuid;
 
-                var result = Insert(feed);
+                var result = Insert(batch);
                 await SaveAsync();
 
                 dbContextTransaction.Commit();
@@ -72,9 +73,9 @@ namespace RSSFeedify.Repositories
             }
         }
 
-        public RepositoryResult<bool> Exists(Guid feedGUID)
+        public RepositoryResult<bool> Exists(Guid guid)
         {
-            bool result = _data.Any(e => e.Guid == feedGUID);
+            bool result = _data.Any(e => e.Guid == guid);
             return new Success<bool>(result);
         }
     }

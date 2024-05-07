@@ -1,8 +1,6 @@
-﻿using RSSFeedify.Repository.Types;
-
-namespace RSSFeedify.Models
+﻿namespace RSSFeedify.Models
 {
-    public class RSSFeedItem : Reposable
+    public class RSSFeedItemDTO
     {
         public string Title { get; set; }
         public string Summary { get; set; }
@@ -13,6 +11,7 @@ namespace RSSFeedify.Models
         public List<string> Contributors { get; set; }
         public string Content { get; set; }
         public string Id { get; set; }
+
 
         public Guid RSSFeedId { get; set; }
     }
