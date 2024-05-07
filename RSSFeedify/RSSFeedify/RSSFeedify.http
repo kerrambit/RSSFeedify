@@ -1,0 +1,6 @@
+@RSSFeedify_HostAddress = http://localhost:5047
+
+GET {{RSSFeedify_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
