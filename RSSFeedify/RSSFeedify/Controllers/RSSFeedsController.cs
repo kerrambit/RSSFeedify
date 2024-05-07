@@ -3,6 +3,8 @@ using PostgreSQL.Data;
 using RSSFeedify.Models;
 using RSSFeedify.Repositories;
 using RSSFeedify.Services;
+using System.Xml;
+using System.ServiceModel.Syndication;
 
 namespace RSSFeedify.Controllers
 {
@@ -50,7 +52,63 @@ namespace RSSFeedify.Controllers
             var result = _repository.Insert(rSSFeed);
             await _repository.SaveAsync();
 
+            /// TMP ----------------------------------------------------------------------------------------------------
+            string url = "https://feeds.bbci.co.uk/news/rss.xml?edition=uk";
+            XmlReader reader = XmlReader.Create(url);
+            SyndicationFeed feed = SyndicationFeed.Load(reader);
+            reader.Close();
 
+            DateTimeOffset feetLastUpdatedTime = feed.LastUpdatedTime;
+            Console.WriteLine($"\n\nLast updated time of the feed: {feetLastUpdatedTime}.\n Individual feed items: ");
+
+            foreach (SyndicationItem item in feed.Items)
+            {
+                String subject = item.Title.Text;
+                String summary = item.Summary.Text;
+                System.Collections.ObjectModel.Collection<SyndicationLink> links = item.Links;
+                System.Collections.ObjectModel.Collection<SyndicationCategory> categories = item.Categories;
+                DateTimeOffset date = item.PublishDate;
+
+                // Authors
+                string authors = string.Join(", ", item.Authors.Select(a => a.Name));
+
+                // Contributors
+                string contributors = string.Join(", ", item.Contributors.Select(c => c.Name));
+
+                // Content
+                string? content = item.Content?.ToString();
+
+                // Id
+                string id = item.Id;
+
+                // BaseUri
+                Uri baseUri = item.BaseUri;
+
+                Console.WriteLine($"Subject: {subject}");
+                Console.WriteLine($"Summary: {summary}");
+                Console.WriteLine($"Authors: {authors}");
+                Console.WriteLine($"Contributors: {contributors}");
+                Console.WriteLine($"Content: {content}");
+                Console.WriteLine($"Id: {id}");
+                Console.WriteLine($"BaseUri: {baseUri}");
+
+                Console.WriteLine("\nLinks:");
+                foreach (var link in links)
+                {
+                    Console.WriteLine($"  - {link.Uri}");
+                }
+
+                Console.WriteLine("\nCategories:");
+                foreach (var category in categories)
+                {
+                    Console.WriteLine($"  - {category.Name}");
+                }
+
+                Console.WriteLine($"Publish Date: {date}");
+                Console.WriteLine("-----------------------------------------");
+            }
+
+            /// TMP ----------------------------------------------------------------------------------------------------
 
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
