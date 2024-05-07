@@ -8,7 +8,8 @@ namespace RSSFeedify.Repositories
         Task<RepositoryResult<RSSFeed>> GetRSSFeedByGUID(Guid feedGUID);
         RepositoryResult<RSSFeed> InsertRSSFeed(RSSFeed feed);
         Task<RepositoryResult<RSSFeed>> DeleteRSSFeedAsync(Guid feedGUID);
-        void UpdateRSSFeed(RSSFeed feed);
+        Task<RepositoryResult<RSSFeed>> UpdateRSSFeed(Guid feedGUID, RSSFeed feed);
         Task SaveAsync();
+        RepositoryResult<bool> RSSFeedExists(Guid feedGUID);
     }
 }

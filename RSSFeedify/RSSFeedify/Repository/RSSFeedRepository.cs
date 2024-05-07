@@ -76,9 +76,35 @@ namespace RSSFeedify.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public void UpdateRSSFeed(RSSFeed student)
+        public async Task<RepositoryResult<RSSFeed>> UpdateRSSFeed(Guid feedGUID, RSSFeed feed)
         {
-            throw new NotImplementedException();
+            var toUpdate = await GetRSSFeedByGUID(feedGUID);
+            if (toUpdate is NotFoundError<RSSFeed>)
+            {
+                return new NotFoundError<RSSFeed>();
+            }
+
+            toUpdate.Data.Name = feed.Name;
+            toUpdate.Data.Description = feed.Description;
+            toUpdate.Data.SourceUrl = feed.SourceUrl;
+            toUpdate.Data.PollingInterval = feed.PollingInterval;
+
+            try
+            {
+                await SaveAsync();
+            }
+            catch (DbUpdateConcurrencyException) when (!RSSFeedExists(feedGUID).Data)
+            {
+                return new NotFoundError<RSSFeed>();
+            }
+
+            return new Success<RSSFeed>(toUpdate.Data);
+        }
+
+        public RepositoryResult<bool> RSSFeedExists(Guid feedGUID)
+        {
+            bool result = _data.Any(e => e.Guid == feedGUID);
+            return new Success<bool>(result);
         }
     }
 }

@@ -2,9 +2,9 @@
 
 namespace RSSFeedify.Models
 {
-    public abstract class RepositoryResult<T> // Define RepositoryResult as a generic class
+    public abstract class RepositoryResult<T>
     {
-        public T Data { get; } // Data property is of type T
+        public T Data { get; }
 
         public RepositoryResult() { }
 
@@ -14,14 +14,14 @@ namespace RSSFeedify.Models
         }
     }
 
-    public class Success<T> : RepositoryResult<T> // Success is a generic class derived from RepositoryResult
+    public class Success<T> : RepositoryResult<T>
     {
         public Success() { }
 
         public Success(T data) : base(data) { }
     }
 
-    public class Created<T> : RepositoryResult<T> // Created is a generic class derived from RepositoryResult
+    public class Created<T> : RepositoryResult<T>
     {
         public string GetEndPoint { get; }
         public Guid Guid { get; }
@@ -33,7 +33,7 @@ namespace RSSFeedify.Models
         }
     }
 
-    public class NotFoundError<T> : RepositoryResult<T> // NotFoundError is a generic class derived from RepositoryResult
+    public class NotFoundError<T> : RepositoryResult<T>
     {
         public NotFoundError() { }
     }

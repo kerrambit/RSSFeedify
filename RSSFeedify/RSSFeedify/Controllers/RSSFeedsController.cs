@@ -1,10 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using PostgreSQL.Data;
 using RSSFeedify.Models;
 using RSSFeedify.Repositories;
 using RSSFeedify.Services;
-using System;
 
 namespace RSSFeedify.Controllers
 {
@@ -12,12 +10,10 @@ namespace RSSFeedify.Controllers
     [ApiController]
     public class RSSFeedsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IRSSFeedRepository _repository;
 
-        public RSSFeedsController(ApplicationDbContext context, IRSSFeedRepository repository)
+        public RSSFeedsController(IRSSFeedRepository repository)
         {
-            _context = context;
             _repository = repository;
         }
 
@@ -40,46 +36,17 @@ namespace RSSFeedify.Controllers
         // PUT: api/RSSFeeds/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{guid}")]
-        public async Task<IActionResult> PutRSSFeed(string guid, RSSFeed rSSFeed)
+        public async Task<ActionResult<RSSFeed>> PutRSSFeed(string guid, RSSFeedDTO rSSFeedDto)
         {
-            if (guid != rSSFeed.Guid.ToString())
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(rSSFeed).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!RSSFeedExists(new Guid(guid)))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
+            var result = await _repository.UpdateRSSFeed(new Guid(guid), RSSFeedDTOToRSSFeed.Convert(rSSFeedDto));
+            return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
 
         // POST: api/RSSFeeds
         [HttpPost]
         public async Task<ActionResult<RSSFeed>> PostRSSFeed(RSSFeedDTO rSSFeedDTO)
         {
-            var rSSFeed = new RSSFeed
-            {
-                Name = rSSFeedDTO.Name,
-                Description = rSSFeedDTO.Description,
-                SourceUrl = rSSFeedDTO.SourceUrl,
-                PollingInterval = rSSFeedDTO.PollingInterval
-            };
-
+            var rSSFeed = RSSFeedDTOToRSSFeed.Convert(rSSFeedDTO);
             var result = _repository.InsertRSSFeed(rSSFeed);
             await _repository.SaveAsync();
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
@@ -96,7 +63,7 @@ namespace RSSFeedify.Controllers
 
         private bool RSSFeedExists(Guid id)
         {
-            return _context.RSSFeeds.Any(e => e.Guid == id);
+            return _repository.RSSFeedExists(id).Data;
         }
     }
 }
