@@ -1,6 +1,6 @@
 ﻿using RSSFeedify.Models;
 
-namespace RSSFeedify.Services
+namespace RSSFeedify.Services.DataTypeConvertors
 {
     public static class RSSFeedDTOToRSSFeed
     {

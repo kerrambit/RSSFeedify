@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
-using RSSFeedify.Services;
+using RSSFeedify.Services.DataTypeConvertors;
 
 namespace RSSFeedify.Controllers
 {

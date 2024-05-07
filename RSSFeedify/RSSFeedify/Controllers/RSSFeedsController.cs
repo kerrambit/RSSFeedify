@@ -2,9 +2,9 @@
 using PostgreSQL.Data;
 using RSSFeedify.Models;
 using RSSFeedify.Repositories;
-using RSSFeedify.Services;
 using System.Xml;
 using System.ServiceModel.Syndication;
+using RSSFeedify.Services.DataTypeConvertors;
 
 namespace RSSFeedify.Controllers
 {

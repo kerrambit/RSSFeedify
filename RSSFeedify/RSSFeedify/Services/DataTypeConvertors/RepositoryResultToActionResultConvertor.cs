@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RSSFeedify.Repository.Types;
 
-namespace RSSFeedify.Services
+namespace RSSFeedify.Services.DataTypeConvertors
 {
     public static class RepositoryResultToActionResultConvertor<T>
     {
