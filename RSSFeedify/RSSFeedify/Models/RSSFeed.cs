@@ -1,4 +1,4 @@
-﻿using RSSFeedify.Repository;
+﻿using RSSFeedify.Repository.Types;
 
 namespace RSSFeedify.Models
 {

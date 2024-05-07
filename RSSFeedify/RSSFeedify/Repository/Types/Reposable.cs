@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
-namespace RSSFeedify.Repository
+namespace RSSFeedify.Repository.Types
 {
     public abstract class Reposable
     {

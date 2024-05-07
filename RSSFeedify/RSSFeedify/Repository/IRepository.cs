@@ -1,8 +1,8 @@
-﻿using RSSFeedify.Models;
+﻿using RSSFeedify.Repository.Types;
 
 namespace RSSFeedify.Repositories
 {
-    public interface IRepository<T>
+    public interface IRepository<T> where T : Reposable
     {
         Task<RepositoryResult<IEnumerable<T>>> GetAsync();
         Task<RepositoryResult<T>> GetAsync(Guid feedGUID);

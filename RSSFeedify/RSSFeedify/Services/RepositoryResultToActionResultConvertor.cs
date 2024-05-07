@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RSSFeedify.Models;
+using RSSFeedify.Repository.Types;
 
 namespace RSSFeedify.Services
 {

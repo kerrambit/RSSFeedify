@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace RSSFeedify.Models
+namespace RSSFeedify.Repository.Types
 {
     public abstract class RepositoryResult<T>
     {

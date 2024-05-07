@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PostgreSQL.Data;
-using RSSFeedify.Models;
-using RSSFeedify.Repository;
+using RSSFeedify.Repository.Types;
 
 namespace RSSFeedify.Repositories
 {
