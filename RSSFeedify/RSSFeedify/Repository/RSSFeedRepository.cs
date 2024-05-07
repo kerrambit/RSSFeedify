@@ -59,9 +59,10 @@ namespace RSSFeedify.Repositories
             return new Success<RSSFeed>(rSSFeed);
         }
 
-        public IEnumerable<RSSFeed> GetRSSFeeds()
+        public async Task<RepositoryResult<IEnumerable<RSSFeed>>> GetRSSFeeds()
         {
-            throw new NotImplementedException();
+            var rSSFeeds = await _data.ToListAsync();
+            return new Success<IEnumerable<RSSFeed>>(rSSFeeds);
         }
 
         public RepositoryResult<RSSFeed> InsertRSSFeed(RSSFeed feed)

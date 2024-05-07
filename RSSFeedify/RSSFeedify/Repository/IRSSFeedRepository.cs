@@ -4,7 +4,7 @@ namespace RSSFeedify.Repositories
 {
     public interface IRSSFeedRepository : IDisposable
     {
-        IEnumerable<RSSFeed> GetRSSFeeds();
+        Task<RepositoryResult<IEnumerable<RSSFeed>>> GetRSSFeeds();
         Task<RepositoryResult<RSSFeed>> GetRSSFeedByGUID(Guid feedGUID);
         RepositoryResult<RSSFeed> InsertRSSFeed(RSSFeed feed);
         Task<RepositoryResult<RSSFeed>> DeleteRSSFeedAsync(Guid feedGUID);

@@ -4,6 +4,7 @@ using PostgreSQL.Data;
 using RSSFeedify.Models;
 using RSSFeedify.Repositories;
 using RSSFeedify.Services;
+using System;
 
 namespace RSSFeedify.Controllers
 {
@@ -24,7 +25,8 @@ namespace RSSFeedify.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RSSFeed>>> GetRSSFeeds()
         {
-            return await _context.RSSFeeds.ToListAsync();
+            var result = await _repository.GetRSSFeeds();
+            return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeed>>.Convert(result);
         }
 
         // GET: api/RSSFeeds/5

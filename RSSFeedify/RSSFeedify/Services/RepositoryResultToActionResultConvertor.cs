@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+﻿using Microsoft.AspNetCore.Mvc;
 using RSSFeedify.Models;
 
 namespace RSSFeedify.Services
@@ -9,7 +7,7 @@ namespace RSSFeedify.Services
     {
         public static readonly string Controllername = "RSSFeeds";
 
-        public static ActionResult<RSSFeed> Convert(RepositoryResult<T> repositoryResult)
+        public static ActionResult<T> Convert(RepositoryResult<T> repositoryResult)
         {
             switch (repositoryResult)
             {
