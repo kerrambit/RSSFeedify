@@ -19,5 +19,6 @@ namespace PostgreSQL.Data
         }
 
         public DbSet<RSSFeed> RSSFeeds { get; set; }
+        public DbSet<RSSFeedItem> RSSFeedsItems { get; set; }
     }
 }
