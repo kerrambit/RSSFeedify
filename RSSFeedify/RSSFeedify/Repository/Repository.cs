@@ -48,6 +48,8 @@ namespace RSSFeedify.Repositories
 
         public RepositoryResult<T> Insert(T batch)
         {
+            batch.CreatedAt = DateTime.UtcNow;
+            batch.UpdatedAt = DateTime.UtcNow;
             _data.Add(batch);
             return new Created<T>("GetRSSFeed", batch, batch.Guid);
         }
@@ -63,9 +65,13 @@ namespace RSSFeedify.Repositories
             {
                 var original = await DeleteAsync(guid);
                 Guid originalGuid = original.Data.Guid;
+                DateTime originalCreatedAt = original.Data.CreatedAt;
                 batch.Guid = originalGuid;
+                batch.UpdatedAt = DateTime.UtcNow;
 
                 var result = Insert(batch);
+
+                batch.CreatedAt = originalCreatedAt;
                 await SaveAsync();
 
                 dbContextTransaction.Commit();

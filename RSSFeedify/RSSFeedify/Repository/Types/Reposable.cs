@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel;
 
 namespace RSSFeedify.Repository.Types
 {
@@ -8,5 +9,7 @@ namespace RSSFeedify.Repository.Types
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Key]
         public Guid Guid { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }
