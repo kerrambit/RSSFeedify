@@ -17,16 +17,18 @@ namespace RSSFeedify.Repositories
             _data = context.RSSFeeds;
         }
 
-        public async Task<RepositoryResult> DeleteRSSFeedAsync(Guid studentGUID)
+        public async Task<RepositoryResult<RSSFeed>> DeleteRSSFeedAsync(Guid studentGUID)
         {
-            var rSSFeed = await _data.FindAsync(studentGUID);
+            var result = await GetRSSFeedByGUID(studentGUID);
+            var rSSFeed = result.Data;
+
             if (rSSFeed == null)
             {
-                return new NotFoundError();
+                return new NotFoundError<RSSFeed>();
             }
 
             _data.Remove(rSSFeed);
-            return new Success(rSSFeed);
+            return new Success<RSSFeed>(rSSFeed);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -47,9 +49,14 @@ namespace RSSFeedify.Repositories
             GC.SuppressFinalize(this);
         }
 
-        public RSSFeed GetRSSFeedByGUID(Guid studentGUID)
+        public async Task<RepositoryResult<RSSFeed>> GetRSSFeedByGUID(Guid studentGUID)
         {
-            throw new NotImplementedException();
+            var rSSFeed = await _data.FindAsync(studentGUID);
+            if (rSSFeed == null)
+            {
+                return new NotFoundError<RSSFeed>();
+            }
+            return new Success<RSSFeed>(rSSFeed);
         }
 
         public IEnumerable<RSSFeed> GetRSSFeeds()
@@ -57,10 +64,10 @@ namespace RSSFeedify.Repositories
             throw new NotImplementedException();
         }
 
-        public RepositoryResult InsertRSSFeed(RSSFeed feed)
+        public RepositoryResult<RSSFeed> InsertRSSFeed(RSSFeed feed)
         {
             _data.Add(feed);
-            return new Created("GetRSSFeed", feed, feed.Guid);
+            return new Created<RSSFeed>("GetRSSFeed", feed, feed.Guid);
         }
 
         public async Task SaveAsync()

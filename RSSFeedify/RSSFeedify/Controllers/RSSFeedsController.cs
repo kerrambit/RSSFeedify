@@ -31,14 +31,8 @@ namespace RSSFeedify.Controllers
         [HttpGet("{guid}")]
         public async Task<ActionResult<RSSFeed>> GetRSSFeed(string guid)
         {
-            var rSSFeed = await _context.RSSFeeds.FindAsync(new Guid(guid));
-
-            if (rSSFeed == null)
-            {
-                return NotFound();
-            }
-
-            return rSSFeed;
+            var result = await _repository.GetRSSFeedByGUID(new Guid(guid));
+            return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
 
         // PUT: api/RSSFeeds/5
@@ -86,7 +80,7 @@ namespace RSSFeedify.Controllers
 
             var result = _repository.InsertRSSFeed(rSSFeed);
             await _repository.SaveAsync();
-            return RepositoryResultToActionResultConvertor.Convert(result);
+            return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
 
         // DELETE: api/RSSFeeds/5
@@ -95,7 +89,7 @@ namespace RSSFeedify.Controllers
         {            
             var result = await _repository.DeleteRSSFeedAsync(new Guid(guid));
             await _repository.SaveAsync();
-            return RepositoryResultToActionResultConvertor.Convert(result);
+            return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
 
         private bool RSSFeedExists(Guid id)
