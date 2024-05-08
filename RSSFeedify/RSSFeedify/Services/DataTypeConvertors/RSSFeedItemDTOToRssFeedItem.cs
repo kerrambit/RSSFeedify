@@ -4,10 +4,11 @@ namespace RSSFeedify.Services.DataTypeConvertors
 {
     public static class RSSFeedItemDTOToRssFeedItem
     {
-        public static RSSFeedItem Convert(RSSFeedItemDTO rSSFeedItemDTO)
+        public static RSSFeedItem Convert(RSSFeedItemDTO rSSFeedItemDTO, string additionalHash)
         {
             var rSSFeed = new RSSFeedItem
             {
+                Hash = additionalHash,
                 Title = rSSFeedItemDTO.Title,
                 Summary = rSSFeedItemDTO.Summary,
                 PublishDate = rSSFeedItemDTO.PublishDate,

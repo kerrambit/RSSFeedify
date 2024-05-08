@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
+using RSSFeedify.Services;
 using RSSFeedify.Services.DataTypeConvertors;
 
 namespace RSSFeedify.Controllers
@@ -37,7 +38,8 @@ namespace RSSFeedify.Controllers
         [HttpPut("{guid}")]
         public async Task<ActionResult<RSSFeedItem>> PutRSSFeedItem(string guid, RSSFeedItemDTO rSSFeedItemDto)
         {
-            var result = await _repository.UpdateAsync(new Guid(guid), RSSFeedItemDTOToRssFeedItem.Convert(rSSFeedItemDto));
+            var hash = RSSFeedPollingService.GenerateRSSFeedItemHash(rSSFeedItemDto.Title, rSSFeedItemDto.PublishDate);
+            var result = await _repository.UpdateAsync(new Guid(guid), RSSFeedItemDTOToRssFeedItem.Convert(rSSFeedItemDto, hash));
             return RepositoryResultToActionResultConvertor<RSSFeedItem>.Convert(result);
         }
 
@@ -46,7 +48,8 @@ namespace RSSFeedify.Controllers
         [HttpPost]
         public async Task<ActionResult<RSSFeedItem>> PostRSSFeedItem(RSSFeedItemDTO rSSFeedItemDto)
         {
-            var rSSFeed = RSSFeedItemDTOToRssFeedItem.Convert(rSSFeedItemDto);
+            var hash = RSSFeedPollingService.GenerateRSSFeedItemHash(rSSFeedItemDto.Title, rSSFeedItemDto.PublishDate);
+            var rSSFeed = RSSFeedItemDTOToRssFeedItem.Convert(rSSFeedItemDto, hash);
             var result = _repository.Insert(rSSFeed);
             await _repository.SaveAsync();
             return RepositoryResultToActionResultConvertor<RSSFeedItem>.Convert(result);
@@ -65,5 +68,7 @@ namespace RSSFeedify.Controllers
         {
             return _repository.Exists(id).Data;
         }
+
+        
     }
 }

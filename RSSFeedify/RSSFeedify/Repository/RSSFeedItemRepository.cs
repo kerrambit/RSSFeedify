@@ -13,7 +13,7 @@ namespace RSSFeedify.Repository
         public async Task<RepositoryResult<IEnumerable<RSSFeedItem>>> GetAsyncFilteredByForeignKey(Guid guid)
         {
             var entities = await _data.Where(e => e.RSSFeedId == guid).ToListAsync();
-            if (entities == null || !entities.Any())
+            if (entities == null)
             {
                 return new NotFoundError<IEnumerable<RSSFeedItem>>();
             }

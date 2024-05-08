@@ -4,6 +4,7 @@ using PostgreSQL.Data;
 using RSSFeedify.Models;
 using RSSFeedify.Repositories;
 using RSSFeedify.Repository;
+using RSSFeedify.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,14 +15,6 @@ builder.Services.AddControllers();
 // Register your DbContext
 builder.Services.AddDbContext<ApplicationDbContext>();
 
-// Register IRSSFeedRepository implementation
-builder.Services.AddScoped<IRepository<RSSFeed>>(serviceProvider =>
-{
-    var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-    var dbSet = context.Set<RSSFeed>();
-    return new Repository<RSSFeed>(context, dbSet);
-});
-
 // Register IRSSFeedItemRepository implementation
 builder.Services.AddScoped<IRSSFeedItemRepository>(serviceProvider =>
 {
@@ -30,9 +23,20 @@ builder.Services.AddScoped<IRSSFeedItemRepository>(serviceProvider =>
     return new RSSFeedItemRepository(context, dbSet);
 });
 
+// Register IRSSFeedRepository implementation
+builder.Services.AddScoped<IRSSFeedRepository>(serviceProvider =>
+{
+    var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+    var dbSet = context.Set<RSSFeed>();
+    return new RSSFeedRepository(context, dbSet);
+});
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// (...)
+builder.Services.AddHostedService<RSSFeedPollingService>();
 
 var app = builder.Build();
 
