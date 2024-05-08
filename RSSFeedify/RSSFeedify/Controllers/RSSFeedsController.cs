@@ -1,10 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PostgreSQL.Data;
 using RSSFeedify.Models;
 using RSSFeedify.Repositories;
-using System.Xml;
-using System.ServiceModel.Syndication;
 using RSSFeedify.Services.DataTypeConvertors;
+using RSSFeedify.Services;
+using RSSFeedify.Repository;
+using Microsoft.EntityFrameworkCore;
+using System;
+using PostgreSQL.Data;
+using System.Security.Policy;
 
 namespace RSSFeedify.Controllers
 {
@@ -13,10 +16,14 @@ namespace RSSFeedify.Controllers
     public class RSSFeedsController : ControllerBase
     {
         private readonly IRepository<RSSFeed> _repository;
+        private readonly IRSSFeedItemRepository _rSSFeedItemRepository;
+        private readonly ApplicationDbContext _context;
 
-        public RSSFeedsController(IRepository<RSSFeed> repository)
+        public RSSFeedsController(ApplicationDbContext context, IRepository<RSSFeed> repository, IRSSFeedItemRepository rSSFeedItemRepository)
         {
+            _context = context;
             _repository = repository;
+            _rSSFeedItemRepository = rSSFeedItemRepository;
         }
 
         // GET: api/RSSFeeds
@@ -49,66 +56,72 @@ namespace RSSFeedify.Controllers
         public async Task<ActionResult<RSSFeed>> PostRSSFeed(RSSFeedDTO rSSFeedDTO)
         {
             var rSSFeed = RSSFeedDTOToRSSFeed.Convert(rSSFeedDTO);
+
+            var data = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
+            //var data = RSSFeedPollingService.LoadRSSFeedItemsFromUri(new Uri("https://feedsfwergrwegergerger"));
+            if (!data.success)
+            {
+                rSSFeed.LastPoll = DateTime.UtcNow;
+            } else
+            {
+                rSSFeed.LastPoll = DateTime.UtcNow;
+                rSSFeed.LastSuccessfullPoll = rSSFeed.LastPoll;
+            }
+
             var result = _repository.Insert(rSSFeed);
             await _repository.SaveAsync();
 
-            /// TMP ----------------------------------------------------------------------------------------------------
-            string url = "https://feeds.bbci.co.uk/news/rss.xml?edition=uk";
-            XmlReader reader = XmlReader.Create(url);
-            SyndicationFeed feed = SyndicationFeed.Load(reader);
-            reader.Close();
-
-            DateTimeOffset feetLastUpdatedTime = feed.LastUpdatedTime;
-            Console.WriteLine($"\n\nLast updated time of the feed: {feetLastUpdatedTime}.\n Individual feed items: ");
-
-            foreach (SyndicationItem item in feed.Items)
+            Console.WriteLine("\n----------------- POST of RSSFeed -----------------");
+            Console.WriteLine($"Last updated time of the feed: {data.lastUpdate}.\nIndividual feed items: ");
+            foreach (var pair in data.items)
             {
-                String subject = item.Title.Text;
-                String summary = item.Summary.Text;
-                System.Collections.ObjectModel.Collection<SyndicationLink> links = item.Links;
-                System.Collections.ObjectModel.Collection<SyndicationCategory> categories = item.Categories;
-                DateTimeOffset date = item.PublishDate;
+                Console.WriteLine($"Hash: {pair.hash}");
+                var item = pair.dto;
+                Console.WriteLine($"Title: {item.Title}");
+                Console.WriteLine($"Summary: {item.Summary}");
+                Console.WriteLine($"Publish Date: {item.PublishDate}");
+                Console.WriteLine($"Content: {item.Content}");
+                Console.WriteLine($"Id: {item.Id}");
 
-                // Authors
-                string authors = string.Join(", ", item.Authors.Select(a => a.Name));
+                Console.WriteLine("\nAuthors:");
+                foreach (var author in item.Authors)
+                {
+                    Console.WriteLine($" - {author}");
+                }
 
-                // Contributors
-                string contributors = string.Join(", ", item.Contributors.Select(c => c.Name));
-
-                // Content
-                string? content = item.Content?.ToString();
-
-                // Id
-                string id = item.Id;
-
-                // BaseUri
-                Uri baseUri = item.BaseUri;
-
-                Console.WriteLine($"Subject: {subject}");
-                Console.WriteLine($"Summary: {summary}");
-                Console.WriteLine($"Authors: {authors}");
-                Console.WriteLine($"Contributors: {contributors}");
-                Console.WriteLine($"Content: {content}");
-                Console.WriteLine($"Id: {id}");
-                Console.WriteLine($"BaseUri: {baseUri}");
+                Console.WriteLine("\nContributors:");
+                foreach (var contributor in item.Contributors)
+                {
+                    Console.WriteLine($" - {contributor}");
+                }
 
                 Console.WriteLine("\nLinks:");
-                foreach (var link in links)
+                foreach (var link in item.Links)
                 {
-                    Console.WriteLine($"  - {link.Uri}");
+                    Console.WriteLine($" - {link}");
                 }
 
                 Console.WriteLine("\nCategories:");
-                foreach (var category in categories)
+                foreach (var category in item.Categories)
                 {
-                    Console.WriteLine($"  - {category.Name}");
+                    Console.WriteLine($"  - {category}");
                 }
 
-                Console.WriteLine($"Publish Date: {date}");
                 Console.WriteLine("-----------------------------------------");
             }
 
-            /// TMP ----------------------------------------------------------------------------------------------------
+            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            {
+                foreach (var item in data.items)
+                {
+                    var rSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(item.dto, item.hash);
+                    rSSFeedItem.RSSFeedId = rSSFeed.Guid;
+                    _ = _rSSFeedItemRepository.Insert(rSSFeedItem);
+                }
+
+                await _rSSFeedItemRepository.SaveAsync();
+                dbContextTransaction.Commit();
+            }
 
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }

@@ -34,6 +34,9 @@ builder.Services.AddScoped<IRSSFeedItemRepository>(serviceProvider =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// (...)
+builder.Services.AddHostedService<RSSFeedPollingService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
