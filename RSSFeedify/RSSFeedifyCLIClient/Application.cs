@@ -30,6 +30,9 @@ namespace RSSFeedifyCLIClient
                         case "quit":
                             appRunning = false;
                             break;
+                        case "add-feed":
+                            await rSSFeedService.AddNewFeed(parameters);
+                            break;
                         default:
                             break;
                     }
