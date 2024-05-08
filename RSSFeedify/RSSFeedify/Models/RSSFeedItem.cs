@@ -14,7 +14,6 @@ namespace RSSFeedify.Models
         public List<string> Contributors { get; set; }
         public string Content { get; set; }
         public string Id { get; set; }
-
         public Guid RSSFeedId { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace RSSFeedify.Repository.Types
 {
     public abstract class RepositoryResult<T>

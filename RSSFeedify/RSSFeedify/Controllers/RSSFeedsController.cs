@@ -1,13 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RSSFeedify.Models;
-using RSSFeedify.Repositories;
 using RSSFeedify.Services.DataTypeConvertors;
 using RSSFeedify.Services;
 using RSSFeedify.Repository;
-using Microsoft.EntityFrameworkCore;
-using System;
 using PostgreSQL.Data;
-using System.Security.Policy;
 
 namespace RSSFeedify.Controllers
 {
@@ -43,7 +39,6 @@ namespace RSSFeedify.Controllers
         }
 
         // PUT: api/RSSFeeds/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{guid}")]
         public async Task<ActionResult<RSSFeed>> PutRSSFeed(string guid, RSSFeedDTO rSSFeedDto)
         {
@@ -58,7 +53,6 @@ namespace RSSFeedify.Controllers
             var rSSFeed = RSSFeedDTOToRSSFeed.Convert(rSSFeedDTO);
 
             var data = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
-            //var data = RSSFeedPollingService.LoadRSSFeedItemsFromUri(new Uri("https://feedsfwergrwegergerger"));
             if (!data.success)
             {
                 rSSFeed.LastPoll = DateTime.UtcNow;
@@ -71,44 +65,44 @@ namespace RSSFeedify.Controllers
             var result = _rSSFeedRepository.Insert(rSSFeed);
             await _rSSFeedRepository.SaveAsync();
 
-            Console.WriteLine("\n----------------- POST of RSSFeed -----------------");
-            Console.WriteLine($"Last updated time of the feed: {data.lastUpdate}.\nIndividual feed items: ");
-            foreach (var pair in data.items)
-            {
-                Console.WriteLine($"Hash: {pair.hash}");
-                var item = pair.dto;
-                Console.WriteLine($"Title: {item.Title}");
-                Console.WriteLine($"Summary: {item.Summary}");
-                Console.WriteLine($"Publish Date: {item.PublishDate}");
-                Console.WriteLine($"Content: {item.Content}");
-                Console.WriteLine($"Id: {item.Id}");
+            //Console.WriteLine("\n----------------- POST of RSSFeed -----------------");
+            //Console.WriteLine($"Last updated time of the feed: {data.lastUpdate}.\nIndividual feed items: ");
+            //foreach (var pair in data.items)
+            //{
+            //    Console.WriteLine($"Hash: {pair.hash}");
+            //    var item = pair.dto;
+            //    Console.WriteLine($"Title: {item.Title}");
+            //    Console.WriteLine($"Summary: {item.Summary}");
+            //    Console.WriteLine($"Publish Date: {item.PublishDate}");
+            //    Console.WriteLine($"Content: {item.Content}");
+            //    Console.WriteLine($"Id: {item.Id}");
 
-                Console.WriteLine("\nAuthors:");
-                foreach (var author in item.Authors)
-                {
-                    Console.WriteLine($" - {author}");
-                }
+            //    Console.WriteLine("\nAuthors:");
+            //    foreach (var author in item.Authors)
+            //    {
+            //        Console.WriteLine($" - {author}");
+            //    }
 
-                Console.WriteLine("\nContributors:");
-                foreach (var contributor in item.Contributors)
-                {
-                    Console.WriteLine($" - {contributor}");
-                }
+            //    Console.WriteLine("\nContributors:");
+            //    foreach (var contributor in item.Contributors)
+            //    {
+            //        Console.WriteLine($" - {contributor}");
+            //    }
 
-                Console.WriteLine("\nLinks:");
-                foreach (var link in item.Links)
-                {
-                    Console.WriteLine($" - {link}");
-                }
+            //    Console.WriteLine("\nLinks:");
+            //    foreach (var link in item.Links)
+            //    {
+            //        Console.WriteLine($" - {link}");
+            //    }
 
-                Console.WriteLine("\nCategories:");
-                foreach (var category in item.Categories)
-                {
-                    Console.WriteLine($"  - {category}");
-                }
+            //    Console.WriteLine("\nCategories:");
+            //    foreach (var category in item.Categories)
+            //    {
+            //        Console.WriteLine($"  - {category}");
+            //    }
 
-                Console.WriteLine("-----------------------------------------");
-            }
+            //    Console.WriteLine("-----------------------------------------");
+            //}
 
             using (var dbContextTransaction = _context.Database.BeginTransaction())
             {
