@@ -48,7 +48,7 @@ namespace RSSFeedify.Repositories
         public RepositoryResult<T> Insert(T batch)
         {
             batch.CreatedAt = DateTime.UtcNow;
-            batch.UpdatedAt = DateTime.UtcNow;
+            batch.UpdatedAt = batch.CreatedAt;
             _data.Add(batch);
             return new Created<T>("GetRSSFeed", batch, batch.Guid);
         }
