@@ -2,7 +2,7 @@
 
 namespace RSSFeedifyCLIClient.Services
 {
-    public class HTTPService
+    public class HTTPService : IDisposable
     {
         private HttpClient _httpClient;
 
@@ -28,6 +28,11 @@ namespace RSSFeedifyCLIClient.Services
                     });
                 }
             }
+        }
+        public void Dispose()
+        {
+            Console.Write("I am deleting HTTP Client.");
+            _httpClient.Dispose();
         }
     }
 }
