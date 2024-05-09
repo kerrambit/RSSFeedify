@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace RSSFeedifyCLIClient.Settings
 {
     public static class Endpoints
     {
-        public static Uri BaseUrl { get; set; } = new(@"https://localhost:32776/api/");
+        public static Uri BaseUrl { get; set; } = new(@"https://localhost:32778/api/");
 
         public enum EndPoint
         {
