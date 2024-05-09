@@ -159,7 +159,7 @@ namespace RSSFeedify.Services
                 RSSFeedItemDTO newItem = new RSSFeedItemDTO
                 {
                     Title = item.Title.Text,
-                    Summary = item.Summary.Text,
+                    Summary = (item.Summary == null) ? "" : item.Summary.Text,
                     PublishDate = DateTime.SpecifyKind(item.PublishDate.DateTime, DateTimeKind.Utc),
                     Links = item.Links.Select(link => link.Uri).ToList(),
                     Categories = item.Categories.Select(category => category.Name).ToList(),
