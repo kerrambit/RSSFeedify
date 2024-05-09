@@ -26,7 +26,7 @@ namespace RSSFeedify.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RSSFeed>>> GetRSSFeeds()
         {
-            var result = await _rSSFeedRepository.GetAsync();
+            var result = await _rSSFeedRepository.GetSortedByAsync(feed => feed.Name);
             return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeed>>.Convert(result);
         }
 
