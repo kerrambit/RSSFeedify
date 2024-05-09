@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.Globalization;
+using System.Net;
+using System.Text;
 
 namespace RSSFeedifyCLIClient.Services
 {
@@ -23,22 +25,37 @@ namespace RSSFeedifyCLIClient.Services
 
         public async Task<(bool success, HttpResponseMessage response)> Get(Uri uri)
         {
-            using (_httpClient)
+            try
             {
-                try
+                HttpResponseMessage response = await _httpClient.GetAsync(uri.ToString());
+                return (true, response);
+            }
+            catch (Exception ex)
+            {
+                return (false, new HttpResponseMessage(HttpStatusCode.InternalServerError)
                 {
-                    HttpResponseMessage response = await _httpClient.GetAsync(uri.ToString());
-                    return (true, response);
-                }
-                catch (Exception ex)
-                {
-                    return (false, new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                    {
-                        Content = new StringContent($"Failed to fetch data from {uri}: {ex.Message}")
-                    });
-                }
+                    Content = new StringContent($"Failed to fetch data from {uri}: {ex.Message}")
+                });
             }
         }
+
+        public async Task<(bool success, HttpResponseMessage response)> Post(Uri uri, string payload, ContentType contentType = ContentType.AppJson)
+        {
+
+            try
+            {
+                HttpResponseMessage response = await _httpClient.PostAsync(uri.ToString(), new StringContent(payload, Encoding.UTF8, StringifyContentType(contentType)));
+                return (true, response);
+            }
+            catch (Exception ex)
+            {
+                return (false, new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                {
+                    Content = new StringContent($"Failed to post data to {uri}: {ex.Message}")
+                });
+            }
+        }
+
         public static ContentType GetContentType(HttpResponseMessage response)
         {
             switch (response.Content.Headers.ContentType?.MediaType)
@@ -60,6 +77,7 @@ namespace RSSFeedifyCLIClient.Services
                     return "text/plain";
             }
         }
+
         public void Dispose()
         {
             Console.Write("I am deleting HTTP Client.");
