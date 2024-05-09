@@ -16,17 +16,23 @@ namespace RSSFeedifyCLIClient.IO
 
         public void RenderWarningMessage(in string message)
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine($"[{Name}][Warning]: {message}");
+            Console.ResetColor();
         }
 
         public void RenderErrorMessage(in string message)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"[{Name}][Error]: {message}");
+            Console.ResetColor();
         }
 
         public void RenderDebugMessage(in string message)
         {
+            Console.ForegroundColor = ConsoleColor.Gray;
             Console.WriteLine($"[{Name}][Debug]: {message}");
+            Console.ResetColor();
         }
 
         public void RenderMessage(in string message)
