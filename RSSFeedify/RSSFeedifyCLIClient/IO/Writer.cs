@@ -3,7 +3,7 @@
 namespace RSSFeedifyCLIClient.IO
 {
     /// <summary>
-    /// Implements CommandHewAwayTool IWriter interface.
+    /// Implements ComamndParsonaut IWriter interface.
     /// </summary>
     public class Writer : IWriter
     {
