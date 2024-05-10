@@ -5,8 +5,6 @@ using RSSFeedifyCLIClient.Services;
 using RSSFeedifyCLIClient.Settings;
 using System.Net.Http.Json;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RSSFeedifyCLIClient.Business
 {
@@ -44,21 +42,41 @@ namespace RSSFeedifyCLIClient.Business
                 return;
             }
 
-            try
+            var feeds = await ReadJson<List<RSSFeed>>(data.response);
+            if (feeds is null)
             {
-                var feeds = await data.response.Content.ReadFromJsonAsync<List<RSSFeed>>();
-                foreach (var feed in feeds)
-                {
-                    RenderRSSFeed(feed);
-                }
+                return;
             }
-            catch (JsonException)
+            foreach (var feed in feeds)
             {
-                RenderErrorMessage(Error.InvalidJsonFormat);
+                RenderRSSFeed(feed);
             }
-            catch (Exception)
+        }
+
+        public async Task GetFeedItemsAsync(IList<ParameterResult> parameters)
+        {
+            string guid = parameters[0].String;
+            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, guid));
+            if (!data.success)
             {
-                RenderErrorMessage();
+                RenderErrorMessage(Error.Network);
+                return;
+            }
+
+            if (HTTPService.GetContentType(data.response) != HTTPService.ContentType.AppJson)
+            {
+                RenderErrorMessage(Error.DataType);
+                return;
+            }
+
+            var items = await ReadJson<List<RSSFeedItem>>(data.response);
+            if (items is null)
+            {
+                return;
+            }
+            foreach (var item in items)
+            {
+                RenderRSSFeedItem(item);
             }
         }
 
@@ -74,6 +92,28 @@ namespace RSSFeedifyCLIClient.Business
 
             _writer.RenderBareText("\nData were sent, new RSSFeed was registered:");
             await ParseRSSFeedInResponse(data.response);
+        }
+        private async Task<T?> ReadJson<T>(HttpResponseMessage response)
+        {
+            try
+            {
+                var data = await response.Content.ReadFromJsonAsync<T>();
+                if (data is null)
+                {
+                    return default(T);
+                }
+                return data;
+            }
+            catch (JsonException)
+            {
+                RenderErrorMessage(Error.InvalidJsonFormat);
+                return default(T);
+            }
+            catch (Exception)
+            {
+                RenderErrorMessage();
+                return default(T);
+            }
         }
 
         private async Task ParseRSSFeedInResponse(HttpResponseMessage response)
@@ -101,6 +141,17 @@ namespace RSSFeedifyCLIClient.Business
                            $"    Link: {feed.SourceUrl}\n" +
                            $"    PollingInterval: {feed.PollingInterval} minutes\n" +
                            $"    LastSuccessfulPolling: {feed.LastSuccessfullPoll}\n");
+        }
+
+        private void RenderRSSFeedItem(RSSFeedItem item)
+        {
+            _writer.RenderBareText($"RSSFeedItem [{item.Guid}]:\n" +
+                           $"    Title: '{item.Title}'\n" +
+                           $"    Summary: '{item.Summary}'\n" +
+                           $"    Publish Date: {item.PublishDate}\n" +
+                           $"    Id: {item.Id}\n" +
+                           $"    Authors: {((item.Authors.Count == 0) ? "[]" : string.Join('\n', item.Authors))}\n" +
+                           $"    Categories: {((item.Categories.Count == 0) ? "[]" : string.Join('\n', item.Categories))}\n");
         }
 
         private void RenderErrorMessage(Error error)
