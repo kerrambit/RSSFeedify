@@ -3,6 +3,7 @@ using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.Models;
 using RSSFeedifyCLIClient.Services;
 using RSSFeedifyCLIClient.Settings;
+using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -53,10 +54,58 @@ namespace RSSFeedifyCLIClient.Business
             }
         }
 
-        public async Task GetFeedItemsAsync(IList<ParameterResult> parameters)
+        public async Task ShowArticle(IList<ParameterResult> parameters)
         {
             string guid = parameters[0].String;
             var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, guid));
+            if (!data.success)
+            {
+                RenderErrorMessage(Error.Network);
+                return;
+            }
+
+            if (HTTPService.GetContentType(data.response) != HTTPService.ContentType.AppJson)
+            {
+                RenderErrorMessage(Error.DataType);
+                return;
+            }
+            var article = await ReadJson<RSSFeedItem>(data.response);
+            if (article is null)
+            {
+                RenderErrorMessage(Error.InvalidJsonFormat);
+                return;
+            }
+
+            try
+            {
+                string link = article.Id;
+                if(!IsValidUrl(link))
+                {
+                    RenderInvalidUrlWarningMessage(link);
+                    return;
+                }
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = link,
+                    UseShellExecute = true
+                });
+
+            }
+            catch (System.ComponentModel.Win32Exception noBrowser)
+            {
+                _writer.RenderErrorMessage(noBrowser.Message);
+            }
+            catch (Exception other)
+            {
+                _writer.RenderErrorMessage(other.Message);
+            }
+        }
+
+        public async Task GetFeedItemsAsync(IList<ParameterResult> parameters)
+        {
+            string guid = parameters[0].String;
+            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, ("byRSSFeedGuid", guid)));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
@@ -177,6 +226,18 @@ namespace RSSFeedifyCLIClient.Business
         private void RenderErrorMessage()
         {
             RenderErrorMessage(Error.General);
+        }
+
+        private void RenderInvalidUrlWarningMessage(string link)
+        {
+            _writer.RenderWarningMessage($"Provided URL '{link}' does not seem to be valid URL and thus the link was refused to be opened in a browser.");
+        }
+
+        bool IsValidUrl(string url)
+        {
+            Uri? uriResult;
+            return Uri.TryCreate(url, UriKind.Absolute, out uriResult)
+                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
     }
 }

@@ -55,6 +55,9 @@ namespace RSSFeedifyCLIClient
                         case "get-feed":
                             await rSSFeedService.GetFeedItemsAsync(parameters);
                             break;
+                        case "show-article":
+                            await rSSFeedService.ShowArticle(parameters);
+                            break;
                         default:
                             break;
                     }
