@@ -2,7 +2,7 @@
 {
     public static class Endpoints
     {
-        public static Uri BaseUrl { get; set; } = new(@"https://localhost:32770/api/");
+        public static Uri BaseUrl { get; set; } = new(@"https://localhost:32772/api/");
 
         public enum EndPoint
         {
