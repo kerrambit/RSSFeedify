@@ -2,7 +2,7 @@
 {
     public static class Endpoints
     {
-        public static Uri BaseUrl { get; set; } = new(@"https://localhost:32768/api/");
+        public static Uri BaseUrl { get; set; } = new(@"https://localhost:32770/api/");
 
         public enum EndPoint
         {
@@ -31,6 +31,20 @@
         {
             string baseUriString = BuildUri(endpoint).ToString();
             string completeUriString = baseUriString + "/" + resourcePath;
+            return new Uri(completeUriString);
+        }
+
+        public static Uri BuildUri(EndPoint endpoint, (string key, string value) queryString)
+        {
+            string baseUriString = BuildUri(endpoint).ToString();
+            string completeUriString = baseUriString + $"?{queryString.key}={queryString.value}";
+            return new Uri(completeUriString);
+        }
+
+        public static Uri BuildUri(EndPoint endpoint, string resourcePath, (string key, string value) queryString)
+        {
+            string baseUriString = BuildUri(endpoint).ToString();
+            string completeUriString = baseUriString + "/" + resourcePath + $"?{queryString.key}={queryString.value}";
             return new Uri(completeUriString);
         }
     }
