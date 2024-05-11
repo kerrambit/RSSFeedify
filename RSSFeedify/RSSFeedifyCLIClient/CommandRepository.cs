@@ -17,6 +17,7 @@ namespace RSSFeedifyCLIClient.Repository
             Command getRSSFeedItems = new Command("get-feed", "guid:STRING", "Displays RSSFeed items.", new List<ParameterType> { ParameterType.String });
             Command showArticle = new Command("show-article", "guid:STRING", "Opens a link of the RSSFeedItem in the default browser.", new List<ParameterType> { ParameterType.String });
 
+            Command next = new Command("next", "", "Shows new page when listing", []);
             Command quit = new Command("quit", "", "Quits the application.", new List<ParameterType> { });
 
             commands["list-feeds"] = listFeeds;
@@ -25,6 +26,7 @@ namespace RSSFeedifyCLIClient.Repository
             commands["get-feed"] = getRSSFeedItems;
             commands["show-article"] = showArticle;
 
+            commands["next"] = next;
             commands["quit"] = quit;
 
             return commands;

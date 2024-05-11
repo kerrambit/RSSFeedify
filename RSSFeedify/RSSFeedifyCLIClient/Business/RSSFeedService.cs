@@ -14,6 +14,10 @@ namespace RSSFeedifyCLIClient.Business
         private IWriter _writer;
         private HTTPService _httpService;
 
+        private IDictionary<string, int> _pages = new Dictionary<string, int>();
+        private readonly int PageSize = 5;
+        private (ListingPage page, IList<ParameterResult> parameters) _currentListingPage = (ListingPage.None, []);
+
         private enum Error
         {
             General,
@@ -22,15 +26,34 @@ namespace RSSFeedifyCLIClient.Business
             InvalidJsonFormat
         }
 
+        private enum ListingPage
+        {
+            RSSFeeds,
+            RSSFeedItems,
+            None
+        }
+
         public RSSFeedService(IWriter writer, HTTPService hTTPService)
         {
             _writer = writer;
             _httpService = hTTPService;
+            _pages["RSSFeeds"] = 1;
+            _pages["RSSFeedItems"] = 1;
         }
 
         public async Task GetFeedsAsync()
         {
-            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds));
+            int count = await RetrieveCount(Endpoints.EndPoint.RSSFeeds);
+            if (count == -1)
+            {
+                return;
+            }
+            if (_pages["RSSFeeds"] > ComputeTotalPagesCount(count))
+            {
+                _pages["RSSFeeds"] = 1;
+            }
+
+            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, new List<(string, string)>() { ("page", $"{_pages["RSSFeeds"]}"), ("pageSize", $"{PageSize}") }));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
@@ -53,6 +76,10 @@ namespace RSSFeedifyCLIClient.Business
             {
                 RenderRSSFeed(feed);
             }
+            _writer.RenderBareText($"\t\t   {_pages["RSSFeeds"]} / {ComputeTotalPagesCount(count)}");
+
+            _pages["RSSFeeds"]++;
+            _currentListingPage = (ListingPage.RSSFeeds, []);
         }
 
         public async Task ShowArticle(IList<ParameterResult> parameters)
@@ -106,7 +133,18 @@ namespace RSSFeedifyCLIClient.Business
         public async Task GetFeedItemsAsync(IList<ParameterResult> parameters)
         {
             string guid = parameters[0].String;
-            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, ("byRSSFeedGuid", guid)));
+
+            int count = await RetrieveCount(Endpoints.EndPoint.RSSFeedItems, ("byRSSFeedGuid", guid));
+            if (count == -1)
+            {
+                return;
+            }
+            if (_pages["RSSFeedItems"] > ComputeTotalPagesCount(count))
+            {
+                _pages["RSSFeedItems"] = 1;
+            }
+
+            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, new List<(string, string)>() { ("byRSSFeedGuid", guid), ("page", $"{_pages["RSSFeeds"]}"), ("pageSize", $"{PageSize}") }));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
@@ -128,6 +166,10 @@ namespace RSSFeedifyCLIClient.Business
             {
                 RenderRSSFeedItem(item);
             }
+            _writer.RenderBareText($"\t\t   {_pages["RSSFeedItems"]} / {ComputeTotalPagesCount(count)}");
+
+            _pages["RSSFeedItems"]++;
+            _currentListingPage = (ListingPage.RSSFeedItems, parameters);
         }
 
         public async Task AddNewFeed(IList<ParameterResult> parameters)
@@ -147,6 +189,67 @@ namespace RSSFeedifyCLIClient.Business
                 RenderRSSFeed(result);
             }
         }
+
+        public async Task Next()
+        {
+            switch (_currentListingPage.page)
+            {
+                case ListingPage.RSSFeeds:
+                    await GetFeedsAsync();
+                    break;
+                case ListingPage.RSSFeedItems:
+                    await GetFeedItemsAsync(_currentListingPage.parameters);
+                    break;
+                case ListingPage.None:
+                    _writer.RenderWarningMessage("Nothing to show.");
+                    break;
+            }
+        }
+
+        private int ComputeTotalPagesCount(int count)
+        {
+            return (int)Math.Ceiling(count / (double)PageSize);
+        }
+
+        private async Task<int> RetrieveCount(Endpoints.EndPoint endpoint, (string key, string value) queryString)
+        {
+            var count = await _httpService.Get(Endpoints.BuildUri(endpoint, "count", queryString));
+            if (!RetrieveCountInner(count))
+            {
+                return -1;
+            }
+
+            return await ReadJson<int>(count.response);
+        }
+
+        private async Task<int> RetrieveCount(Endpoints.EndPoint endpoint)
+        {
+            var count = await _httpService.Get(Endpoints.BuildUri(endpoint, "count"));
+            if (!RetrieveCountInner(count))
+            {
+                return -1;
+            }
+
+            return await ReadJson<int>(count.response);
+        }
+
+        private bool RetrieveCountInner((bool success, HttpResponseMessage response) count)
+        {
+            if (!count.success)
+            {
+                RenderErrorMessage(Error.Network);
+                return false;
+            }
+
+            if (HTTPService.GetContentType(count.response) != HTTPService.ContentType.AppJson)
+            {
+                RenderErrorMessage(Error.DataType);
+                return false;
+            }
+
+            return true;
+        }
+
         private async Task<T?> ReadJson<T>(HttpResponseMessage response)
         {
             try
