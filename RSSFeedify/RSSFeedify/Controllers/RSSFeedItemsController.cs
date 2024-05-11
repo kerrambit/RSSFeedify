@@ -17,20 +17,35 @@ namespace RSSFeedify.Controllers
             _repository = repository;
         }
 
-        // GET: api/RSSFeedItems
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<RSSFeedItem>>> GetRSSFeedsItems()
+        // GET: api/RSSFeedItems?byRSSFeedGuid=5
+        [HttpGet("")]
+        public async Task<ActionResult<IEnumerable<RSSFeedItem>>> GetRSSFeedItems([FromQuery] string? byRSSFeedGuid)
         {
-            var result = await _repository.GetAsync();
+            if (byRSSFeedGuid is null || byRSSFeedGuid == string.Empty)
+            {
+                var unfilteredItemsResult = await _repository.GetAsync();
+                return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeedItem>>.Convert(unfilteredItemsResult);
+            }
+
+            if (!QueryStringParser.ParseGuid(byRSSFeedGuid, out Guid rssFeedGuid))
+            {
+                return ControllersHelper.GetResultForInvalidGuid<IEnumerable<RSSFeedItem>>();
+            }
+
+            var result = await _repository.GetFilteredByForeignKeyAsync(rssFeedGuid);
             return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeedItem>>.Convert(result);
         }
 
         // GET: api/RSSFeedItems/5
         [HttpGet("{guid}")]
-        public async Task<ActionResult<IEnumerable<RSSFeedItem>>> GetRSSFeedItemsFiltered(string guid)
+        public async Task<ActionResult<RSSFeedItem>> GetRSSFeedItem(string guid)
         {
-            var result = await _repository.GetAsyncFilteredByForeignKey(new Guid(guid));
-            return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeedItem>>.Convert(result);
+            if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
+            {
+                return ControllersHelper.GetResultForInvalidGuid<RSSFeedItem>();
+            }
+            var result = await _repository.GetAsync(rssFeedGuid);
+            return RepositoryResultToActionResultConvertor<RSSFeedItem>.Convert(result);
         }
 
         // PUT: api/RSSFeedItems/5
@@ -68,7 +83,5 @@ namespace RSSFeedify.Controllers
         {
             return _repository.Exists(id).Data;
         }
-
-        
     }
 }
