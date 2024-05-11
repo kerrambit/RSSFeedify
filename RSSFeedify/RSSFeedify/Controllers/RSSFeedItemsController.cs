@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
+using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedify.Services;
 using RSSFeedify.Services.DataTypeConvertors;
 
@@ -19,11 +20,11 @@ namespace RSSFeedify.Controllers
 
         // GET: api/RSSFeedItems?byRSSFeedGuid=5
         [HttpGet("")]
-        public async Task<ActionResult<IEnumerable<RSSFeedItem>>> GetRSSFeedItems([FromQuery] string? byRSSFeedGuid)
+        public async Task<ActionResult<IEnumerable<RSSFeedItem>>> GetRSSFeedItems([FromQuery] string byRSSFeedGuid, [FromQuery] int page, [FromQuery] int pageSize)
         {
             if (byRSSFeedGuid is null || byRSSFeedGuid == string.Empty)
             {
-                var unfilteredItemsResult = await _repository.GetAsync();
+                var unfilteredItemsResult = await _repository.GetAsync(new PaginationQuery(page, pageSize));
                 return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeedItem>>.Convert(unfilteredItemsResult);
             }
 
@@ -32,7 +33,7 @@ namespace RSSFeedify.Controllers
                 return ControllersHelper.GetResultForInvalidGuid<IEnumerable<RSSFeedItem>>();
             }
 
-            var result = await _repository.GetFilteredByForeignKeyAsync(rssFeedGuid);
+            var result = await _repository.GetFilteredByForeignKeyAsync(rssFeedGuid, new PaginationQuery(page, pageSize));
             return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeedItem>>.Convert(result);
         }
 

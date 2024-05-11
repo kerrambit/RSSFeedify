@@ -4,6 +4,9 @@ using RSSFeedify.Services.DataTypeConvertors;
 using RSSFeedify.Services;
 using RSSFeedify.Repository;
 using PostgreSQL.Data;
+using RSSFeedify.Repository.Types.PaginationQuery;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Drawing.Printing;
 
 namespace RSSFeedify.Controllers
 {
@@ -24,9 +27,9 @@ namespace RSSFeedify.Controllers
 
         // GET: api/RSSFeeds
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RSSFeed>>> GetRSSFeeds()
+        public async Task<ActionResult<IEnumerable<RSSFeed>>> GetRSSFeeds(int page, int pageSize)
         {
-            var result = await _rSSFeedRepository.GetSortedByAsync(feed => feed.Name);
+            var result = await _rSSFeedRepository.GetSortedByNameAsync(new PaginationQuery(page, pageSize));
             return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeed>>.Convert(result);
         }
 
