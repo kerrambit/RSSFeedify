@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using PostgreSQL.Data;
 using RSSFeedify.Repository.Types;
+using RSSFeedify.Repository.Types.Pagination;
+using RSSFeedify.Repository.Types.PaginationQuery;
 
 namespace RSSFeedify.Repositories
 {
@@ -45,11 +47,10 @@ namespace RSSFeedify.Repositories
             return new Success<IEnumerable<T>>(batches);
         }
 
-        public async Task<RepositoryResult<IEnumerable<T>>> GetSortedByAsync<TKey>(Func<T, TKey> sortingKey)
+        public async Task<RepositoryResult<IEnumerable<T>>> GetAsync(PaginationQuery paginationQuery)
         {
-            var batches = await _data.ToListAsync(); 
-            var sortedBatches = batches.OrderBy(sortingKey);
-            return new Success<IEnumerable<T>>(sortedBatches);
+            var batches = await _data.ToPagedListAsync(paginationQuery.Page, paginationQuery.PageSize);
+            return new Success<IEnumerable<T>>(batches);
         }
 
         public RepositoryResult<T> Insert(T batch)
@@ -89,6 +90,12 @@ namespace RSSFeedify.Repositories
         {
             bool result = _data.Any(e => e.Guid == guid);
             return new Success<bool>(result);
+        }
+
+        public async Task<RepositoryResult<int>> GetTotalCountAsync()
+        {
+            var result = await _data.CountAsync();
+            return new Success<int>(result);
         }
     }
 }

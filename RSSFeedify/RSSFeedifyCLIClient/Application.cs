@@ -58,6 +58,9 @@ namespace RSSFeedifyCLIClient
                         case "show-article":
                             await rSSFeedService.ShowArticle(parameters);
                             break;
+                        case "next":
+                            await rSSFeedService.Next();
+                            break;
                         default:
                             break;
                     }
