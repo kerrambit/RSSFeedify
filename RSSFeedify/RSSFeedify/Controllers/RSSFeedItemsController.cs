@@ -37,6 +37,19 @@ namespace RSSFeedify.Controllers
             return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeedItem>>.Convert(result);
         }
 
+        // GET: api/RSSFeedItems/count?byRSSFeedGuid=5
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetRSSFeedsCount([FromQuery] string byRSSFeedGuid)
+        {
+            if (!QueryStringParser.ParseGuid(byRSSFeedGuid, out Guid rssFeedGuid))
+            {
+                return ControllersHelper.GetResultForInvalidGuid<int>();
+            }
+
+            var result = await _repository.GetTotalCountAsync(rssFeedGuid);
+            return RepositoryResultToActionResultConvertor<int>.Convert(result);
+        }
+
         // GET: api/RSSFeedItems/5
         [HttpGet("{guid}")]
         public async Task<ActionResult<RSSFeedItem>> GetRSSFeedItem(string guid)

@@ -41,6 +41,14 @@ namespace RSSFeedify.Controllers
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
 
+        // GET: api/RSSFeeds/count
+        [HttpGet("count")]
+        public async Task<ActionResult<int>> GetRSSFeedsCount()
+        {
+            var result = await _rSSFeedRepository.GetTotalCountAsync();
+            return RepositoryResultToActionResultConvertor<int>.Convert(result);
+        }
+
         // PUT: api/RSSFeeds/5
         [HttpPut("{guid}")]
         public async Task<ActionResult<RSSFeed>> PutRSSFeed(string guid, RSSFeedDTO rSSFeedDto)

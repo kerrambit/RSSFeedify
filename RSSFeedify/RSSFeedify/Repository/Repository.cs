@@ -91,5 +91,11 @@ namespace RSSFeedify.Repositories
             bool result = _data.Any(e => e.Guid == guid);
             return new Success<bool>(result);
         }
+
+        public async Task<RepositoryResult<int>> GetTotalCountAsync()
+        {
+            var result = await _data.CountAsync();
+            return new Success<int>(result);
+        }
     }
 }
