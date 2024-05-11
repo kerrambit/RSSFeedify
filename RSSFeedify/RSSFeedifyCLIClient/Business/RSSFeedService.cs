@@ -144,7 +144,7 @@ namespace RSSFeedifyCLIClient.Business
                 _pages["RSSFeedItems"] = 1;
             }
 
-            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, new List<(string, string)>() { ("byRSSFeedGuid", guid), ("page", $"{_pages["RSSFeeds"]}"), ("pageSize", $"{PageSize}") }));
+            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, new List<(string, string)>() { ("byRSSFeedGuid", guid), ("page", $"{_pages["RSSFeedItems"]}"), ("pageSize", $"{PageSize}") }));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
