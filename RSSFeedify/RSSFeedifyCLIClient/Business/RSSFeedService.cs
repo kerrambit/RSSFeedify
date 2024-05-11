@@ -46,6 +46,7 @@ namespace RSSFeedifyCLIClient.Business
             var feeds = await ReadJson<List<RSSFeed>>(data.response);
             if (feeds is null)
             {
+                RenderErrorMessage(Error.InvalidJsonFormat);
                 return;
             }
             foreach (var feed in feeds)
@@ -139,8 +140,12 @@ namespace RSSFeedifyCLIClient.Business
                 return;
             }
 
-            _writer.RenderBareText("\nData were sent, new RSSFeed was registered:");
-            await ParseRSSFeedInResponse(data.response);
+            var result = await ReadJson<RSSFeed>(data.response);
+            if (result is not null)
+            {
+                _writer.RenderBareText("New RSSFeed was registered:");
+                RenderRSSFeed(result);
+            }
         }
         private async Task<T?> ReadJson<T>(HttpResponseMessage response)
         {
@@ -162,23 +167,6 @@ namespace RSSFeedifyCLIClient.Business
             {
                 RenderErrorMessage();
                 return default(T);
-            }
-        }
-
-        private async Task ParseRSSFeedInResponse(HttpResponseMessage response)
-        {
-            try
-            {
-                var feed = await response.Content.ReadFromJsonAsync<RSSFeed>();
-                RenderRSSFeed(feed);
-            }
-            catch (JsonException)
-            {
-                RenderErrorMessage(Error.InvalidJsonFormat);
-            }
-            catch (Exception)
-            {
-                RenderErrorMessage();
             }
         }
 
