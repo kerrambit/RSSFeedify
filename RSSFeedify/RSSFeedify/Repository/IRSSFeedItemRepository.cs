@@ -6,6 +6,6 @@ namespace RSSFeedify.Repository
 {
     public interface IRSSFeedItemRepository : IRepository<RSSFeedItem>
     {
-        Task<RepositoryResult<IEnumerable<RSSFeedItem>>> GetAsyncFilteredByForeignKey(Guid guid);
+        Task<RepositoryResult<IEnumerable<RSSFeedItem>>> GetFilteredByForeignKeyAsync(Guid guid);
     }
 }

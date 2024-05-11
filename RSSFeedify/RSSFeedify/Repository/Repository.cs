@@ -45,6 +45,13 @@ namespace RSSFeedify.Repositories
             return new Success<IEnumerable<T>>(batches);
         }
 
+        public async Task<RepositoryResult<IEnumerable<T>>> GetSortedByAsync<TKey>(Func<T, TKey> sortingKey)
+        {
+            var batches = await _data.ToListAsync(); 
+            var sortedBatches = batches.OrderBy(sortingKey);
+            return new Success<IEnumerable<T>>(sortedBatches);
+        }
+
         public RepositoryResult<T> Insert(T batch)
         {
             batch.CreatedAt = DateTime.UtcNow;

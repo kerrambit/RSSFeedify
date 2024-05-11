@@ -62,7 +62,7 @@ namespace RSSFeedify.Services
 
                             Console.WriteLine($"[RSSFeedPollingService]: feed was updated so the database must be also updated ({feed.LastPoll} < {lastUpdate})");
 
-                            var originalItems = await rSSItemsRepository.GetAsyncFilteredByForeignKey(feed.Guid);
+                            var originalItems = await rSSItemsRepository.GetFilteredByForeignKeyAsync(feed.Guid);
                             if (originalItems is not Success<IEnumerable<RSSFeedItem>>)
                             {
                                 Console.WriteLine($"[RSSFeedPollingService]: failure. Unable to get access to RSSFeedsItems for feed: {feed.Guid}!");
@@ -159,7 +159,7 @@ namespace RSSFeedify.Services
                 RSSFeedItemDTO newItem = new RSSFeedItemDTO
                 {
                     Title = item.Title.Text,
-                    Summary = item.Summary.Text,
+                    Summary = (item.Summary == null) ? "" : item.Summary.Text,
                     PublishDate = DateTime.SpecifyKind(item.PublishDate.DateTime, DateTimeKind.Utc),
                     Links = item.Links.Select(link => link.Uri).ToList(),
                     Categories = item.Categories.Select(category => category.Name).ToList(),
