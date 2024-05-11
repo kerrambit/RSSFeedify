@@ -24,7 +24,7 @@ namespace RSSFeedify.Repository
 
         public async Task<RepositoryResult<IEnumerable<RSSFeedItem>>> GetFilteredByForeignKeyAsync(Guid guid, PaginationQuery paginationQuery)
         {
-            var entities = await _data.Where(e => e.RSSFeedId == guid).ToPagedListAsync(paginationQuery.Page, paginationQuery.PageSize);
+            var entities = await _data.Where(item => item.RSSFeedId == guid).OrderByDescending(item => item.PublishDate).ToPagedListAsync(paginationQuery.Page, paginationQuery.PageSize);
             if (entities == null)
             {
                 return new NotFoundError<IEnumerable<RSSFeedItem>>();
