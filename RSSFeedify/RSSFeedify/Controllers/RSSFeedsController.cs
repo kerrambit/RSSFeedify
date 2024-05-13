@@ -51,7 +51,7 @@ namespace RSSFeedify.Controllers
         [HttpPut("{guid}")]
         public async Task<ActionResult<RSSFeed>> PutRSSFeed(string guid, RSSFeedDTO rSSFeedDto)
         {
-            var result = await _rSSFeedRepository.UpdateAsync(new Guid(guid), RSSFeedDTOToRSSFeed.Convert(rSSFeedDto));
+            var result = await _rSSFeedRepository.UpdateAsync(new Guid(guid), rSSFeedDto);
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
 

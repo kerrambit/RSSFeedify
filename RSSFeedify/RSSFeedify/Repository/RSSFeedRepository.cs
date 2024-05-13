@@ -41,5 +41,31 @@ namespace RSSFeedify.Repository
                 }
             }
         }
+
+        public async Task<RepositoryResult<RSSFeed>> UpdateAsync(Guid guid, RSSFeedDTO batch)
+        {
+            using (var context = new ApplicationDbContext(_configuration))
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    var feed = context.RSSFeeds.SingleOrDefault(feed => feed.Guid == guid);
+                    if(feed is not null)
+                    {
+                        feed.Name = batch.Name;
+                        feed.Description = batch.Description;
+                        feed.SourceUrl = batch.SourceUrl;
+                        feed.PollingInterval = batch.PollingInterval;
+
+                        await SaveAsync(context);
+
+                        transaction.Commit();
+                        return new Success<RSSFeed>(feed);
+                    } else
+                    {
+                        return new NotFoundError<RSSFeed>();
+                    }
+                }
+            }
+        }
     }
 }
