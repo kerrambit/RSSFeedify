@@ -14,8 +14,8 @@ namespace RSSFeedifyCLIClient.Business
         private IWriter _writer;
         private HTTPService _httpService;
 
-        private IDictionary<string, int> _pages = new Dictionary<string, int>();
         private readonly int PageSize = 5;
+        private IDictionary<string, int> _pages = new Dictionary<string, int>();
         private (ListingPage page, IList<ParameterResult> parameters) _currentListingPage = (ListingPage.None, []);
 
         private enum Error
@@ -82,7 +82,33 @@ namespace RSSFeedifyCLIClient.Business
             _currentListingPage = (ListingPage.RSSFeeds, []);
         }
 
-        public async Task ShowArticle(IList<ParameterResult> parameters)
+        public async Task DeleteFeedAsync(IList<ParameterResult> parameters)
+        {
+            string guid = parameters[0].String;
+            var data = await _httpService.DeleteAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, guid));
+            if (!data.success)
+            {
+                RenderErrorMessage(Error.Network);
+                return;
+            }
+
+            if (HTTPService.GetContentType(data.response) != HTTPService.ContentType.AppJson)
+            {
+                RenderErrorMessage(Error.DataType);
+                return;
+            }
+
+            var feed = await ReadJson<RSSFeed>(data.response);
+            if (feed is null)
+            {
+                RenderErrorMessage(Error.InvalidJsonFormat);
+                return;
+            }
+
+            _writer.RenderBareText($"RSSFeed '{feed.Name}' with GUID '{feed.Guid}' was successfully deleted!");
+        }
+
+        public async Task ReadArticle(IList<ParameterResult> parameters)
         {
             string guid = parameters[0].String;
             var data = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, guid));

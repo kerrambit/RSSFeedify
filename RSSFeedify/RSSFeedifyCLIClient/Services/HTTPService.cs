@@ -38,6 +38,22 @@ namespace RSSFeedifyCLIClient.Services
             }
         }
 
+        public async Task<(bool success, HttpResponseMessage response)> DeleteAsync(Uri uri)
+        {
+            try
+            {
+                HttpResponseMessage response = await _httpClient.DeleteAsync(uri.ToString());
+                return (true, response);
+            }
+            catch (Exception ex)
+            {
+                return (false, new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                {
+                    Content = new StringContent($"Failed to fetch data from {uri}: {ex.Message}")
+                });
+            }
+        }
+
         public async Task<(bool success, HttpResponseMessage response)> PostAsync(Uri uri, string payload, ContentType contentType = ContentType.AppJson)
         {
             try

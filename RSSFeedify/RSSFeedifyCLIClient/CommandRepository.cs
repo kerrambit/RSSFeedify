@@ -13,6 +13,7 @@ namespace RSSFeedifyCLIClient.Repository
 
             Command listFeeds = new Command("list-feeds", "", "Lists all available RSS feeds.", []);
             Command addRSSFeed = new Command("add-feed", "name:STRING description:STRING url:URI polling-interval-in-minutes:INTEGER", "Adds new RSS feed into the database.", new List<ParameterType> { ParameterType.String, ParameterType.String, ParameterType.String, ParameterType.IntegerRange }, new List<(int, int)> { (10, 60)});
+            Command deleteRSSFeed = new Command("delete-feed", "guid:STRING", "Deletes RSSFeed.", new List<ParameterType> { ParameterType.String });
 
             Command getRSSFeedItems = new Command("get-feed", "guid:STRING", "Displays RSSFeed items.", new List<ParameterType> { ParameterType.String });
             Command readArticle = new Command("read-article", "guid:STRING", "Opens a link of the RSSFeedItem in the default browser.", new List<ParameterType> { ParameterType.String });
@@ -22,6 +23,7 @@ namespace RSSFeedifyCLIClient.Repository
 
             commands["list-feeds"] = listFeeds;
             commands["add-feed"] = addRSSFeed;
+            commands["delete-feed"] = deleteRSSFeed;
 
             commands["get-feed"] = getRSSFeedItems;
             commands["show-article"] = readArticle;
