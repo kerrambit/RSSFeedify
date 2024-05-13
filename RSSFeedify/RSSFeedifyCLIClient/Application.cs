@@ -5,7 +5,6 @@ using RSSFeedifyCLIClient.Business;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Repository;
 using RSSFeedifyCLIClient.Services;
-using System.Security.Authentication;
 
 namespace RSSFeedifyCLIClient
 {
@@ -18,19 +17,37 @@ namespace RSSFeedifyCLIClient
 
         private static async Task RunAsync()
         {
+            // Create commands repository.
             var commands = CommandsRepository.InitCommands();
+
+            // Initialize the writer and reader.
             IWriter writer = new Writer();
             IReader reader = new Reader();
 
+            // Create CommandParser and fill it with commands from the commands repository.
             var parser = new CommandParser(writer, reader);
             parser.AddCommands(commands.Values.ToList());
 
+            // Create HttpClient using HttpClientHandler (need to turn off the certificate validation as the localhost certificate is only self-signed).
             HttpClientHandler clientHandler = new HttpClientHandler();
             clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
             var client = new HttpClient(clientHandler);
 
+            // Create RSSFeedService that runs all commands logic. Also, HTTPService must be initialized.
             RSSFeedService rSSFeedService = new(writer, new HTTPService(client));
 
+            // And finally, run the application.
+            try
+            {
+                await StartAndRunApplicationAsync(writer, parser, rSSFeedService);
+            } catch (Exception)
+            {
+                writer.RenderErrorMessage("Unhandled exception occured. Application had to be terminated. Please, report the bug and send the logs to the support.");
+            }
+        }
+
+        private static async Task StartAndRunApplicationAsync(IWriter writer, CommandParser parser, RSSFeedService rSSFeedService)
+        {
             RenderASCIIPicture(writer);
 
             bool appRunning = true;
