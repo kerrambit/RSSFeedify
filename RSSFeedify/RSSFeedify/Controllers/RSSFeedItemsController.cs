@@ -2,7 +2,6 @@
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types.PaginationQuery;
-using RSSFeedify.Services;
 using RSSFeedify.Services.DataTypeConvertors;
 
 namespace RSSFeedify.Controllers
@@ -62,26 +61,26 @@ namespace RSSFeedify.Controllers
             return RepositoryResultToActionResultConvertor<RSSFeedItem>.Convert(result);
         }
 
-        // PUT: api/RSSFeedItems/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{guid}")]
-        public async Task<ActionResult<RSSFeedItem>> PutRSSFeedItem(string guid, RSSFeedItemDTO rSSFeedItemDto)
-        {
-            var hash = RSSFeedPollingService.GenerateRSSFeedItemHash(rSSFeedItemDto.Title, rSSFeedItemDto.PublishDate);
-            var result = await _repository.UpdateAsync(new Guid(guid), RSSFeedItemDTOToRssFeedItem.Convert(rSSFeedItemDto, hash));
-            return RepositoryResultToActionResultConvertor<RSSFeedItem>.Convert(result);
-        }
+        //// PUT: api/RSSFeedItems/5
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPut("{guid}")]
+        //public async Task<ActionResult<RSSFeedItem>> PutRSSFeedItem(string guid, RSSFeedItemDTO rSSFeedItemDto)
+        //{
+        //    var hash = RSSFeedPollingService.GenerateRSSFeedItemHash(rSSFeedItemDto.Title, rSSFeedItemDto.PublishDate);
+        //    var result = await _repository.UpdateAsync(new Guid(guid), RSSFeedItemDTOToRssFeedItem.Convert(rSSFeedItemDto, hash));
+        //    return RepositoryResultToActionResultConvertor<RSSFeedItem>.Convert(result);
+        //}
 
-        // POST: api/RSSFeedItems
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<RSSFeedItem>> PostRSSFeedItem(RSSFeedItemDTO rSSFeedItemDto)
-        {
-            var hash = RSSFeedPollingService.GenerateRSSFeedItemHash(rSSFeedItemDto.Title, rSSFeedItemDto.PublishDate);
-            var rSSFeed = RSSFeedItemDTOToRssFeedItem.Convert(rSSFeedItemDto, hash);
-            var result = await _repository.InsertAsync(rSSFeed);
-            return RepositoryResultToActionResultConvertor<RSSFeedItem>.Convert(result);
-        }
+        //// POST: api/RSSFeedItems
+        //// To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        //[HttpPost]
+        //public async Task<ActionResult<RSSFeedItem>> PostRSSFeedItem(RSSFeedItemDTO rSSFeedItemDto)
+        //{
+        //    var hash = RSSFeedPollingService.GenerateRSSFeedItemHash(rSSFeedItemDto.Title, rSSFeedItemDto.PublishDate);
+        //    var rSSFeed = RSSFeedItemDTOToRssFeedItem.Convert(rSSFeedItemDto, hash);
+        //    var result = await _repository.InsertAsync(rSSFeed);
+        //    return RepositoryResultToActionResultConvertor<RSSFeedItem>.Convert(result);
+        //}
 
         // DELETE: api/RSSFeedItems/5
         [HttpDelete("{guid}")]

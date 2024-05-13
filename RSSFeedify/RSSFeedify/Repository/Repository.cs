@@ -91,29 +91,6 @@ namespace RSSFeedify.Repositories
              await context.SaveChangesAsync();
         }
 
-        public async Task<RepositoryResult<T>> UpdateAsync(Guid guid, T batch)
-        {
-            using (var context = new ApplicationDbContext(_configuration))
-            {
-                using (var transaction = context.Database.BeginTransaction())
-                {
-                    var original = await DeleteAsync(guid);
-                    Guid originalGuid = original.Data.Guid;
-                    DateTime originalCreatedAt = original.Data.CreatedAt;
-                    batch.Guid = originalGuid;
-                    batch.UpdatedAt = DateTime.UtcNow;
-
-                    var result = await InsertAsync(batch);
-
-                    batch.CreatedAt = originalCreatedAt;
-                    await SaveAsync(context);
-
-                    transaction.Commit();
-                    return result;
-                }
-            }
-        }
-
         public RepositoryResult<bool> Exists(Guid guid)
         {
             using (var context = new ApplicationDbContext(_configuration))

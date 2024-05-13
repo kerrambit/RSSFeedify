@@ -12,7 +12,6 @@ namespace RSSFeedify.Repositories
         Task<RepositoryResult<T>> GetAsync(Guid feedGUID);
         Task<RepositoryResult<T>> InsertAsync(T feed);
         Task<RepositoryResult<T>> DeleteAsync(Guid feedGUID);
-        Task<RepositoryResult<T>> UpdateAsync(Guid feedGUID, T feed);
         Task SaveAsync(ApplicationDbContext context);
         RepositoryResult<bool> Exists(Guid feedGUID);
     }
