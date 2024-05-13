@@ -54,6 +54,22 @@ namespace RSSFeedifyCLIClient.Services
             }
         }
 
+        public async Task<(bool success, HttpResponseMessage response)> PutAsync(Uri uri, string payload, ContentType contentType = ContentType.AppJson)
+        {
+            try
+            {
+                HttpResponseMessage response = await _httpClient.PutAsync(uri.ToString(), new StringContent(payload, Encoding.UTF8, StringifyContentType(contentType)));
+                return (true, response);
+            }
+            catch (Exception ex)
+            {
+                return (false, new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                {
+                    Content = new StringContent($"Failed to post data to {uri}: {ex.Message}")
+                });
+            }
+        }
+
         public async Task<(bool success, HttpResponseMessage response)> PostAsync(Uri uri, string payload, ContentType contentType = ContentType.AppJson)
         {
             try
