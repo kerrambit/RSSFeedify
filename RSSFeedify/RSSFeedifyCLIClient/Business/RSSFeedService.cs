@@ -350,8 +350,8 @@ namespace RSSFeedifyCLIClient.Business
                            $"    Summary: '{item.Summary}'\n" +
                            $"    Publish Date: {item.PublishDate}\n" +
                            $"    Id: {item.Id}\n" +
-                           $"    Authors: {((item.Authors.Count == 0) ? "[]" : string.Join('\n', item.Authors))}\n" +
-                           $"    Categories: {((item.Categories.Count == 0) ? "[]" : string.Join('\n', item.Categories))}\n");
+                           $"    Authors: {((item.Authors is null || item.Authors.Count == 0) ? "[]" : string.Join('\n', item.Authors))}\n" +
+                           $"    Categories: {((item.Categories is null || item.Categories.Count == 0) ? "[]" : string.Join('\n', item.Categories))}\n");
         }
 
         private void RenderErrorMessage(Error error)
