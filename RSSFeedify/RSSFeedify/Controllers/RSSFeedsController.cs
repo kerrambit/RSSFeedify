@@ -73,45 +73,6 @@ namespace RSSFeedify.Controllers
 
             var result = await _rSSFeedRepository.InsertAsync(rSSFeed);
 
-            //Console.WriteLine("\n----------------- POST of RSSFeed -----------------");
-            //Console.WriteLine($"Last updated time of the feed: {data.lastUpdate}.\nIndividual feed items: ");
-            //foreach (var pair in data.items)
-            //{
-            //    Console.WriteLine($"Hash: {pair.hash}");
-            //    var item = pair.dto;
-            //    Console.WriteLine($"Title: {item.Title}");
-            //    Console.WriteLine($"Summary: {item.Summary}");
-            //    Console.WriteLine($"Publish Date: {item.PublishDate}");
-            //    Console.WriteLine($"Content: {item.Content}");
-            //    Console.WriteLine($"Id: {item.Id}");
-
-            //    Console.WriteLine("\nAuthors:");
-            //    foreach (var author in item.Authors)
-            //    {
-            //        Console.WriteLine($" - {author}");
-            //    }
-
-            //    Console.WriteLine("\nContributors:");
-            //    foreach (var contributor in item.Contributors)
-            //    {
-            //        Console.WriteLine($" - {contributor}");
-            //    }
-
-            //    Console.WriteLine("\nLinks:");
-            //    foreach (var link in item.Links)
-            //    {
-            //        Console.WriteLine($" - {link}");
-            //    }
-
-            //    Console.WriteLine("\nCategories:");
-            //    foreach (var category in item.Categories)
-            //    {
-            //        Console.WriteLine($"  - {category}");
-            //    }
-
-            //    Console.WriteLine("-----------------------------------------");
-            //}
-
             IList<RSSFeedItem> items = new List<RSSFeedItem>();
             foreach (var item in data.items)
             {
