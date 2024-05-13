@@ -1,56 +1,51 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using PostgreSQL.Data;
-using RSSFeedify.Models;
-using RSSFeedify.Repositories;
-using RSSFeedify.Repository;
-using RSSFeedify.Services;
+    using PostgreSQL.Data;
+    using RSSFeedify.Repository;
+    using RSSFeedify.Services;
 
-var builder = WebApplication.CreateBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
 
+    // Add services to the container.
+    builder.Services.AddControllers();
 
-// Add services to the container.
-builder.Services.AddControllers();
+    // Register your DbContext
+    builder.Services.AddDbContext<ApplicationDbContext>();
 
-// Register your DbContext
-builder.Services.AddDbContext<ApplicationDbContext>();
+    // Register IRSSFeedItemRepository implementation
+    builder.Services.AddScoped<IRSSFeedItemRepository>(serviceProvider =>
+    {
+        //var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+        //var dbSet = context.Set<RSSFeedItem>();
+        return new RSSFeedItemRepository(serviceProvider.GetRequiredService<IConfiguration>());
+    });
 
-// Register IRSSFeedItemRepository implementation
-builder.Services.AddScoped<IRSSFeedItemRepository>(serviceProvider =>
-{
-    var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-    var dbSet = context.Set<RSSFeedItem>();
-    return new RSSFeedItemRepository(context, dbSet);
-});
+    // Register IRSSFeedRepository implementation
+    builder.Services.AddScoped<IRSSFeedRepository>(serviceProvider =>
+    {
+        //var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
+        //var dbSet = context.Set<RSSFeed>();
+        return new RSSFeedRepository(serviceProvider.GetRequiredService<IConfiguration>());
+    });
 
-// Register IRSSFeedRepository implementation
-builder.Services.AddScoped<IRSSFeedRepository>(serviceProvider =>
-{
-    var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-    var dbSet = context.Set<RSSFeed>();
-    return new RSSFeedRepository(context, dbSet);
-});
+    // Add Swagger
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+    // Register hosted service
+    builder.Services.AddHostedService<RSSFeedPollingService>();
 
-// (...)
-builder.Services.AddHostedService<RSSFeedPollingService>();
+    var app = builder.Build();
 
-var app = builder.Build();
+    // Configure the HTTP request pipeline.
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    app.UseHttpsRedirection();
 
-app.UseHttpsRedirection();
+    app.UseAuthorization();
 
-app.UseAuthorization();
+    app.MapControllers();
 
-app.MapControllers();
-
-app.Run();
+    app.Run();

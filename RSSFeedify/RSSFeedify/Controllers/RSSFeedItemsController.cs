@@ -79,8 +79,7 @@ namespace RSSFeedify.Controllers
         {
             var hash = RSSFeedPollingService.GenerateRSSFeedItemHash(rSSFeedItemDto.Title, rSSFeedItemDto.PublishDate);
             var rSSFeed = RSSFeedItemDTOToRssFeedItem.Convert(rSSFeedItemDto, hash);
-            var result = _repository.Insert(rSSFeed);
-            await _repository.SaveAsync();
+            var result = await _repository.InsertAsync(rSSFeed);
             return RepositoryResultToActionResultConvertor<RSSFeedItem>.Convert(result);
         }
 
@@ -89,7 +88,6 @@ namespace RSSFeedify.Controllers
         public async Task<ActionResult<RSSFeedItem>> DeleteRSSFeedItem(string guid)
         {
             var result = await _repository.DeleteAsync(new Guid(guid));
-            await _repository.SaveAsync();
             return RepositoryResultToActionResultConvertor<RSSFeedItem>.Convert(result);
         }
 

@@ -9,6 +9,7 @@ namespace RSSFeedify.Repository
     {
         Task<RepositoryResult<IEnumerable<RSSFeedItem>>> GetFilteredByForeignKeyAsync(Guid guid, PaginationQuery paginationQuery);
         Task<RepositoryResult<IEnumerable<RSSFeedItem>>> GetFilteredByForeignKeyAsync(Guid guid);
-        public Task<RepositoryResult<int>> GetTotalCountAsync(Guid guid);
+        Task<RepositoryResult<int>> GetTotalCountAsync(Guid guid);
+        Task<RepositoryResult<int>> InsertMultipleAsync(IList<RSSFeedItem> rSSFeedItems);
     }
 }

@@ -16,11 +16,9 @@ namespace RSSFeedify.Controllers
     {
         private readonly IRSSFeedRepository _rSSFeedRepository;
         private readonly IRSSFeedItemRepository _rSSFeedItemRepository;
-        private readonly ApplicationDbContext _context;
 
-        public RSSFeedsController(ApplicationDbContext context, IRSSFeedRepository rSSFeedRepository, IRSSFeedItemRepository rSSFeedItemRepository)
+        public RSSFeedsController(IRSSFeedRepository rSSFeedRepository, IRSSFeedItemRepository rSSFeedItemRepository)
         {
-            _context = context;
             _rSSFeedRepository = rSSFeedRepository;
             _rSSFeedItemRepository = rSSFeedItemRepository;
         }
@@ -73,8 +71,7 @@ namespace RSSFeedify.Controllers
                 rSSFeed.LastSuccessfullPoll = rSSFeed.LastPoll;
             }
 
-            var result = _rSSFeedRepository.Insert(rSSFeed);
-            await _rSSFeedRepository.SaveAsync();
+            var result = await _rSSFeedRepository.InsertAsync(rSSFeed);
 
             //Console.WriteLine("\n----------------- POST of RSSFeed -----------------");
             //Console.WriteLine($"Last updated time of the feed: {data.lastUpdate}.\nIndividual feed items: ");
@@ -115,18 +112,14 @@ namespace RSSFeedify.Controllers
             //    Console.WriteLine("-----------------------------------------");
             //}
 
-            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            IList<RSSFeedItem> items = new List<RSSFeedItem>();
+            foreach (var item in data.items)
             {
-                foreach (var item in data.items)
-                {
-                    var rSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(item.dto, item.hash);
-                    rSSFeedItem.RSSFeedId = rSSFeed.Guid;
-                    _ = _rSSFeedItemRepository.Insert(rSSFeedItem);
-                }
-
-                await _rSSFeedItemRepository.SaveAsync();
-                dbContextTransaction.Commit();
+                var rSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(item.dto, item.hash);
+                rSSFeedItem.RSSFeedId = rSSFeed.Guid;
+                items.Add(rSSFeedItem);
             }
+            _ = await _rSSFeedItemRepository.InsertMultipleAsync(items);
 
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
@@ -136,7 +129,7 @@ namespace RSSFeedify.Controllers
         public async Task<ActionResult<RSSFeed>> DeleteRSSFeed(string guid)
         {            
             var result = await _rSSFeedRepository.DeleteAsync(new Guid(guid));
-            await _rSSFeedRepository.SaveAsync();
+            //await _rSSFeedRepository.SaveAsync();
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
 
