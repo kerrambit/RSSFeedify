@@ -22,7 +22,7 @@ namespace RSSFeedifyCLIClient.Services
             _httpClient = httpClient;
         }
 
-        public async Task<(bool success, HttpResponseMessage response)> Get(Uri uri)
+        public async Task<(bool success, HttpResponseMessage response)> GetAsync(Uri uri)
         {
             try
             {
@@ -38,9 +38,8 @@ namespace RSSFeedifyCLIClient.Services
             }
         }
 
-        public async Task<(bool success, HttpResponseMessage response)> Post(Uri uri, string payload, ContentType contentType = ContentType.AppJson)
+        public async Task<(bool success, HttpResponseMessage response)> PostAsync(Uri uri, string payload, ContentType contentType = ContentType.AppJson)
         {
-
             try
             {
                 HttpResponseMessage response = await _httpClient.PostAsync(uri.ToString(), new StringContent(payload, Encoding.UTF8, StringifyContentType(contentType)));

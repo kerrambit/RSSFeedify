@@ -53,7 +53,7 @@ namespace RSSFeedifyCLIClient.Business
                 _pages["RSSFeeds"] = 1;
             }
 
-            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, new List<(string, string)>() { ("page", $"{_pages["RSSFeeds"]}"), ("pageSize", $"{PageSize}") }));
+            var data = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, new List<(string, string)>() { ("page", $"{_pages["RSSFeeds"]}"), ("pageSize", $"{PageSize}") }));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
@@ -85,7 +85,7 @@ namespace RSSFeedifyCLIClient.Business
         public async Task ShowArticle(IList<ParameterResult> parameters)
         {
             string guid = parameters[0].String;
-            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, guid));
+            var data = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, guid));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
@@ -144,7 +144,7 @@ namespace RSSFeedifyCLIClient.Business
                 _pages["RSSFeedItems"] = 1;
             }
 
-            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, new List<(string, string)>() { ("byRSSFeedGuid", guid), ("page", $"{_pages["RSSFeedItems"]}"), ("pageSize", $"{PageSize}") }));
+            var data = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, new List<(string, string)>() { ("byRSSFeedGuid", guid), ("page", $"{_pages["RSSFeedItems"]}"), ("pageSize", $"{PageSize}") }));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
@@ -175,7 +175,7 @@ namespace RSSFeedifyCLIClient.Business
         public async Task AddNewFeed(IList<ParameterResult> parameters)
         {
             RSSFeedDTO feed = new(parameters[0].String, parameters[1].String, new Uri(parameters[2].String), parameters[3].Double);
-            var data = await _httpService.Post(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds), JsonConvertor.ConvertObjectToJsonString(feed));
+            var data = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds), JsonConvertor.ConvertObjectToJsonString(feed));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
@@ -213,7 +213,7 @@ namespace RSSFeedifyCLIClient.Business
 
         private async Task<int> RetrieveCount(Endpoints.EndPoint endpoint, (string key, string value) queryString)
         {
-            var count = await _httpService.Get(Endpoints.BuildUri(endpoint, "count", queryString));
+            var count = await _httpService.GetAsync(Endpoints.BuildUri(endpoint, "count", queryString));
             if (!RetrieveCountInner(count))
             {
                 return -1;
@@ -224,7 +224,7 @@ namespace RSSFeedifyCLIClient.Business
 
         private async Task<int> RetrieveCount(Endpoints.EndPoint endpoint)
         {
-            var count = await _httpService.Get(Endpoints.BuildUri(endpoint, "count"));
+            var count = await _httpService.GetAsync(Endpoints.BuildUri(endpoint, "count"));
             if (!RetrieveCountInner(count))
             {
                 return -1;
