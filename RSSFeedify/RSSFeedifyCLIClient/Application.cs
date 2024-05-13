@@ -75,6 +75,9 @@ namespace RSSFeedifyCLIClient
                         case "delete-feed":
                             await rSSFeedService.DeleteFeedAsync(parameters);
                             break;
+                        case "edit-feed":
+                            await rSSFeedService.EditFeedAsync(parameters);
+                            break;
                         case "read-article":
                             await rSSFeedService.ReadArticle(parameters);
                             break;

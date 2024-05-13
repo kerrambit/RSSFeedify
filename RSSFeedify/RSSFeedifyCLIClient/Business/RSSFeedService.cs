@@ -108,6 +108,40 @@ namespace RSSFeedifyCLIClient.Business
             _writer.RenderBareText($"RSSFeed '{feed.Name}' with GUID '{feed.Guid}' was successfully deleted!");
         }
 
+        public async Task EditFeedAsync(IList<ParameterResult> parameters)
+        {
+            string guid = parameters[0].String;
+
+            var original = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, guid));
+            if (!original.success)
+            {
+                RenderErrorMessage(Error.Network);
+                return;
+            }
+
+            var originalFeed = await ReadJson<RSSFeed>(original.response);
+            if (originalFeed is null)
+            {
+                RenderErrorMessage(Error.InvalidJsonFormat);
+                return;
+            }
+
+            RSSFeedDTO feed = new(parameters[1].String, parameters[2].String, originalFeed.SourceUrl, parameters[3].Double);
+            var data = await _httpService.PutAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, guid), JsonConvertor.ConvertObjectToJsonString(feed));
+            if (!data.success)
+            {
+                RenderErrorMessage(Error.Network);
+                return;
+            }
+
+            var result = await ReadJson<RSSFeed>(data.response);
+            if (result is not null)
+            {
+                _writer.RenderBareText("RSSFeed was successfully edited:");
+                RenderRSSFeed(result);
+            }
+        }
+
         public async Task ReadArticle(IList<ParameterResult> parameters)
         {
             string guid = parameters[0].String;
