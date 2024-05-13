@@ -19,9 +19,16 @@ namespace RSSFeedify.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            bool firstRun = true;
+
             while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.Delay(_pollingInterval, stoppingToken);
+                if(!firstRun)
+                {
+                    await Task.Delay(_pollingInterval, stoppingToken);
+                }
+
+                firstRun = false;
                 using (var scope = _scopeFactory.CreateScope())
                 {
                     Console.WriteLine("[RSSFeedPollingService]: service wakes up...");
