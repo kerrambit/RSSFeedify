@@ -10,19 +10,15 @@
     // Register your DbContext
     builder.Services.AddDbContext<ApplicationDbContext>();
 
-    // Register IRSSFeedItemRepository implementation
+    // Register IRSSFeedItemRepository implementation.
     builder.Services.AddScoped<IRSSFeedItemRepository>(serviceProvider =>
     {
-        //var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-        //var dbSet = context.Set<RSSFeedItem>();
         return new RSSFeedItemRepository(serviceProvider.GetRequiredService<IConfiguration>());
     });
 
-    // Register IRSSFeedRepository implementation
+    // Register IRSSFeedRepository implementation.
     builder.Services.AddScoped<IRSSFeedRepository>(serviceProvider =>
     {
-        //var context = serviceProvider.GetRequiredService<ApplicationDbContext>();
-        //var dbSet = context.Set<RSSFeed>();
         return new RSSFeedRepository(serviceProvider.GetRequiredService<IConfiguration>());
     });
 
@@ -30,7 +26,7 @@
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
-    // Register hosted service
+    // Register hosted service for polling of RSSFeeds.
     builder.Services.AddHostedService<RSSFeedPollingService>();
 
     var app = builder.Build();
