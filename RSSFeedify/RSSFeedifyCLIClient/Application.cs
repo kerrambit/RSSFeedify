@@ -72,7 +72,7 @@ namespace RSSFeedifyCLIClient
                         case "get-feed":
                             await rSSFeedService.GetFeedItemsAsync(parameters);
                             break;
-                        case "show-article":
+                        case "read-article":
                             await rSSFeedService.ShowArticle(parameters);
                             break;
                         case "next":
