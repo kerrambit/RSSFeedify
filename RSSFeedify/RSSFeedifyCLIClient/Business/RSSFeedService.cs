@@ -241,6 +241,11 @@ namespace RSSFeedifyCLIClient.Business
                 RenderErrorMessage(Error.Network);
                 return;
             }
+            if (data.response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                _writer.RenderErrorMessage("Source URL has to be unique!");
+                return;
+            }
 
             var result = await ReadJson<RSSFeed>(data.response);
             if (result is not null)

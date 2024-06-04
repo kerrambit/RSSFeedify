@@ -4,6 +4,7 @@ using RSSFeedify.Services.DataTypeConvertors;
 using RSSFeedify.Services;
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types.PaginationQuery;
+using RSSFeedify.Repository.Types;
 
 namespace RSSFeedify.Controllers
 {
@@ -57,6 +58,15 @@ namespace RSSFeedify.Controllers
         public async Task<ActionResult<RSSFeed>> PostRSSFeed(RSSFeedDTO rSSFeedDTO)
         {
             var rSSFeed = RSSFeedDTOToRSSFeed.Convert(rSSFeedDTO);
+
+            var originalRssFeeds = await _rSSFeedRepository.GetAsync();
+            if (originalRssFeeds is Success<IEnumerable<RSSFeed>>)
+            {
+                if (originalRssFeeds.Data.Where(feed => feed.SourceUrl == rSSFeedDTO.SourceUrl).Count() != 0)
+                {
+                    return BadRequest($"Source URL has to be unique. Source URL '{rSSFeedDTO.SourceUrl}' is duplicated!");
+                }
+            }
 
             var data = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
             if (!data.success)
