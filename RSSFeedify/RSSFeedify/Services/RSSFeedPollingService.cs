@@ -23,7 +23,7 @@ namespace RSSFeedify.Services
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                if(!firstRun)
+                if (!firstRun)
                 {
                     await Task.Delay(_pollingInterval, stoppingToken);
                 }
@@ -42,7 +42,7 @@ namespace RSSFeedify.Services
                         Console.WriteLine("[RSSFeedPollingService]: failure. Unable to get access to RSSFeeds!");
                         continue;
                     }
-                    
+
                     foreach (var feed in feeds.Data)
                     {
                         if (!CheckTimeStampsForUpdate(feed))
@@ -59,7 +59,7 @@ namespace RSSFeedify.Services
                             await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: false);
                             continue;
                         }
-                            
+
                         if (feed.LastPoll > lastUpdate)
                         {
                             Console.WriteLine($"[RSSFeedPollingService]: feed was not updated so our RSSFeed can be left as it is and only time stamps are going to be updated.");
@@ -157,7 +157,7 @@ namespace RSSFeedify.Services
                     reader.Close();
                 }
             }
-     
+
             List<(string hash, RSSFeedItemDTO dto)> items = [];
             foreach (SyndicationItem item in feed.Items)
             {

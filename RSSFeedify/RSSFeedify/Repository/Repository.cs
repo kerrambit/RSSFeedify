@@ -17,9 +17,9 @@ namespace RSSFeedify.Repositories
 
         public async Task<RepositoryResult<T>> DeleteAsync(Guid guid)
         {
-            using(var context = new ApplicationDbContext(_configuration))
+            using (var context = new ApplicationDbContext(_configuration))
             {
-                using(var transaction = context.Database.BeginTransaction())
+                using (var transaction = context.Database.BeginTransaction())
                 {
                     var result = await GetAsync(guid);
                     var batch = result.Data;
@@ -88,7 +88,7 @@ namespace RSSFeedify.Repositories
 
         public async Task SaveAsync(ApplicationDbContext context)
         {
-             await context.SaveChangesAsync();
+            await context.SaveChangesAsync();
         }
 
         public RepositoryResult<bool> Exists(Guid guid)

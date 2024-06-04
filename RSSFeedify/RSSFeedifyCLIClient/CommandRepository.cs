@@ -12,7 +12,7 @@ namespace RSSFeedifyCLIClient.Repository
             Dictionary<string, Command> commands = new Dictionary<string, Command>();
 
             Command listFeeds = new Command("list-feeds", "", "Lists all available RSS feeds.", []);
-            Command addRSSFeed = new Command("add-feed", "name:STRING description:STRING url:URI polling-interval-in-minutes:INTEGER", "Adds new RSS feed into the database.", new List<ParameterType> { ParameterType.String, ParameterType.String, ParameterType.Uri, ParameterType.DoubleRange }, new List<(double, double)> { (10.0, 60.0)});
+            Command addRSSFeed = new Command("add-feed", "name:STRING description:STRING url:URI polling-interval-in-minutes:INTEGER", "Adds new RSS feed into the database.", new List<ParameterType> { ParameterType.String, ParameterType.String, ParameterType.Uri, ParameterType.DoubleRange }, new List<(double, double)> { (10.0, 60.0) });
             Command deleteRSSFeed = new Command("delete-feed", "guid:STRING", "Deletes RSSFeed.", new List<ParameterType> { ParameterType.String });
             Command editRSSFeed = new Command("edit-feed", "guid:STRING new-name:STRING new-description:STRING new-polling-interval-in-minutes:INTEGER", "Edits RSS feed in the database.", new List<ParameterType> { ParameterType.String, ParameterType.String, ParameterType.String, ParameterType.DoubleRange }, new List<(double, double)> { (10.0, 60.0) });
 

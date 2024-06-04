@@ -35,7 +35,7 @@ namespace RSSFeedify.Repository
                             result.Data.LastSuccessfullPoll = result.Data.LastPoll;
                         }
                     }
-                
+
                     await SaveAsync(context);
                     dbContextTransaction.Commit();
                 }
@@ -49,7 +49,7 @@ namespace RSSFeedify.Repository
                 using (var transaction = context.Database.BeginTransaction())
                 {
                     var feed = context.RSSFeeds.SingleOrDefault(feed => feed.Guid == guid);
-                    if(feed is not null)
+                    if (feed is not null)
                     {
                         feed.Name = batch.Name;
                         feed.Description = batch.Description;
@@ -60,7 +60,8 @@ namespace RSSFeedify.Repository
 
                         transaction.Commit();
                         return new Success<RSSFeed>(feed);
-                    } else
+                    }
+                    else
                     {
                         return new NotFoundError<RSSFeed>();
                     }

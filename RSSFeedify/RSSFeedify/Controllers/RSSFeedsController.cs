@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RSSFeedify.Models;
-using RSSFeedify.Services.DataTypeConvertors;
-using RSSFeedify.Services;
 using RSSFeedify.Repository;
-using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedify.Repository.Types;
+using RSSFeedify.Repository.Types.PaginationQuery;
+using RSSFeedify.Services;
+using RSSFeedify.Services.DataTypeConvertors;
 
 namespace RSSFeedify.Controllers
 {
@@ -72,7 +72,8 @@ namespace RSSFeedify.Controllers
             if (!data.success)
             {
                 rSSFeed.LastPoll = DateTime.UtcNow;
-            } else
+            }
+            else
             {
                 rSSFeed.LastPoll = DateTime.UtcNow;
                 rSSFeed.LastSuccessfullPoll = rSSFeed.LastPoll;
@@ -95,7 +96,7 @@ namespace RSSFeedify.Controllers
         // DELETE: api/RSSFeeds/5
         [HttpDelete("{guid}")]
         public async Task<ActionResult<RSSFeed>> DeleteRSSFeed(string guid)
-        {            
+        {
             var result = await _rSSFeedRepository.DeleteAsync(new Guid(guid));
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }

@@ -49,9 +49,9 @@ namespace RSSFeedify.Repository
 
         public async Task<RepositoryResult<int>> InsertMultipleAsync(IList<RSSFeedItem> rSSFeedItems)
         {
-            using(var context = new ApplicationDbContext(_configuration))
+            using (var context = new ApplicationDbContext(_configuration))
             {
-                using(var transaction = context.Database.BeginTransaction())
+                using (var transaction = context.Database.BeginTransaction())
                 {
                     int insertedEntities = 0;
                     foreach (var item in rSSFeedItems)

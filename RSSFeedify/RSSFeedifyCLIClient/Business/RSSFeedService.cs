@@ -167,7 +167,7 @@ namespace RSSFeedifyCLIClient.Business
             try
             {
                 string link = article.Id;
-                if(!IsValidUrl(link))
+                if (!IsValidUrl(link))
                 {
                     RenderInvalidUrlWarningMessage(link);
                     return;

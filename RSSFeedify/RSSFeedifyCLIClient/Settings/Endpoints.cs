@@ -55,7 +55,7 @@ namespace RSSFeedifyCLIClient.Settings
             string baseUriString = BuildUri(endpoint).ToString();
             StringBuilder completeUriString = new StringBuilder(baseUriString + "/" + resourcePath);
 
-            if(queryStrings.Count == 0)
+            if (queryStrings.Count == 0)
             {
                 return new Uri(completeUriString.ToString());
             }
@@ -65,7 +65,7 @@ namespace RSSFeedifyCLIClient.Settings
             {
                 completeUriString.Append($"{queryString.key}={queryString.value}&");
             }
-            
+
             completeUriString.Remove(completeUriString.Length - 1, 1);
             return new Uri(completeUriString.ToString());
         }
