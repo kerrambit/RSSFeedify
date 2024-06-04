@@ -10,7 +10,7 @@ namespace RSSFeedify.Services
     public sealed class RSSFeedPollingService : BackgroundService
     {
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly TimeSpan _pollingInterval = TimeSpan.FromSeconds(20);
+        private readonly TimeSpan _pollingInterval = TimeSpan.FromMinutes(10);
 
         public RSSFeedPollingService(IServiceScopeFactory scopeFactory)
         {
