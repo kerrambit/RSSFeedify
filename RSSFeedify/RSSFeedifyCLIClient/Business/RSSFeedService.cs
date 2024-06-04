@@ -243,7 +243,7 @@ namespace RSSFeedifyCLIClient.Business
             }
             if (data.response.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
-                _writer.RenderErrorMessage("Source URL has to be unique!");
+                RenderErrorMessage(await data.response.Content.ReadAsStringAsync());
                 return;
             }
 
@@ -383,6 +383,11 @@ namespace RSSFeedifyCLIClient.Business
                     _writer.RenderErrorMessage("Error occured!");
                     break;
             }
+        }
+
+        private void RenderErrorMessage(string error)
+        {
+            _writer.RenderErrorMessage(error);
         }
 
         private void RenderErrorMessage()
