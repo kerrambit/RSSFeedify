@@ -234,7 +234,7 @@ namespace RSSFeedifyCLIClient.Business
 
         public async Task AddNewFeed(IList<ParameterResult> parameters)
         {
-            RSSFeedDTO feed = new(parameters[0].String, parameters[1].String, new Uri(parameters[2].String), parameters[3].Double);
+            RSSFeedDTO feed = new(parameters[0].String, parameters[1].String, parameters[2].Uri, parameters[3].Double);
             var data = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds), JsonConvertor.ConvertObjectToJsonString(feed));
             if (!data.success)
             {
