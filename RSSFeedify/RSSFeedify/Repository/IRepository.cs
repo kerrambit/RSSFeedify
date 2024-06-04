@@ -1,4 +1,5 @@
-﻿using RSSFeedify.Repository.Types;
+﻿using PostgreSQL.Data;
+using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.PaginationQuery;
 
 namespace RSSFeedify.Repositories
@@ -9,10 +10,9 @@ namespace RSSFeedify.Repositories
         Task<RepositoryResult<IEnumerable<T>>> GetAsync(PaginationQuery paginationQuery);
         Task<RepositoryResult<int>> GetTotalCountAsync();
         Task<RepositoryResult<T>> GetAsync(Guid feedGUID);
-        RepositoryResult<T> Insert(T feed);
+        Task<RepositoryResult<T>> InsertAsync(T feed);
         Task<RepositoryResult<T>> DeleteAsync(Guid feedGUID);
-        Task<RepositoryResult<T>> UpdateAsync(Guid feedGUID, T feed);
-        Task SaveAsync();
+        Task SaveAsync(ApplicationDbContext context);
         RepositoryResult<bool> Exists(Guid feedGUID);
     }
 }

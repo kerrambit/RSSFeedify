@@ -19,9 +19,16 @@ namespace RSSFeedify.Services
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            bool firstRun = true;
+
             while (!stoppingToken.IsCancellationRequested)
             {
-                await Task.Delay(_pollingInterval, stoppingToken);
+                if (!firstRun)
+                {
+                    await Task.Delay(_pollingInterval, stoppingToken);
+                }
+
+                firstRun = false;
                 using (var scope = _scopeFactory.CreateScope())
                 {
                     Console.WriteLine("[RSSFeedPollingService]: service wakes up...");
@@ -33,46 +40,44 @@ namespace RSSFeedify.Services
                     if (feeds is not Success<IEnumerable<RSSFeed>>)
                     {
                         Console.WriteLine("[RSSFeedPollingService]: failure. Unable to get access to RSSFeeds!");
+                        continue;
+                    }
 
-                    } else
+                    foreach (var feed in feeds.Data)
                     {
-                        foreach (var feed in feeds.Data)
+                        if (!CheckTimeStampsForUpdate(feed))
                         {
-                            if (!CheckTimeStampsForUpdate(feed))
-                            {
-                                Console.WriteLine($"[RSSFeedPollingService]: feed must be updated: {false}");
-                                continue;
-                            }
-
-                            Console.WriteLine($"[RSSFeedPollingService]: feed must be updated: {true}");
-                            (bool success, DateTime lastUpdate, List<(string hash, RSSFeedItemDTO dto)> items) = LoadRSSFeedItemsFromUri(feed.SourceUrl);
-                            if (!success)
-                            {
-                                Console.WriteLine($"[RSSFeedPollingService]: poll was not successfull so only LastPoll time stamp will be updated.");
-                                await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: false);
-                                continue;
-                            }
-                            
-                            if (feed.LastPoll > lastUpdate)
-                            {
-                                Console.WriteLine($"[RSSFeedPollingService]: feed was not updated so our RSSFeed can be left as it is and only time stamps are going to be updated.");
-                                await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: true);
-                                continue;
-                            }
-
-                            Console.WriteLine($"[RSSFeedPollingService]: feed was updated so the database must be also updated ({feed.LastPoll} < {lastUpdate})");
-
-                            var originalItems = await rSSItemsRepository.GetFilteredByForeignKeyAsync(feed.Guid);
-                            if (originalItems is not Success<IEnumerable<RSSFeedItem>>)
-                            {
-                                Console.WriteLine($"[RSSFeedPollingService]: failure. Unable to get access to RSSFeedsItems for feed: {feed.Guid}!");
-                                await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: false);
-                                continue;
-                            }
-
-                            UpdateRSSFeedItems(rSSItemsRepository, feed, items, originalItems);
-                            await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: true);
+                            Console.WriteLine($"[RSSFeedPollingService]: feed must be updated: {false}");
+                            continue;
                         }
+                        Console.WriteLine($"[RSSFeedPollingService]: feed must be updated: {true}");
+
+                        (bool success, DateTime lastUpdate, List<(string hash, RSSFeedItemDTO dto)> items) = LoadRSSFeedItemsFromUri(feed.SourceUrl);
+                        if (!success)
+                        {
+                            Console.WriteLine($"[RSSFeedPollingService]: poll was not successfull so only LastPoll time stamp will be updated.");
+                            await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: false);
+                            continue;
+                        }
+
+                        if (feed.LastPoll > lastUpdate)
+                        {
+                            Console.WriteLine($"[RSSFeedPollingService]: feed was not updated so our RSSFeed can be left as it is and only time stamps are going to be updated.");
+                            await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: true);
+                            continue;
+                        }
+                        Console.WriteLine($"[RSSFeedPollingService]: feed was updated so the database must be also updated ({feed.LastPoll} < {lastUpdate})");
+
+                        var originalItems = await rSSItemsRepository.GetFilteredByForeignKeyAsync(feed.Guid);
+                        if (originalItems is not Success<IEnumerable<RSSFeedItem>>)
+                        {
+                            Console.WriteLine($"[RSSFeedPollingService]: failure. Unable to get access to RSSFeedsItems for feed: {feed.Guid}!");
+                            await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: false);
+                            continue;
+                        }
+
+                        UpdateRSSFeedItems(rSSItemsRepository, feed, items, originalItems);
+                        await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: true);
                     }
                 }
             }
@@ -95,7 +100,7 @@ namespace RSSFeedify.Services
                 {
                     var newRSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(newFeedItem.dto, newFeedItem.hash);
                     newRSSFeedItem.RSSFeedId = feed.Guid;
-                    _ = rSSItemsRepository.Insert(newRSSFeedItem);
+                    _ = rSSItemsRepository.InsertAsync(newRSSFeedItem);
                     Console.WriteLine($"[RSSFeedPollingService]: new RSSFeedItem should be inserted {newRSSFeedItem.Title}.");
                 }
             }
@@ -104,7 +109,7 @@ namespace RSSFeedify.Services
         private static bool CheckTimeStampsForUpdate(RSSFeed feed)
         {
             bool readyToUpdate = false;
-            Console.WriteLine($"\n\n{feed.Guid} - {feed.Name}, LastPoll: {feed.LastPoll}, LastSuccessfullPoll: {feed.LastSuccessfullPoll}, PollingInterval: {feed.PollingInterval}");
+            Console.WriteLine($"\n\n[RSSFeedPollingService]: checking time stamps of {feed.Guid} - {feed.Name}, LastPoll: {feed.LastPoll}, LastSuccessfullPoll: {feed.LastSuccessfullPoll}, PollingInterval: {feed.PollingInterval}");
             if (feed.LastPoll == DateTime.MinValue && feed.LastSuccessfullPoll == DateTime.MinValue || feed.LastSuccessfullPoll != feed.LastPoll)
             {
                 readyToUpdate = true;
@@ -152,7 +157,7 @@ namespace RSSFeedify.Services
                     reader.Close();
                 }
             }
-     
+
             List<(string hash, RSSFeedItemDTO dto)> items = [];
             foreach (SyndicationItem item in feed.Items)
             {

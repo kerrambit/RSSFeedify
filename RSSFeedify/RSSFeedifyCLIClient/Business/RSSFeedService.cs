@@ -14,8 +14,8 @@ namespace RSSFeedifyCLIClient.Business
         private IWriter _writer;
         private HTTPService _httpService;
 
-        private IDictionary<string, int> _pages = new Dictionary<string, int>();
         private readonly int PageSize = 5;
+        private IDictionary<string, int> _pages = new Dictionary<string, int>();
         private (ListingPage page, IList<ParameterResult> parameters) _currentListingPage = (ListingPage.None, []);
 
         private enum Error
@@ -53,7 +53,7 @@ namespace RSSFeedifyCLIClient.Business
                 _pages["RSSFeeds"] = 1;
             }
 
-            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, new List<(string, string)>() { ("page", $"{_pages["RSSFeeds"]}"), ("pageSize", $"{PageSize}") }));
+            var data = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, new List<(string, string)>() { ("page", $"{_pages["RSSFeeds"]}"), ("pageSize", $"{PageSize}") }));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
@@ -82,10 +82,70 @@ namespace RSSFeedifyCLIClient.Business
             _currentListingPage = (ListingPage.RSSFeeds, []);
         }
 
-        public async Task ShowArticle(IList<ParameterResult> parameters)
+        public async Task DeleteFeedAsync(IList<ParameterResult> parameters)
         {
             string guid = parameters[0].String;
-            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, guid));
+            var data = await _httpService.DeleteAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, guid));
+            if (!data.success)
+            {
+                RenderErrorMessage(Error.Network);
+                return;
+            }
+
+            if (HTTPService.GetContentType(data.response) != HTTPService.ContentType.AppJson)
+            {
+                RenderErrorMessage(Error.DataType);
+                return;
+            }
+
+            var feed = await ReadJson<RSSFeed>(data.response);
+            if (feed is null)
+            {
+                RenderErrorMessage(Error.InvalidJsonFormat);
+                return;
+            }
+
+            _writer.RenderBareText($"RSSFeed '{feed.Name}' with GUID '{feed.Guid}' was successfully deleted!");
+        }
+
+        public async Task EditFeedAsync(IList<ParameterResult> parameters)
+        {
+            string guid = parameters[0].String;
+
+            var original = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, guid));
+            if (!original.success)
+            {
+                RenderErrorMessage(Error.Network);
+                return;
+            }
+
+            var originalFeed = await ReadJson<RSSFeed>(original.response);
+            if (originalFeed is null)
+            {
+                RenderErrorMessage(Error.InvalidJsonFormat);
+                return;
+            }
+
+            RSSFeedDTO feed = new(parameters[1].String, parameters[2].String, originalFeed.SourceUrl, parameters[3].Double);
+            var data = await _httpService.PutAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, guid), JsonConvertor.ConvertObjectToJsonString(feed));
+            if (!data.success)
+            {
+                RenderErrorMessage(Error.Network);
+                return;
+            }
+
+            var result = await ReadJson<RSSFeed>(data.response);
+            if (result is not null)
+            {
+                _writer.RenderBareText("RSSFeed was successfully edited:");
+                RenderRSSFeed(result);
+            }
+        }
+
+        public async Task ReadArticle(IList<ParameterResult> parameters)
+        {
+            string guid = parameters[0].String;
+            var data = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, guid));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
@@ -107,7 +167,7 @@ namespace RSSFeedifyCLIClient.Business
             try
             {
                 string link = article.Id;
-                if(!IsValidUrl(link))
+                if (!IsValidUrl(link))
                 {
                     RenderInvalidUrlWarningMessage(link);
                     return;
@@ -144,7 +204,7 @@ namespace RSSFeedifyCLIClient.Business
                 _pages["RSSFeedItems"] = 1;
             }
 
-            var data = await _httpService.Get(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, new List<(string, string)>() { ("byRSSFeedGuid", guid), ("page", $"{_pages["RSSFeedItems"]}"), ("pageSize", $"{PageSize}") }));
+            var data = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, new List<(string, string)>() { ("byRSSFeedGuid", guid), ("page", $"{_pages["RSSFeedItems"]}"), ("pageSize", $"{PageSize}") }));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
@@ -174,11 +234,16 @@ namespace RSSFeedifyCLIClient.Business
 
         public async Task AddNewFeed(IList<ParameterResult> parameters)
         {
-            RSSFeedDTO feed = new(parameters[0].String, parameters[1].String, new Uri(parameters[2].String), parameters[3].Double);
-            var data = await _httpService.Post(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds), JsonConvertor.ConvertObjectToJsonString(feed));
+            RSSFeedDTO feed = new(parameters[0].String, parameters[1].String, parameters[2].Uri, parameters[3].Double);
+            var data = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds), JsonConvertor.ConvertObjectToJsonString(feed));
             if (!data.success)
             {
                 RenderErrorMessage(Error.Network);
+                return;
+            }
+            if (data.response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                RenderErrorMessage(await data.response.Content.ReadAsStringAsync());
                 return;
             }
 
@@ -206,6 +271,12 @@ namespace RSSFeedifyCLIClient.Business
             }
         }
 
+        public void Settings()
+        {
+            _writer.RenderBareText("\n>General");
+            _writer.RenderBareText($"\t>KEY: 'ssl-host-port'\t\tVALUE: '{Endpoints.BaseUrl}'");
+        }
+
         private int ComputeTotalPagesCount(int count)
         {
             return (int)Math.Ceiling(count / (double)PageSize);
@@ -213,7 +284,7 @@ namespace RSSFeedifyCLIClient.Business
 
         private async Task<int> RetrieveCount(Endpoints.EndPoint endpoint, (string key, string value) queryString)
         {
-            var count = await _httpService.Get(Endpoints.BuildUri(endpoint, "count", queryString));
+            var count = await _httpService.GetAsync(Endpoints.BuildUri(endpoint, "count", queryString));
             if (!RetrieveCountInner(count))
             {
                 return -1;
@@ -224,7 +295,7 @@ namespace RSSFeedifyCLIClient.Business
 
         private async Task<int> RetrieveCount(Endpoints.EndPoint endpoint)
         {
-            var count = await _httpService.Get(Endpoints.BuildUri(endpoint, "count"));
+            var count = await _httpService.GetAsync(Endpoints.BuildUri(endpoint, "count"));
             if (!RetrieveCountInner(count))
             {
                 return -1;
@@ -290,8 +361,8 @@ namespace RSSFeedifyCLIClient.Business
                            $"    Summary: '{item.Summary}'\n" +
                            $"    Publish Date: {item.PublishDate}\n" +
                            $"    Id: {item.Id}\n" +
-                           $"    Authors: {((item.Authors.Count == 0) ? "[]" : string.Join('\n', item.Authors))}\n" +
-                           $"    Categories: {((item.Categories.Count == 0) ? "[]" : string.Join('\n', item.Categories))}\n");
+                           $"    Authors: {((item.Authors is null || item.Authors.Count == 0) ? "[]" : string.Join(", ", item.Authors))}\n" +
+                           $"    Categories: {((item.Categories is null || item.Categories.Count == 0) ? "[]" : string.Join(", ", item.Categories))}\n");
         }
 
         private void RenderErrorMessage(Error error)
@@ -312,6 +383,11 @@ namespace RSSFeedifyCLIClient.Business
                     _writer.RenderErrorMessage("Error occured!");
                     break;
             }
+        }
+
+        private void RenderErrorMessage(string error)
+        {
+            _writer.RenderErrorMessage(error);
         }
 
         private void RenderErrorMessage()

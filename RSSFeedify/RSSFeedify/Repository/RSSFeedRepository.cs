@@ -1,40 +1,71 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PostgreSQL.Data;
+﻿using PostgreSQL.Data;
 using RSSFeedify.Models;
 using RSSFeedify.Repositories;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.Pagination;
 using RSSFeedify.Repository.Types.PaginationQuery;
-using System.Linq;
 
 namespace RSSFeedify.Repository
 {
     public class RSSFeedRepository : Repository<RSSFeed>, IRSSFeedRepository
     {
-        public RSSFeedRepository(ApplicationDbContext context, DbSet<RSSFeed> data) : base(context, data) { }
+        public RSSFeedRepository(IConfiguration configuration) : base(configuration) { }
 
         public async Task<RepositoryResult<IEnumerable<RSSFeed>>> GetSortedByNameAsync(PaginationQuery paginationQuery)
         {
-            var batches = await _data.OrderBy(u => u.Name).ToPagedListAsync(paginationQuery.Page, paginationQuery.PageSize);
-            return new Success<IEnumerable<RSSFeed>>(batches);
+            using (var context = new ApplicationDbContext(_configuration))
+            {
+                var batches = await context.Set<RSSFeed>().OrderBy(u => u.Name).ToPagedListAsync(paginationQuery.Page, paginationQuery.PageSize);
+                return new Success<IEnumerable<RSSFeed>>(batches);
+            }
         }
 
         public async Task UpdatePollingTimeAsync(Guid guid, bool successfullPolling)
         {
-            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            using (var context = new ApplicationDbContext(_configuration))
             {
-                var result = await GetAsync(guid);
-                if (result is Success<RSSFeed>)
+                using (var dbContextTransaction = context.Database.BeginTransaction())
                 {
-                    result.Data.LastPoll = DateTime.UtcNow;
-                    if (successfullPolling)
+                    var result = await GetAsync(guid);
+                    if (result is Success<RSSFeed>)
                     {
-                        result.Data.LastSuccessfullPoll = result.Data.LastPoll;
+                        result.Data.LastPoll = DateTime.UtcNow;
+                        if (successfullPolling)
+                        {
+                            result.Data.LastSuccessfullPoll = result.Data.LastPoll;
+                        }
+                    }
+
+                    await SaveAsync(context);
+                    dbContextTransaction.Commit();
+                }
+            }
+        }
+
+        public async Task<RepositoryResult<RSSFeed>> UpdateAsync(Guid guid, RSSFeedDTO batch)
+        {
+            using (var context = new ApplicationDbContext(_configuration))
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    var feed = context.RSSFeeds.SingleOrDefault(feed => feed.Guid == guid);
+                    if (feed is not null)
+                    {
+                        feed.Name = batch.Name;
+                        feed.Description = batch.Description;
+                        feed.SourceUrl = batch.SourceUrl;
+                        feed.PollingInterval = batch.PollingInterval;
+
+                        await SaveAsync(context);
+
+                        transaction.Commit();
+                        return new Success<RSSFeed>(feed);
+                    }
+                    else
+                    {
+                        return new NotFoundError<RSSFeed>();
                     }
                 }
-                
-                await SaveAsync();
-                dbContextTransaction.Commit();
             }
         }
     }

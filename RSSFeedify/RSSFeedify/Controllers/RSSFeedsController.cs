@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RSSFeedify.Models;
-using RSSFeedify.Services.DataTypeConvertors;
-using RSSFeedify.Services;
 using RSSFeedify.Repository;
-using PostgreSQL.Data;
+using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.PaginationQuery;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Drawing.Printing;
+using RSSFeedify.Services;
+using RSSFeedify.Services.DataTypeConvertors;
 
 namespace RSSFeedify.Controllers
 {
@@ -16,11 +14,9 @@ namespace RSSFeedify.Controllers
     {
         private readonly IRSSFeedRepository _rSSFeedRepository;
         private readonly IRSSFeedItemRepository _rSSFeedItemRepository;
-        private readonly ApplicationDbContext _context;
 
-        public RSSFeedsController(ApplicationDbContext context, IRSSFeedRepository rSSFeedRepository, IRSSFeedItemRepository rSSFeedItemRepository)
+        public RSSFeedsController(IRSSFeedRepository rSSFeedRepository, IRSSFeedItemRepository rSSFeedItemRepository)
         {
-            _context = context;
             _rSSFeedRepository = rSSFeedRepository;
             _rSSFeedItemRepository = rSSFeedItemRepository;
         }
@@ -53,7 +49,7 @@ namespace RSSFeedify.Controllers
         [HttpPut("{guid}")]
         public async Task<ActionResult<RSSFeed>> PutRSSFeed(string guid, RSSFeedDTO rSSFeedDto)
         {
-            var result = await _rSSFeedRepository.UpdateAsync(new Guid(guid), RSSFeedDTOToRSSFeed.Convert(rSSFeedDto));
+            var result = await _rSSFeedRepository.UpdateAsync(new Guid(guid), rSSFeedDto);
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
 
@@ -63,70 +59,36 @@ namespace RSSFeedify.Controllers
         {
             var rSSFeed = RSSFeedDTOToRSSFeed.Convert(rSSFeedDTO);
 
+            var originalRssFeeds = await _rSSFeedRepository.GetAsync();
+            if (originalRssFeeds is Success<IEnumerable<RSSFeed>>)
+            {
+                if (originalRssFeeds.Data.Where(feed => feed.SourceUrl == rSSFeedDTO.SourceUrl).Count() != 0)
+                {
+                    return ControllersHelper.GetResultForDuplicatedSourcerUrl<RSSFeed>(rSSFeedDTO.SourceUrl);
+                }
+            }
+
             var data = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
             if (!data.success)
             {
                 rSSFeed.LastPoll = DateTime.UtcNow;
-            } else
+            }
+            else
             {
                 rSSFeed.LastPoll = DateTime.UtcNow;
                 rSSFeed.LastSuccessfullPoll = rSSFeed.LastPoll;
             }
 
-            var result = _rSSFeedRepository.Insert(rSSFeed);
-            await _rSSFeedRepository.SaveAsync();
+            var result = await _rSSFeedRepository.InsertAsync(rSSFeed);
 
-            //Console.WriteLine("\n----------------- POST of RSSFeed -----------------");
-            //Console.WriteLine($"Last updated time of the feed: {data.lastUpdate}.\nIndividual feed items: ");
-            //foreach (var pair in data.items)
-            //{
-            //    Console.WriteLine($"Hash: {pair.hash}");
-            //    var item = pair.dto;
-            //    Console.WriteLine($"Title: {item.Title}");
-            //    Console.WriteLine($"Summary: {item.Summary}");
-            //    Console.WriteLine($"Publish Date: {item.PublishDate}");
-            //    Console.WriteLine($"Content: {item.Content}");
-            //    Console.WriteLine($"Id: {item.Id}");
-
-            //    Console.WriteLine("\nAuthors:");
-            //    foreach (var author in item.Authors)
-            //    {
-            //        Console.WriteLine($" - {author}");
-            //    }
-
-            //    Console.WriteLine("\nContributors:");
-            //    foreach (var contributor in item.Contributors)
-            //    {
-            //        Console.WriteLine($" - {contributor}");
-            //    }
-
-            //    Console.WriteLine("\nLinks:");
-            //    foreach (var link in item.Links)
-            //    {
-            //        Console.WriteLine($" - {link}");
-            //    }
-
-            //    Console.WriteLine("\nCategories:");
-            //    foreach (var category in item.Categories)
-            //    {
-            //        Console.WriteLine($"  - {category}");
-            //    }
-
-            //    Console.WriteLine("-----------------------------------------");
-            //}
-
-            using (var dbContextTransaction = _context.Database.BeginTransaction())
+            IList<RSSFeedItem> items = new List<RSSFeedItem>();
+            foreach (var item in data.items)
             {
-                foreach (var item in data.items)
-                {
-                    var rSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(item.dto, item.hash);
-                    rSSFeedItem.RSSFeedId = rSSFeed.Guid;
-                    _ = _rSSFeedItemRepository.Insert(rSSFeedItem);
-                }
-
-                await _rSSFeedItemRepository.SaveAsync();
-                dbContextTransaction.Commit();
+                var rSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(item.dto, item.hash);
+                rSSFeedItem.RSSFeedId = rSSFeed.Guid;
+                items.Add(rSSFeedItem);
             }
+            _ = await _rSSFeedItemRepository.InsertMultipleAsync(items);
 
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
@@ -134,9 +96,8 @@ namespace RSSFeedify.Controllers
         // DELETE: api/RSSFeeds/5
         [HttpDelete("{guid}")]
         public async Task<ActionResult<RSSFeed>> DeleteRSSFeed(string guid)
-        {            
+        {
             var result = await _rSSFeedRepository.DeleteAsync(new Guid(guid));
-            await _rSSFeedRepository.SaveAsync();
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
 
