@@ -109,7 +109,7 @@ namespace RSSFeedify.Services
         private static bool CheckTimeStampsForUpdate(RSSFeed feed)
         {
             bool readyToUpdate = false;
-            Console.WriteLine($"\n\n{feed.Guid} - {feed.Name}, LastPoll: {feed.LastPoll}, LastSuccessfullPoll: {feed.LastSuccessfullPoll}, PollingInterval: {feed.PollingInterval}");
+            Console.WriteLine($"\n\n[RSSFeedPollingService]: checking time stamps of {feed.Guid} - {feed.Name}, LastPoll: {feed.LastPoll}, LastSuccessfullPoll: {feed.LastSuccessfullPoll}, PollingInterval: {feed.PollingInterval}");
             if (feed.LastPoll == DateTime.MinValue && feed.LastSuccessfullPoll == DateTime.MinValue || feed.LastSuccessfullPoll != feed.LastPoll)
             {
                 readyToUpdate = true;
