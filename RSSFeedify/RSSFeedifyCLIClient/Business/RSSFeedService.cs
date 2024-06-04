@@ -266,6 +266,12 @@ namespace RSSFeedifyCLIClient.Business
             }
         }
 
+        public void Settings()
+        {
+            _writer.RenderBareText("\n>General");
+            _writer.RenderBareText($"\t>KEY: 'ssl-host-port'\t\tVALUE: '{Endpoints.BaseUrl}'");
+        }
+
         private int ComputeTotalPagesCount(int count)
         {
             return (int)Math.Ceiling(count / (double)PageSize);

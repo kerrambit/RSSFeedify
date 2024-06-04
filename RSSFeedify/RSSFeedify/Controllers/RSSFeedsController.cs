@@ -3,10 +3,7 @@ using RSSFeedify.Models;
 using RSSFeedify.Services.DataTypeConvertors;
 using RSSFeedify.Services;
 using RSSFeedify.Repository;
-using PostgreSQL.Data;
 using RSSFeedify.Repository.Types.PaginationQuery;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using System.Drawing.Printing;
 
 namespace RSSFeedify.Controllers
 {
@@ -90,7 +87,6 @@ namespace RSSFeedify.Controllers
         public async Task<ActionResult<RSSFeed>> DeleteRSSFeed(string guid)
         {            
             var result = await _rSSFeedRepository.DeleteAsync(new Guid(guid));
-            //await _rSSFeedRepository.SaveAsync();
             return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
         }
 

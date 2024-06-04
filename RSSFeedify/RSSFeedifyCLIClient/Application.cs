@@ -84,6 +84,9 @@ namespace RSSFeedifyCLIClient
                         case "next":
                             await rSSFeedService.Next();
                             break;
+                        case "settings":
+                            rSSFeedService.Settings();
+                            break;
                         default:
                             break;
                     }

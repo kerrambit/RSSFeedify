@@ -4,7 +4,7 @@ namespace RSSFeedifyCLIClient.Settings
 {
     public static class Endpoints
     {
-        public static Uri BaseUrl { get; set; } = new(@"https://localhost:32768/api/");
+        public static Uri BaseUrl { get; set; } = new(@"https://localhost:32001/api/");
 
         public enum EndPoint
         {

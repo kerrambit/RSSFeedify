@@ -41,7 +41,6 @@ namespace RSSFeedify.Services
                     {
                         Console.WriteLine("[RSSFeedPollingService]: failure. Unable to get access to RSSFeeds!");
                         continue;
-
                     }
                     
                     foreach (var feed in feeds.Data)

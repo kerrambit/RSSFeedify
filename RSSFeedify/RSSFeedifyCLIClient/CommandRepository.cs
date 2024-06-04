@@ -21,6 +21,9 @@ namespace RSSFeedifyCLIClient.Repository
 
             Command next = new Command("next", "", "Shows new page when listing", []);
             Command quit = new Command("quit", "", "Quits the application.", new List<ParameterType> { });
+            Command settings = new Command("settings", "", "Shows current settings of the application.", []);
+
+            commands["settings"] = settings;
 
             commands["list-feeds"] = listFeeds;
             commands["add-feed"] = addRSSFeed;
