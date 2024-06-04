@@ -64,7 +64,7 @@ namespace RSSFeedify.Controllers
             {
                 if (originalRssFeeds.Data.Where(feed => feed.SourceUrl == rSSFeedDTO.SourceUrl).Count() != 0)
                 {
-                    return BadRequest($"Source URL has to be unique. Source URL '{rSSFeedDTO.SourceUrl}' is duplicated!");
+                    return ControllersHelper.GetResultForDuplicatedSourcerUrl<RSSFeed>(rSSFeedDTO.SourceUrl);
                 }
             }
 
