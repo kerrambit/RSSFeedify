@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PostgreSQL.Data;
@@ -12,9 +13,11 @@ using PostgreSQL.Data;
 namespace RSSFeedify.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240715185905_2240715205855")]
+    partial class _2240715205855
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -225,9 +228,6 @@ namespace RSSFeedify.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -255,8 +255,6 @@ namespace RSSFeedify.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Guid");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.ToTable("RSSFeeds");
                 });
@@ -369,18 +367,6 @@ namespace RSSFeedify.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("RSSFeedify.Models.RSSFeed", b =>
-                {
-                    b.HasOne("ApplicationUser", null)
-                        .WithMany("WatchedList")
-                        .HasForeignKey("ApplicationUserId");
-                });
-
-            modelBuilder.Entity("ApplicationUser", b =>
-                {
-                    b.Navigation("WatchedList");
                 });
 #pragma warning restore 612, 618
         }

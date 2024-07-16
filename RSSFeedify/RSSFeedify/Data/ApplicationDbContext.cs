@@ -1,9 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using RSSFeedify.Models;
 
 namespace PostgreSQL.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         protected readonly IConfiguration Configuration;
 
@@ -21,3 +23,5 @@ namespace PostgreSQL.Data
         public DbSet<RSSFeedItem> RSSFeedsItems { get; set; }
     }
 }
+
+
