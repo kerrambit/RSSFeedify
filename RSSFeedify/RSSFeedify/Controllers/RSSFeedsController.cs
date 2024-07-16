@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedify.Services;
 using RSSFeedify.Services.DataTypeConvertors;
+using System.Net.Http.Headers;
+using System.Net.Http;
 
 namespace RSSFeedify.Controllers
 {
@@ -23,14 +27,17 @@ namespace RSSFeedify.Controllers
 
         // GET: api/RSSFeeds
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<RSSFeed>>> GetRSSFeeds(int page, int pageSize)
         {
+
             var result = await _rSSFeedRepository.GetSortedByNameAsync(new PaginationQuery(page, pageSize));
             return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeed>>.Convert(result);
         }
 
         // GET: api/RSSFeeds/5
         [HttpGet("{guid}")]
+        [Authorize]
         public async Task<ActionResult<RSSFeed>> GetRSSFeed(string guid)
         {
             var result = await _rSSFeedRepository.GetAsync(new Guid(guid));
