@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types.PaginationQuery;
@@ -19,6 +20,7 @@ namespace RSSFeedify.Controllers
 
         // GET: api/RSSFeedItems?byRSSFeedGuid=5
         [HttpGet("")]
+        [Authorize]
         public async Task<ActionResult<IEnumerable<RSSFeedItem>>> GetRSSFeedItems([FromQuery] string byRSSFeedGuid, [FromQuery] int page, [FromQuery] int pageSize)
         {
             if (byRSSFeedGuid is null || byRSSFeedGuid == string.Empty)
@@ -38,6 +40,7 @@ namespace RSSFeedify.Controllers
 
         // GET: api/RSSFeedItems/count?byRSSFeedGuid=5
         [HttpGet("count")]
+        [Authorize]
         public async Task<ActionResult<int>> GetRSSFeedsCount([FromQuery] string byRSSFeedGuid)
         {
             if (!QueryStringParser.ParseGuid(byRSSFeedGuid, out Guid rssFeedGuid))
@@ -51,6 +54,7 @@ namespace RSSFeedify.Controllers
 
         // GET: api/RSSFeedItems/5
         [HttpGet("{guid}")]
+        [Authorize]
         public async Task<ActionResult<RSSFeedItem>> GetRSSFeedItem(string guid)
         {
             if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
@@ -84,6 +88,7 @@ namespace RSSFeedify.Controllers
 
         // DELETE: api/RSSFeedItems/5
         [HttpDelete("{guid}")]
+        [Authorize]
         public async Task<ActionResult<RSSFeedItem>> DeleteRSSFeedItem(string guid)
         {
             var result = await _repository.DeleteAsync(new Guid(guid));

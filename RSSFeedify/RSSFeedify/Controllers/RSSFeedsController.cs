@@ -1,14 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedify.Services;
 using RSSFeedify.Services.DataTypeConvertors;
-using System.Net.Http.Headers;
-using System.Net.Http;
 
 namespace RSSFeedify.Controllers
 {
@@ -46,6 +43,7 @@ namespace RSSFeedify.Controllers
 
         // GET: api/RSSFeeds/count
         [HttpGet("count")]
+        [Authorize]
         public async Task<ActionResult<int>> GetRSSFeedsCount()
         {
             var result = await _rSSFeedRepository.GetTotalCountAsync();
@@ -54,6 +52,7 @@ namespace RSSFeedify.Controllers
 
         // PUT: api/RSSFeeds/5
         [HttpPut("{guid}")]
+        [Authorize]
         public async Task<ActionResult<RSSFeed>> PutRSSFeed(string guid, RSSFeedDTO rSSFeedDto)
         {
             var result = await _rSSFeedRepository.UpdateAsync(new Guid(guid), rSSFeedDto);
@@ -62,6 +61,7 @@ namespace RSSFeedify.Controllers
 
         // POST: api/RSSFeeds
         [HttpPost]
+        [Authorize]
         public async Task<ActionResult<RSSFeed>> PostRSSFeed(RSSFeedDTO rSSFeedDTO)
         {
             var rSSFeed = RSSFeedDTOToRSSFeed.Convert(rSSFeedDTO);
@@ -102,6 +102,7 @@ namespace RSSFeedify.Controllers
 
         // DELETE: api/RSSFeeds/5
         [HttpDelete("{guid}")]
+        [Authorize]
         public async Task<ActionResult<RSSFeed>> DeleteRSSFeed(string guid)
         {
             var result = await _rSSFeedRepository.DeleteAsync(new Guid(guid));
