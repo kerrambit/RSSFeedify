@@ -24,7 +24,7 @@ namespace RSSFeedify.Controllers
 
         // GET: api/RSSFeeds
         [HttpGet]
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<RSSFeed>>> GetRSSFeeds(int page, int pageSize)
         {
 

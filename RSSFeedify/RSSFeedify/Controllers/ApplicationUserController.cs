@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using NuGet.Packaging;
 using RSSFeedify.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -28,14 +29,21 @@ namespace RSSFeedify.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email  };
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 var result = await _userManager.CreateAsync(user, model.Password);
-
-                if (result.Succeeded)
+                
+                if (!result.Succeeded)
                 {
-                    return Ok();
+                    return BadRequest(result.Errors);
                 }
-                return BadRequest(result.Errors);
+
+                result = await _userManager.AddToRoleAsync(user, "Admin"); // TMP!
+                if (!result.Succeeded)
+                {
+                    return BadRequest(result.Errors);
+                }
+
+                return Ok();
             }
             return BadRequest(ModelState);
         }
@@ -49,8 +57,18 @@ namespace RSSFeedify.Controllers
                 if (result.Succeeded)
                 {
                     var user = await _userManager.FindByEmailAsync(model.Email);
-                    // TODO: handle null user
-                    var token = GenerateJwtToken(user);
+                    if (user is null)
+                    {
+                        return ControllersHelper.GetResultForInvalidLoginAttempt();
+                    }
+
+                    string token;
+                    bool jwtResult = GenerateJwtToken(user, await _userManager.GetRolesAsync(user), out token);
+                    if (!jwtResult)
+                    {
+                        return ControllersHelper.GetResultForInvalidLoginAttempt();
+                    }
+
                     return Ok(new { token });
                 }
                 return ControllersHelper.GetResultForInvalidLoginAttempt();
@@ -58,17 +76,24 @@ namespace RSSFeedify.Controllers
             return BadRequest(ModelState);
         }
 
-        private string GenerateJwtToken(ApplicationUser user)
+        private bool GenerateJwtToken(ApplicationUser user, IList<string> userRoles, out string stringifiedToken)
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            if (userRoles.Count <= 0)
+            {
+                stringifiedToken = string.Empty;
+                return false;
+            }
+
+            claims.AddRange(userRoles.Select(role => new Claim(ClaimsIdentity.DefaultRoleClaimType, role)));
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
@@ -78,7 +103,8 @@ namespace RSSFeedify.Controllers
                 signingCredentials: creds
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            stringifiedToken = new JwtSecurityTokenHandler().WriteToken(token);
+            return true;
         }
     }
 }

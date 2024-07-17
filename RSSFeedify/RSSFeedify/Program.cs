@@ -7,7 +7,6 @@ using PostgreSQL.Data;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Services;
-using System.Configuration;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,14 +26,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddCors();
-
 // Configure Authentication with JWT
-builder.Services.AddAuthentication(x =>
-{
-    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-});
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -59,6 +51,8 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredLength = 8;
     options.Password.RequiredUniqueChars = 1;
 });
+
+builder.Services.AddScoped<RoleManager<IdentityRole>>();
 
 // Register IRSSFeedItemRepository implementation.
 builder.Services.AddScoped<IRSSFeedItemRepository>(serviceProvider =>
@@ -87,7 +81,6 @@ builder.Services.AddSwaggerGen(c =>
         BearerFormat = "JWT"
     });
 
-    // Make sure Swagger UI requires a Bearer token to be specified
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -118,12 +111,18 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-
-app.UseExceptionHandler("/api/Error/error");
+// Use exceptions and errors middleware
+//app.UseExceptionHandler("/api/Error/error");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    await Seeder.Run(services);
+}
 
 app.Run();

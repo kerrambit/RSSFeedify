@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Writers;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace RSSFeedify.Controllers
 {
@@ -15,7 +13,7 @@ namespace RSSFeedify.Controllers
         {
             return new BadRequestObjectResult($"Source URL has to be unique. Source URL '{uri}' is duplicated!");
         }
-        
+
         public static ActionResult GetResultForInvalidLoginAttempt()
         {
             return new BadRequestObjectResult("Invalid login attempt.");
