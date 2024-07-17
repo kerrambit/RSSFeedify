@@ -120,6 +120,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+
+app.UseExceptionHandler("/api/Error/error");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
