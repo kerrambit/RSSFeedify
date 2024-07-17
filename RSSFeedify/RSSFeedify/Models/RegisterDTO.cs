@@ -5,7 +5,7 @@ namespace RSSFeedify.Models
     public class RegisterDTO
     {
         [Required]
-        [EmailAddress]
+        [EmailAddress(ErrorMessage = "The email adress is not valid.")]
         public string Email { get; set; }
 
         [Required]
