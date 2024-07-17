@@ -72,13 +72,11 @@ builder.Services.AddScoped<IRSSFeedRepository>(serviceProvider =>
     return new RSSFeedRepository(serviceProvider.GetRequiredService<IConfiguration>());
 });
 
-// Add Swagger
+// Add Swagger with JWT Bearer Authorization
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API Name", Version = "v1" });
-
-    // Define the security scheme (Bearer type)
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "RSSFeedify", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme",
