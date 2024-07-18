@@ -111,8 +111,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Use exceptions and errors middleware
-//app.UseExceptionHandler("/api/Error/error");
+// Use exceptions and errors middleware (COMMENTED OUT UNTIL LOGGING IS ADDED)
+// app.UseExceptionHandler("/api/Error/error");
 
 app.UseAuthentication();
 app.UseAuthorization();
