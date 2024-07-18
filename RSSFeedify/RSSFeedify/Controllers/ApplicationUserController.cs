@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
-using NuGet.Packaging;
 using RSSFeedify.Models;
+using RSSFeedify.Types;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -31,7 +31,7 @@ namespace RSSFeedify.Controllers
             {
                 var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
                 var result = await _userManager.CreateAsync(user, model.Password);
-                
+
                 if (!result.Succeeded)
                 {
                     return BadRequest(result.Errors);
@@ -62,35 +62,38 @@ namespace RSSFeedify.Controllers
                         return ControllersHelper.GetResultForInvalidLoginAttempt();
                     }
 
-                    string token;
-                    bool jwtResult = GenerateJwtToken(user, await _userManager.GetRolesAsync(user), out token);
-                    if (!jwtResult)
+                    var jwtResult = GenerateJwtToken(user, await _userManager.GetRolesAsync(user));
+                    if (jwtResult.IsError)
                     {
-                        return ControllersHelper.GetResultForInvalidLoginAttempt();
+                        return ControllersHelper.GenerateBadRequest(jwtResult.GetError);
                     }
 
-                    return Ok(new { token });
+                    return Ok(new { jwt = jwtResult.GetValue });
                 }
                 return ControllersHelper.GetResultForInvalidLoginAttempt();
             }
             return BadRequest(ModelState);
         }
 
-        private bool GenerateJwtToken(ApplicationUser user, IList<string> userRoles, out string stringifiedToken)
+        private Result<string, string> GenerateJwtToken(ApplicationUser user, IList<string> userRoles)
         {
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
+
+            if (_configuration["Jwt:Key"] is null)
+            {
+                return Result.Error<string, string>("Could not generate JWT Bearer.");
+            }
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             if (userRoles.Count <= 0)
             {
-                stringifiedToken = string.Empty;
-                return false;
+                return Result.Error<string, string>("User has no roles. Authorization process cannot be finished.");
             }
 
             claims.AddRange(userRoles.Select(role => new Claim(ClaimsIdentity.DefaultRoleClaimType, role)));
@@ -103,8 +106,8 @@ namespace RSSFeedify.Controllers
                 signingCredentials: creds
             );
 
-            stringifiedToken = new JwtSecurityTokenHandler().WriteToken(token);
-            return true;
+            var stringifiedToken = new JwtSecurityTokenHandler().WriteToken(token);
+            return Result.Ok<string, string>(stringifiedToken);
         }
     }
 }
