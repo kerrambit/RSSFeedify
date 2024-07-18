@@ -37,7 +37,7 @@ namespace RSSFeedify.Controllers
                     return BadRequest(result.Errors);
                 }
 
-                result = await _userManager.AddToRoleAsync(user, "Admin"); // TMP!
+                result = await _userManager.AddToRoleAsync(user, "RegularUser");
                 if (!result.Succeeded)
                 {
                     return BadRequest(result.Errors);
