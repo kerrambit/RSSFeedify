@@ -18,5 +18,10 @@ namespace RSSFeedify.Controllers
         {
             return new BadRequestObjectResult("Invalid login attempt.");
         }
+
+        public static ActionResult GenerateBadRequest(string message)
+        {
+            return new BadRequestObjectResult(message);
+        }
     }
 }
