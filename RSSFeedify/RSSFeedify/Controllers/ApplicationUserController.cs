@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using RSSFeedify.Models;
 using RSSFeedify.Types;
+using StackExchange.Redis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -16,12 +17,14 @@ namespace RSSFeedify.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly IConnectionMultiplexer _redisConnection;
 
-        public ApplicationUserController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+        public ApplicationUserController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, IConnectionMultiplexer redisConnection)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _redisConnection = redisConnection;
         }
 
         [HttpPost("register")]
@@ -71,6 +74,21 @@ namespace RSSFeedify.Controllers
                     return Ok(new { jwt = jwtResult.GetValue });
                 }
                 return ControllersHelper.GetResultForInvalidLoginAttempt();
+            }
+            return BadRequest(ModelState);
+        }
+
+        [HttpPost("logout")]
+        public async Task<ActionResult> Logout([FromBody] LogoutDTO model)
+        {
+            if (ModelState.IsValid)
+            {
+                await _signInManager.SignOutAsync();
+
+                var db = _redisConnection.GetDatabase();
+                await db.StringSetAsync(model.JWT, $"Blacklisted at {DateTime.UtcNow}.", TimeSpan.FromMinutes(Convert.ToInt32(_configuration["Jwt:ExpireMinutes"])));
+
+                return ControllersHelper.GetResultForSuccessfulLoggedOut();
             }
             return BadRequest(ModelState);
         }

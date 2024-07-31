@@ -23,5 +23,10 @@ namespace RSSFeedify.Controllers
         {
             return new BadRequestObjectResult(message);
         }
+
+        public static ActionResult GetResultForSuccessfulLoggedOut()
+        {
+            return new OkObjectResult("You have been successfully logged out.");
+        }
     }
 }
