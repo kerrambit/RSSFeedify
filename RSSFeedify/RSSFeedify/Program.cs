@@ -8,6 +8,7 @@ using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Services;
 using System.Text;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,13 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+// Configure Redis connection
+builder.Services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer =>
+{
+    var configuration = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("RedisConnection"), true);
+    return ConnectionMultiplexer.Connect(configuration);
+}); // add LoggerFactory, see https://stackexchange.github.io/StackExchange.Redis/Configuration
 
 // Configure Authentication with JWT
 builder.Services.AddAuthentication(x =>
