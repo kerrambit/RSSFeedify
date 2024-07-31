@@ -60,6 +60,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequiredUniqueChars = 1;
 });
 
+// Register RoleManager.
 builder.Services.AddScoped<RoleManager<IdentityRole>>();
 
 // Register IRSSFeedItemRepository implementation.
@@ -121,6 +122,9 @@ app.UseHttpsRedirection();
 
 // Use exceptions and errors middleware (COMMENTED OUT UNTIL LOGGING IS ADDED)
 // app.UseExceptionHandler("/api/Error/error");
+
+// Register JWT blacklisting middleware.
+app.UseMiddleware<JWTBlacklistService>();
 
 app.UseAuthentication();
 app.UseAuthorization();
