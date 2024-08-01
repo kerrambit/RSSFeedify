@@ -9,6 +9,8 @@ using RSSFeedify.Repository;
 using RSSFeedify.Services;
 using System.Text;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Mvc;
+using RSSFeedify.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,6 +60,15 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
     options.Password.RequiredUniqueChars = 1;
+});
+
+// Configure customized ModelState error messages format.
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = actionContext =>
+    {
+        return ControllersHelper.GetFormattedModelStateErrorMessage(actionContext);
+    };
 });
 
 // Register RoleManager.

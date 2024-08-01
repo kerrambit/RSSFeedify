@@ -1,4 +1,6 @@
-﻿namespace RSSFeedify.Repository.Types.PaginationQuery
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace RSSFeedify.Repository.Types.PaginationQuery
 {
     public class PaginationQuery
     {

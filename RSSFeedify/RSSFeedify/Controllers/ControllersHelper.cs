@@ -6,7 +6,7 @@ namespace RSSFeedify.Controllers
     {
         public static ActionResult<T> GetResultForInvalidGuid<T>()
         {
-            return new BadRequestObjectResult("Invalid RSSFeedGuid format");
+            return new BadRequestObjectResult("Invalid RSSFeedGuid format.");
         }
 
         public static ActionResult<T> GetResultForDuplicatedSourcerUrl<T>(Uri uri)
@@ -27,6 +27,11 @@ namespace RSSFeedify.Controllers
         public static ActionResult GetResultForSuccessfulLoggedOut()
         {
             return new OkObjectResult("You have been successfully logged out.");
+        }
+
+        public static ActionResult GetFormattedModelStateErrorMessage(ActionContext actionContext)
+        {
+            return new BadRequestObjectResult(string.Join("\n", actionContext.ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
         }
     }
 }

@@ -16,7 +16,12 @@ namespace RSSFeedify.Services.DataTypeConvertors
                 case Created<T> create:
                     return new CreatedAtActionResult(create.GetEndPoint, Controllername, new { guid = create.Guid }, create.Data);
                 default:
-                    return new NotFoundResult();
+                    return new ContentResult
+                    {
+                        StatusCode = 404,
+                        Content = "Repository query was not successful. Requested resource was not found.",
+                        ContentType = "text/plain"
+                    };
             }
         }
     }
