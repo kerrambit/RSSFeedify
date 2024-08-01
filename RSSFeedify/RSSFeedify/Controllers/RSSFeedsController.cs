@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using RSSFeedify.Controllers.HelperTypes;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
@@ -8,7 +7,6 @@ using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedify.Services;
 using RSSFeedify.Services.DataTypeConvertors;
-using System.Drawing.Printing;
 
 namespace RSSFeedify.Controllers
 {

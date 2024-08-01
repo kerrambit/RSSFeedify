@@ -5,7 +5,6 @@ using RSSFeedify.Repositories;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.Pagination;
 using RSSFeedify.Repository.Types.PaginationQuery;
-using RSSFeedify.Types;
 
 namespace RSSFeedify.Repository
 {

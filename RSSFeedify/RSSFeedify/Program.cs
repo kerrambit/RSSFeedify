@@ -1,16 +1,16 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PostgreSQL.Data;
+using RSSFeedify.Controllers;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Services;
-using System.Text;
 using StackExchange.Redis;
-using Microsoft.AspNetCore.Mvc;
-using RSSFeedify.Controllers;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
