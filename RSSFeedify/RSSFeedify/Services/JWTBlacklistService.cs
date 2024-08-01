@@ -31,7 +31,8 @@ namespace RSSFeedify.Services
                     Console.WriteLine("[JWTBlacklistService]: JWT bearer is blacklisted.");
 
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    await context.Response.WriteAsync("You have been logged off.");
+                    context.Response.ContentType = "text/plain";
+                    await context.Response.WriteAsync("You've been logged out. You will need to log in again to gain access.");
                     return;
                 }
 
