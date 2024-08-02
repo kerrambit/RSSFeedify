@@ -71,7 +71,9 @@ namespace RSSFeedify.Controllers
                         return ControllersHelper.GenerateBadRequest(jwtResult.GetError);
                     }
 
-                    return Ok(new { jwt = jwtResult.GetValue });
+                    var payload = new LoginResponseDTO();
+                    payload.JWT = jwtResult.GetValue;
+                    return Ok(payload);
                 }
                 return ControllersHelper.GetResultForInvalidLoginAttempt();
             }
