@@ -24,6 +24,9 @@ namespace RSSFeedifyCLIClient
             IWriter writer = new Writer();
             IReader reader = new Reader();
 
+            // Initialize application error writer.
+            ApplicationErrorWriter errorWriter = new ApplicationErrorWriter(writer);
+
             // Create CommandParser and fill it with commands from the commands repository.
             var parser = new CommandParser(writer, reader);
             parser.AddCommands(commands.Values.ToList());
@@ -37,10 +40,10 @@ namespace RSSFeedifyCLIClient
             var httpService = new HTTPService(client);
 
             // Create RSSFeedService that runs all commands logic. Also, HTTPService must be initialized.
-            RSSFeedService rSSFeedService = new(writer, httpService);
+            RSSFeedService rSSFeedService = new(writer, errorWriter, httpService);
 
             // Create AccountService for managing logged users.
-            AccountService accountService = new(writer, reader, parser, httpService);
+            AccountService accountService = new(writer, reader, errorWriter, parser, httpService);
 
             // And finally, run the application.
             try
