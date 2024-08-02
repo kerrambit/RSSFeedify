@@ -1,10 +1,10 @@
 ﻿using CommandParsonaut.CommandHewAwayTool;
 using CommandParsonaut.Interfaces;
+using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Models;
 using RSSFeedifyClientCore;
 using System.Globalization;
 using System.Text.RegularExpressions;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace RSSFeedifyCLIClient.Business
 {
@@ -12,77 +12,61 @@ namespace RSSFeedifyCLIClient.Business
     {
         private IWriter _writer;
         private IReader _reader;
+        private ApplicationErrorWriter _errorWriter;
+
         private CommandParser _parser;
         private HTTPService _httpService;
 
-        public AccountService(IWriter writer, IReader reader, CommandParser parser, HTTPService httpService)
+        public AccountService(IWriter writer, IReader reader, ApplicationErrorWriter errorWriter, CommandParser parser, HTTPService httpService)
         {
             _writer = writer;
             _reader = reader;
+            _errorWriter = errorWriter;
             _parser = parser;
             _httpService = httpService;
         }
 
         public async Task Login()
         {
-
             var loginData = new LoginDTO();
-            loginData.Email = "marek.eibel@seznam.com";
-            loginData.Password = "Aa*12345";
+            loginData.Email = GetEmail();
+            loginData.Password = GetPassword((6, 100));
             loginData.RememberMe = true;
 
             var data = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
 
-            Console.WriteLine(JsonConvertor.ConvertObjectToJsonString(loginData));
-
             if (!data.success)
             {
-                //RenderErrorMessage(Error.Network);
+                _errorWriter.RenderErrorMessage(ApplicationError.Network);
                 return;
             }
+
             Console.WriteLine(data.response);
-            Console.WriteLine("Response Content:");
             string responseContent = await data.response.Content.ReadAsStringAsync();
             Console.WriteLine(responseContent);
+
+            // TODO: create system which will recognize different static codes and handle situation according to them.
             if (data.response.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
                 //RenderErrorMessage(await data.response.Content.ReadAsStringAsync());
-                
                 return;
             }
 
-            Console.WriteLine(data.response);
+            var result = await JsonFromHttpResponseReader.ReadJson<LoginResponseDTO>(data.response);
+            if (result.IsError)
+            {
+                _errorWriter.RenderErrorMessage(result.GetError);
+            }
 
-            //var result = await ReadJson<RSSFeed>(data.response);
-            //if (result is not null)
-            //{
-            //    _writer.RenderBareText("New RSSFeed was registered:");
-            //    RenderRSSFeed(result);
-            //}
+            string bearerToken = result.GetValue.JWT;
+            _writer.RenderDebugMessage($"JWT: {bearerToken}");
         }
 
         public async Task Register()
         {
-            string email = GetEmail();
-
-            string password = GetPassword((6, 100));
-            bool firstAttempt = true;
-            do
-            {
-                if (!firstAttempt)
-                {
-                    _writer.RenderErrorMessage("The passwords are not the same.");
-                }
-
-                firstAttempt = false;
-            } while (!ConfirmPassword(password));
-
-            _writer.RenderDebugMessage("Registration starts...");
-            _writer.RenderDebugMessage($"Email: {email}");
-            _writer.RenderDebugMessage($"Password: {password}");
-
             var registartionData = new RegisterDTO();
-            registartionData.Email = email;
+            registartionData.Email = GetEmail();
+            string password = GetConfirmedPassword((6, 100));
             registartionData.Password = password;
             registartionData.ConfirmPassword = password;
 
@@ -115,10 +99,26 @@ namespace RSSFeedifyCLIClient.Business
             //}
         }
 
+        private string GetConfirmedPassword((int minimalLength, int maximalLength) passwordRequierements)
+        {
+            string password = GetPassword(passwordRequierements);
+            bool firstAttempt = true;
+            do
+            {
+                if (!firstAttempt)
+                {
+                    _writer.RenderErrorMessage("The passwords are not the same.");
+                }
+
+                firstAttempt = false;
+            } while (!ConfirmPassword(password));
+
+            return password;
+        }
+
         private string GetPassword((int minimalLength, int maximalLength) passwordRequierements, bool confirmationPassword = false)
         {
             string password = string.Empty;
-
             bool firstAttempt = true;
             do
             {
@@ -137,10 +137,8 @@ namespace RSSFeedifyCLIClient.Business
                 }
 
                 password = ReadPassword();
-
                 firstAttempt = false;
-            }
-            while (password.Length > passwordRequierements.maximalLength || password.Length < passwordRequierements.minimalLength);
+            } while (password.Length > passwordRequierements.maximalLength || password.Length < passwordRequierements.minimalLength);
 
             return password;
         }
@@ -150,6 +148,7 @@ namespace RSSFeedifyCLIClient.Business
             string password = string.Empty;
             ConsoleKeyInfo key;
 
+            _writer.RenderBareText(">>> ", false);
             do
             {
                 key = Console.ReadKey(true);
@@ -194,7 +193,6 @@ namespace RSSFeedifyCLIClient.Business
                 _parser.GetUnprocessedInput(out email);
 
                 firstAttempt = false;
-
             } while (!IsEmailValid(email));
 
             return email;
