@@ -1,8 +1,7 @@
 ﻿using CommandParsonaut.Core.Types;
 using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.Models;
-using RSSFeedifyCLIClient.Services;
-using RSSFeedifyCLIClient.Settings;
+using RSSFeedifyClientCore;
 using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;

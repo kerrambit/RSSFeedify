@@ -11,6 +11,10 @@ namespace RSSFeedifyCLIClient.Repository
         {
             Dictionary<string, Command> commands = new Dictionary<string, Command>();
 
+            Command register = new Command("register", "", "Register new account.", []);
+            Command login = new Command("login", "", "Login the user.", []);
+            Command logout = new Command("logout", "", "Log out the user.", []);
+
             Command listFeeds = new Command("list-feeds", "", "Lists all available RSS feeds.", []);
             Command addRSSFeed = new Command("add-feed", "name:STRING description:STRING url:URI polling-interval-in-minutes:INTEGER", "Adds new RSS feed into the database.", new List<ParameterType> { ParameterType.String, ParameterType.String, ParameterType.Uri, ParameterType.DoubleRange }, new List<(double, double)> { (10.0, 60.0) });
             Command deleteRSSFeed = new Command("delete-feed", "guid:STRING", "Deletes RSSFeed.", new List<ParameterType> { ParameterType.String });
@@ -24,6 +28,10 @@ namespace RSSFeedifyCLIClient.Repository
             Command settings = new Command("settings", "", "Shows current settings of the application.", []);
 
             commands["settings"] = settings;
+
+            commands["register"] = register;
+            commands["login"] = login;
+            commands["logout"] = logout;
 
             commands["list-feeds"] = listFeeds;
             commands["add-feed"] = addRSSFeed;

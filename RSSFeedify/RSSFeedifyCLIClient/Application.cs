@@ -4,7 +4,7 @@ using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.Business;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Repository;
-using RSSFeedifyCLIClient.Services;
+using RSSFeedifyClientCore;
 
 namespace RSSFeedifyCLIClient
 {
@@ -33,21 +33,28 @@ namespace RSSFeedifyCLIClient
             clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
             var client = new HttpClient(clientHandler);
 
+            // Create HTTP service.
+            var httpService = new HTTPService(client);
+
             // Create RSSFeedService that runs all commands logic. Also, HTTPService must be initialized.
-            RSSFeedService rSSFeedService = new(writer, new HTTPService(client));
+            RSSFeedService rSSFeedService = new(writer, httpService);
+
+            // Create AccountService for managing logged users.
+            AccountService accountService = new(writer, reader, parser, httpService);
 
             // And finally, run the application.
             try
             {
-                await StartAndRunApplicationAsync(writer, parser, rSSFeedService);
+                await StartAndRunApplicationAsync(writer, parser, rSSFeedService, accountService);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 writer.RenderErrorMessage("Unhandled exception occured. Application had to be terminated. Please, report the bug and send the logs to the support.");
+                writer.RenderDebugMessage(e.Message); // Until the logging is finished.
             }
         }
 
-        private static async Task StartAndRunApplicationAsync(IWriter writer, CommandParser parser, RSSFeedService rSSFeedService)
+        private static async Task StartAndRunApplicationAsync(IWriter writer, CommandParser parser, RSSFeedService rSSFeedService, AccountService accountService)
         {
             RenderASCIIPicture(writer);
 
@@ -87,6 +94,9 @@ namespace RSSFeedifyCLIClient
                             break;
                         case "settings":
                             rSSFeedService.Settings();
+                            break;
+                        case "register":
+                            accountService.Register();
                             break;
                         default:
                             break;

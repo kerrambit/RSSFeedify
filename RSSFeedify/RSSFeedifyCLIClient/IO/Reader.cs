@@ -11,5 +11,10 @@ namespace RSSFeedifyCLIClient.IO
         {
             return Console.ReadLine();
         }
+
+        public int ReadKey()
+        {
+            return (int)Console.ReadKey().Key;
+        }
     }
 }
