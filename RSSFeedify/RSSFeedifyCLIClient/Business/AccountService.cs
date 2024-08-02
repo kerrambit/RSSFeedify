@@ -23,6 +23,44 @@ namespace RSSFeedifyCLIClient.Business
             _httpService = httpService;
         }
 
+        public async Task Login()
+        {
+
+            var loginData = new LoginDTO();
+            loginData.Email = "marek.eibel@seznam.com";
+            loginData.Password = "Aa*12345";
+            loginData.RememberMe = true;
+
+            var data = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
+
+            Console.WriteLine(JsonConvertor.ConvertObjectToJsonString(loginData));
+
+            if (!data.success)
+            {
+                //RenderErrorMessage(Error.Network);
+                return;
+            }
+            Console.WriteLine(data.response);
+            Console.WriteLine("Response Content:");
+            string responseContent = await data.response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseContent);
+            if (data.response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                //RenderErrorMessage(await data.response.Content.ReadAsStringAsync());
+                
+                return;
+            }
+
+            Console.WriteLine(data.response);
+
+            //var result = await ReadJson<RSSFeed>(data.response);
+            //if (result is not null)
+            //{
+            //    _writer.RenderBareText("New RSSFeed was registered:");
+            //    RenderRSSFeed(result);
+            //}
+        }
+
         public async Task Register()
         {
             string email = GetEmail();

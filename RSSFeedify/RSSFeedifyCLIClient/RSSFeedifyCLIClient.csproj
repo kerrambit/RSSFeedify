@@ -16,4 +16,8 @@
     <ProjectReference Include="..\RSSFeedifyClientCore\RSSFeedifyClientCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Settings\" />
+  </ItemGroup>
+
 </Project>

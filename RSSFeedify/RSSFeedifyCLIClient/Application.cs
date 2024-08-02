@@ -96,7 +96,10 @@ namespace RSSFeedifyCLIClient
                             rSSFeedService.Settings();
                             break;
                         case "register":
-                            accountService.Register();
+                            await accountService.Register();
+                            break;
+                        case "login":
+                            await accountService.Login();
                             break;
                         default:
                             break;
