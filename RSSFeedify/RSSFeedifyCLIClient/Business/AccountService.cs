@@ -33,26 +33,28 @@ namespace RSSFeedifyCLIClient.Business
             loginData.Password = GetPassword((6, 100));
             loginData.RememberMe = true;
 
-            var data = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
+            var requestResult = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
 
-            if (!data.success)
+            if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.Network);
+                _errorWriter.RenderErrorMessage(ApplicationError.Network, requestResult.GetError);
                 return;
             }
 
-            Console.WriteLine(data.response);
-            string responseContent = await data.response.Content.ReadAsStringAsync();
+            var response = requestResult.GetValue;
+
+            Console.WriteLine(response);
+            string responseContent = await response.Content.ReadAsStringAsync();
             Console.WriteLine(responseContent);
 
             // TODO: create system which will recognize different static codes and handle situation according to them.
-            if (data.response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
                 //RenderErrorMessage(await data.response.Content.ReadAsStringAsync());
                 return;
             }
 
-            var result = await JsonFromHttpResponseReader.ReadJson<LoginResponseDTO>(data.response);
+            var result = await JsonFromHttpResponseReader.ReadJson<LoginResponseDTO>(response);
             if (result.IsError)
             {
                 _errorWriter.RenderErrorMessage(result.GetError);
@@ -70,26 +72,27 @@ namespace RSSFeedifyCLIClient.Business
             registartionData.Password = password;
             registartionData.ConfirmPassword = password;
 
-            var data = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "register"), JsonConvertor.ConvertObjectToJsonString(registartionData));
+            var requestResult = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "register"), JsonConvertor.ConvertObjectToJsonString(registartionData));
 
-            Console.WriteLine(JsonConvertor.ConvertObjectToJsonString(registartionData));
-
-            if (!data.success)
+            if (requestResult.IsError)
             {
-                //RenderErrorMessage(Error.Network);
+                _errorWriter.RenderErrorMessage(ApplicationError.Network, requestResult.GetError);
                 return;
             }
-            if (data.response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+
+            var response = requestResult.GetValue;
+
+            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
             {
                 //RenderErrorMessage(await data.response.Content.ReadAsStringAsync());
-                Console.WriteLine(data.response);
+                Console.WriteLine(response);
                 Console.WriteLine("Response Content:");
-                string responseContent = await data.response.Content.ReadAsStringAsync();
+                string responseContent = await response.Content.ReadAsStringAsync();
                 Console.WriteLine(responseContent);
                 return;
             }
 
-            Console.WriteLine(data.response);
+            Console.WriteLine(response);
 
             //var result = await ReadJson<RSSFeed>(data.response);
             //if (result is not null)

@@ -22,88 +22,115 @@ namespace RSSFeedifyClientCore
             _httpClient = httpClient;
         }
 
-        public async Task<(bool success, HttpResponseMessage response)> GetAsync(Uri uri)
+        public async Task<Result<HttpResponseMessage, string>> GetAsync(Uri uri)
         {
             try
             {
                 HttpResponseMessage response = await _httpClient.GetAsync(uri.ToString());
-                return (true, response);
+                return Result.Ok<HttpResponseMessage, string>(response);
             }
             catch (Exception ex)
             {
-                return (false, new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                {
-                    Content = new StringContent($"Failed to fetch data from {uri}: {ex.Message}")
-                });
+                return Result.Error<HttpResponseMessage, string>($"Failed to fetch data from {uri}: {ex.Message}.");
             }
         }
 
-        public async Task<(bool success, HttpResponseMessage response)> GetAsync(Uri uri, IAuthenticationHeader authenticationHeader)
+        public async Task<Result<HttpResponseMessage, string>> GetAsync(Uri uri, IAuthenticationHeader authenticationHeader)
         {
             try
             {
                 AddAuthenticationHeader(authenticationHeader);
                 HttpResponseMessage response = await _httpClient.GetAsync(uri.ToString());
-                return (true, response);
+                return Result.Ok<HttpResponseMessage, string>(response);
             }
             catch (Exception ex)
             {
-                return (false, new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                {
-                    Content = new StringContent($"Failed to fetch data from {uri}: {ex.Message}")
-                });
+                return Result.Error<HttpResponseMessage, string>($"Failed to fetch data from {uri}: {ex.Message}.");
             }
         }
 
-        public async Task<(bool success, HttpResponseMessage response)> DeleteAsync(Uri uri)
+        public async Task<Result<HttpResponseMessage, string>> DeleteAsync(Uri uri)
         {
             try
             {
                 HttpResponseMessage response = await _httpClient.DeleteAsync(uri.ToString());
-                return (true, response);
+                return Result.Ok<HttpResponseMessage, string>(response);
             }
             catch (Exception ex)
             {
-                return (false, new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                {
-                    Content = new StringContent($"Failed to fetch data from {uri}: {ex.Message}")
-                });
+                return Result.Error<HttpResponseMessage, string>($"Failed to fetch data from {uri}: {ex.Message}.");
             }
         }
 
-        public async Task<(bool success, HttpResponseMessage response)> PutAsync(Uri uri, string payload, ContentType contentType = ContentType.AppJson)
+        public async Task<Result<HttpResponseMessage, string>> DeleteAsync(Uri uri, IAuthenticationHeader authenticationHeader)
+        {
+            try
+            {
+                AddAuthenticationHeader(authenticationHeader);
+                HttpResponseMessage response = await _httpClient.DeleteAsync(uri.ToString());
+                return Result.Ok<HttpResponseMessage, string>(response);
+            }
+            catch (Exception ex)
+            {
+                return Result.Error<HttpResponseMessage, string>($"Failed to fetch data from {uri}: {ex.Message}.");
+            }
+        }
+
+        public async Task<Result<HttpResponseMessage, string>> PutAsync(Uri uri, string payload, ContentType contentType = ContentType.AppJson)
         {
             try
             {
                 HttpResponseMessage response = await _httpClient.PutAsync(uri.ToString(), new StringContent(payload, Encoding.UTF8, StringifyContentType(contentType)));
-                return (true, response);
+                return Result.Ok<HttpResponseMessage, string>(response);
             }
             catch (Exception ex)
             {
-                return (false, new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                {
-                    Content = new StringContent($"Failed to post data to {uri}: {ex.Message}")
-                });
+                return Result.Error<HttpResponseMessage, string>($"Failed to fetch data from {uri}: {ex.Message}.");
             }
         }
 
-        public async Task<(bool success, HttpResponseMessage response)> PostAsync(Uri uri, string payload, ContentType contentType = ContentType.AppJson)
+        public async Task<Result<HttpResponseMessage, string>> PutAsync(Uri uri, string payload, IAuthenticationHeader authenticationHeader, ContentType contentType = ContentType.AppJson)
+        {
+            try
+            {
+                AddAuthenticationHeader(authenticationHeader);
+                HttpResponseMessage response = await _httpClient.PutAsync(uri.ToString(), new StringContent(payload, Encoding.UTF8, StringifyContentType(contentType)));
+                return Result.Ok<HttpResponseMessage, string>(response);
+            }
+            catch (Exception ex)
+            {
+                return Result.Error<HttpResponseMessage, string>($"Failed to fetch data from {uri}: {ex.Message}.");
+            }
+        }
+
+        public async Task<Result<HttpResponseMessage, string>> PostAsync(Uri uri, string payload, ContentType contentType = ContentType.AppJson)
         {
             try
             {
                 HttpResponseMessage response = await _httpClient.PostAsync(uri.ToString(), new StringContent(payload, Encoding.UTF8, StringifyContentType(contentType)));
-                return (true, response);
+                return Result.Ok<HttpResponseMessage, string>(response);
             }
             catch (Exception ex)
             {
-                return (false, new HttpResponseMessage(HttpStatusCode.InternalServerError)
-                {
-                    Content = new StringContent($"Failed to post data to {uri}: {ex.Message}")
-                });
+                return Result.Error<HttpResponseMessage, string>($"Failed to fetch data from {uri}: {ex.Message}.");
             }
         }
 
-        public static ContentType GetContentType(HttpResponseMessage response)
+        public async Task<Result<HttpResponseMessage, string>> PostAsync(Uri uri, string payload, IAuthenticationHeader authenticationHeader, ContentType contentType = ContentType.AppJson)
+        {
+            try
+            {
+                AddAuthenticationHeader(authenticationHeader);
+                HttpResponseMessage response = await _httpClient.PostAsync(uri.ToString(), new StringContent(payload, Encoding.UTF8, StringifyContentType(contentType)));
+                return Result.Ok<HttpResponseMessage, string>(response);
+            }
+            catch (Exception ex)
+            {
+                return Result.Error<HttpResponseMessage, string>($"Failed to fetch data from {uri}: {ex.Message}.");
+            }
+        }
+
+        public static ContentType RetrieveContentType(HttpResponseMessage response)
         {
             switch (response.Content.Headers.ContentType?.MediaType)
             {
@@ -125,11 +152,6 @@ namespace RSSFeedifyClientCore
             }
         }
 
-        public void Dispose()
-        {
-            _httpClient.Dispose();
-        }
-
         private void AddAuthenticationHeader(IAuthenticationHeader authenticationHeader)
         {
             if (authenticationHeader.AuthSchemeType == AuthenticationTypeName.NoAuth)
@@ -138,6 +160,11 @@ namespace RSSFeedifyClientCore
             }
 
             _httpClient.DefaultRequestHeaders.Authorization = authenticationHeader.ConvertToDotNetHttpHeader();
+        }
+
+        public void Dispose()
+        {
+            _httpClient.Dispose();
         }
     }
 }
