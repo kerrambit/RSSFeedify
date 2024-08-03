@@ -1,16 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace RSSFeedifyClientCore
 {
     public static class AuthenticationHeaderExtensions
     {
-        public static System.Net.Http.Headers.AuthenticationHeaderValue ConvertToDotNetHttpHeader(this IAuthenticationHeader authenticationHeader)
+        public static AuthenticationHeaderValue ConvertToDotNetHttpHeader(this IAuthenticationHeader authenticationHeader)
         {
-            return new System.Net.Http.Headers.AuthenticationHeaderValue(authenticationHeader.AuthScheme, authenticationHeader.AuthToken);
+            switch (authenticationHeader.AuthSchemeType)
+            {
+                case AuthenticationTypeName.NoAuth:
+                    throw new ArgumentException("AuthSchemeType cannot be NoAuth!");
+                case AuthenticationTypeName.BearerToken:
+                    return new AuthenticationHeaderValue("Bearer", authenticationHeader.AuthToken);
+                case AuthenticationTypeName.BasicAuth:
+                    var parameter = Convert.ToBase64String(Encoding.ASCII.GetBytes(authenticationHeader.AuthToken));
+                    return new AuthenticationHeaderValue("Basic", parameter);
+                default:
+                    throw new NotSupportedException($"AuthSchemeType {authenticationHeader.AuthSchemeType} is not supported!");
+            }
         }
     }
 }
