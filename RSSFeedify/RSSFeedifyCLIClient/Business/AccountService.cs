@@ -17,6 +17,8 @@ namespace RSSFeedifyCLIClient.Business
         private CommandParser _parser;
         private HTTPService _httpService;
 
+        public ApplicationUser User { get; private set; } = new();
+
         public AccountService(IWriter writer, IReader reader, ApplicationErrorWriter errorWriter, CommandParser parser, HTTPService httpService)
         {
             _writer = writer;
@@ -29,7 +31,8 @@ namespace RSSFeedifyCLIClient.Business
         public async Task Login()
         {
             var loginData = new LoginDTO();
-            loginData.Email = GetEmail();
+            var email = GetEmail();
+            loginData.Email = email;
             loginData.Password = GetPassword((6, 100));
             loginData.RememberMe = true;
 
@@ -62,6 +65,8 @@ namespace RSSFeedifyCLIClient.Business
 
             string bearerToken = result.GetValue.JWT;
             _writer.RenderDebugMessage($"JWT: {bearerToken}");
+            User.Email = email;
+            User.Login(bearerToken);
         }
 
         public async Task Register()

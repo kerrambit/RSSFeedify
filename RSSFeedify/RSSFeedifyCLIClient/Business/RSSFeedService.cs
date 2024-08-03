@@ -12,6 +12,7 @@ namespace RSSFeedifyCLIClient.Business
         private IWriter _writer;
         private readonly ApplicationErrorWriter _errorWriter;
         private HTTPService _httpService;
+        private AccountService _accountService;
 
         private readonly int PageSize = 5;
         private IDictionary<string, int> _pages = new Dictionary<string, int>();
@@ -24,11 +25,12 @@ namespace RSSFeedifyCLIClient.Business
             None
         }
 
-        public RSSFeedService(IWriter writer, ApplicationErrorWriter errorWriter, HTTPService hTTPService)
+        public RSSFeedService(IWriter writer, ApplicationErrorWriter errorWriter, HTTPService hTTPService, AccountService accountService)
         {
             _writer = writer;
             _errorWriter = errorWriter;
             _httpService = hTTPService;
+            _accountService = accountService;
             _pages["RSSFeeds"] = 1;
             _pages["RSSFeedItems"] = 1;
         }
@@ -147,11 +149,17 @@ namespace RSSFeedifyCLIClient.Business
 
         public async Task ReadArticle(IList<ParameterResult> parameters)
         {
-            AuthenticationType authenticationType = new BearerToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJkZDNiYTljOS1kYmE2LTRmNWMtODkwNC02MDc4MjM2OGM2Y2UiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjMxMTMyZTY4LTYxZTQtNGI1YS1iZTQyLTMzNmVmZDVhNDI3MyIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IlJlZ3VsYXJVc2VyIiwiZXhwIjoxNzIyNjg4MjI4LCJpc3MiOiJodHRwczovL2dpdGh1Yi5jb20va2VycmFtYml0L1JTU0ZlZWRpZnkiLCJhdWQiOiJSU1NGZWVkaWZ5IEFQSSJ9.3Psy4kkyaGNa4Dn2U51ywQJMaWRymzpnl9E6VY_4su0");
+            var accessToken = _accountService.User.GetAccessToken();
+            if (accessToken.IsError)
+            {
+                _errorWriter.RenderErrorMessage(accessToken.GetError);
+                return;
+            }
+
+            AuthenticationType authenticationType = new BearerToken(accessToken.GetValue);
             IAuthenticationHeader authenticationHeader = new AuthenticationHeader(authenticationType);
 
             string guid = parameters[0].String;
-            guid = "2995bf42-b3e9-4981-b54a-914bec4d0b60"; // TEMP
             var requestResult = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, guid), authenticationHeader);
             if (requestResult.IsError)
             {

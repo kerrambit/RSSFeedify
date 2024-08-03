@@ -38,12 +38,12 @@ namespace RSSFeedifyCLIClient
 
             // Create HTTP service.
             var httpService = new HTTPService(client);
-
-            // Create RSSFeedService that runs all commands logic. Also, HTTPService must be initialized.
-            RSSFeedService rSSFeedService = new(writer, errorWriter, httpService);
-
+            
             // Create AccountService for managing logged users.
             AccountService accountService = new(writer, reader, errorWriter, parser, httpService);
+
+            // Create RSSFeedService that runs all commands logic. Also, HTTPService must be initialized.
+            RSSFeedService rSSFeedService = new(writer, errorWriter, httpService, accountService);
 
             // And finally, run the application.
             try
