@@ -32,6 +32,48 @@ namespace RSSFeedifyCLIClient.IO
             }
         }
 
+        public void RenderErrorMessage(DetailedApplicationError error)
+        {
+            var details = error.Details;
+
+            switch (error.Error)
+            {
+                case ApplicationError.Network:
+                    _writer.RenderErrorMessage($"Unable to send the request! Detailed message: {details}");
+                    break;
+                case ApplicationError.DataType:
+                    _writer.RenderErrorMessage($"Wrong data type received! Detailed message: {details}");
+                    break;
+                case ApplicationError.InvalidJsonFormat:
+                    _writer.RenderErrorMessage($"Invalid Json format! Detailed message: {details}");
+                    break;
+                case ApplicationError.General:
+                default:
+                    _writer.RenderErrorMessage($"Error occured! Detailed message: {details}");
+                    break;
+            }
+        }
+
+        public void RenderErrorMessage(ApplicationError error, string details)
+        {
+            switch (error)
+            {
+                case ApplicationError.Network:
+                    _writer.RenderErrorMessage($"Unable to send the request! Detailed message: {details}");
+                    break;
+                case ApplicationError.DataType:
+                    _writer.RenderErrorMessage($"Wrong data type received! Detailed message: {details}");
+                    break;
+                case ApplicationError.InvalidJsonFormat:
+                    _writer.RenderErrorMessage($"Invalid Json format! Detailed message: {details}");
+                    break;
+                case ApplicationError.General:
+                default:
+                    _writer.RenderErrorMessage($"Error occured! Detailed message: {details}");
+                    break;
+            }
+        }
+
         public void RenderErrorMessage(string error)
         {
             _writer.RenderErrorMessage(error);
