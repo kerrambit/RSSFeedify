@@ -33,7 +33,7 @@
     {
         public BearerToken(string token)
         {
-            _payload = $"Bearer {token}";
+            _payload = $"{token}";
             _typeName = AuthenticationTypeName.BearerToken;
         }
     }
