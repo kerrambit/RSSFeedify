@@ -135,7 +135,6 @@ namespace RSSFeedifyCLIClient.Business
 
         private async Task Login(LoginDTO loginData)
         {
-
             var requestResult = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
             if (requestResult.IsError)
             {
