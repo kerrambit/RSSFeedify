@@ -10,9 +10,17 @@ namespace RSSFeedifyClientCore
     public enum ApplicationError
     {
         General,
-        Network,
-        DataType,
-        InvalidJsonFormat
+        NetworkGeneral,
+        NetworkUnexpectedStatusCode,
+        NetworkBadRequest,
+        NetworkForbidden,
+        NetworkNotFound,
+        NetworkUnauthorized,
+        NetworkNotSupported,
+        NetworkServerError,
+        NetworkUnexpectedDataType,
+        InvalidJsonFormat,
+        UserNotLoggedIn
     }
 
     public static class ApplicationErrorExtensions
