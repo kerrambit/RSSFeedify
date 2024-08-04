@@ -1,7 +1,7 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 
-namespace RSSFeedifyClientCore
+namespace RSSFeedifyClientCore.Services.Networking
 {
     public static class AuthenticationHeaderExtensions
     {

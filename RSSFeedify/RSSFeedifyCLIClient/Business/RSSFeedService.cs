@@ -2,7 +2,10 @@
 using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Models;
-using RSSFeedifyClientCore;
+using RSSFeedifyClientCore.Business.Errors;
+using RSSFeedifyClientCore.Services;
+using RSSFeedifyClientCore.Services.Networking;
+using RSSFeedifyClientCore.Types;
 using System.Diagnostics;
 
 namespace RSSFeedifyCLIClient.Business
@@ -425,7 +428,7 @@ namespace RSSFeedifyCLIClient.Business
         public void Settings()
         {
             _writer.RenderBareText("\n>General");
-            _writer.RenderBareText($"\t>KEY: 'ssl-host-port'\t\tVALUE: '{Endpoints.BaseUrl}'");
+            _writer.RenderBareText($"\t>KEY: 'http-host-port'\t\tVALUE: '{Endpoints.BaseUrl}'");
         }
 
         private Result<IAuthenticationHeader, ApplicationError> CreateAuthHeader()

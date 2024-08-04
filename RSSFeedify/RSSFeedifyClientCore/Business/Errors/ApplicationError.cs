@@ -1,4 +1,4 @@
-﻿namespace RSSFeedifyClientCore
+﻿namespace RSSFeedifyClientCore.Business.Errors
 {
     public enum ApplicationError
     {

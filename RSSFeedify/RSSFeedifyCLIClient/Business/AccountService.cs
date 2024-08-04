@@ -2,7 +2,10 @@
 using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Models;
-using RSSFeedifyClientCore;
+using RSSFeedifyClientCore.Business;
+using RSSFeedifyClientCore.Business.Errors;
+using RSSFeedifyClientCore.Services;
+using RSSFeedifyClientCore.Services.Networking;
 using System.Globalization;
 using System.Text.RegularExpressions;
 

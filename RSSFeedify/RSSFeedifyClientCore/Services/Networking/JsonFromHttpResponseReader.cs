@@ -1,7 +1,9 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
+using RSSFeedifyClientCore.Business.Errors;
+using RSSFeedifyClientCore.Types;
 
-namespace RSSFeedifyClientCore
+namespace RSSFeedifyClientCore.Services.Networking
 {
     public static class JsonFromHttpResponseReader
     {

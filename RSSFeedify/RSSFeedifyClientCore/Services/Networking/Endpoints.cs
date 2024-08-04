@@ -1,10 +1,10 @@
 ﻿using System.Text;
 
-namespace RSSFeedifyClientCore
+namespace RSSFeedifyClientCore.Services.Networking
 {
     public static class Endpoints
     {
-        public static Uri BaseUrl { get; set; } = new(@"https://localhost:32001/api/");
+        public static Uri BaseUrl { get; set; } = new(@"http://localhost:32000/api/");
 
         public enum EndPoint
         {

@@ -1,4 +1,4 @@
-﻿namespace RSSFeedifyClientCore
+﻿namespace RSSFeedifyClientCore.Services.Networking
 {
     public enum AuthenticationTypeName
     {

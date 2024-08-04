@@ -1,5 +1,7 @@
-﻿
-namespace RSSFeedifyClientCore
+﻿using RSSFeedifyClientCore.Business.Errors;
+using RSSFeedifyClientCore.Types;
+
+namespace RSSFeedifyClientCore.Business
 {
     public class ApplicationUser
     {

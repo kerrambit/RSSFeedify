@@ -1,6 +1,8 @@
-﻿using static RSSFeedifyClientCore.HTTPService;
+﻿using RSSFeedifyClientCore.Business.Errors;
+using RSSFeedifyClientCore.Types;
+using static RSSFeedifyClientCore.Services.Networking.HTTPService;
 
-namespace RSSFeedifyClientCore
+namespace RSSFeedifyClientCore.Services.Networking
 {
     public class HttpResponseMessageValidator
     {

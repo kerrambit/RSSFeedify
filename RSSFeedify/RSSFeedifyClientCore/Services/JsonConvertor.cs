@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace RSSFeedifyClientCore
+namespace RSSFeedifyClientCore.Services
 {
     public static class JsonConvertor
     {

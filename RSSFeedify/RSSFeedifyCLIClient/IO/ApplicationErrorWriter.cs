@@ -1,5 +1,5 @@
 ﻿using CommandParsonaut.Interfaces;
-using RSSFeedifyClientCore;
+using RSSFeedifyClientCore.Business.Errors;
 
 namespace RSSFeedifyCLIClient.IO
 {

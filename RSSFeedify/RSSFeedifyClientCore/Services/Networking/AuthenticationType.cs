@@ -1,4 +1,4 @@
-﻿namespace RSSFeedifyClientCore
+﻿namespace RSSFeedifyClientCore.Services.Networking
 {
     public abstract class AuthenticationType : IAuthenticationType
     {

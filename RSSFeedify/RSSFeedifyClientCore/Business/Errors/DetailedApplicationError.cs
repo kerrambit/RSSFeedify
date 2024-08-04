@@ -1,5 +1,4 @@
-﻿
-namespace RSSFeedifyClientCore
+﻿namespace RSSFeedifyClientCore.Business.Errors
 {
     public record DetailedApplicationError(ApplicationError Error, string Details)
     {

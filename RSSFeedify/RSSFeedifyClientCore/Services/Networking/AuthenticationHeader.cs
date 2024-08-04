@@ -1,5 +1,4 @@
-﻿
-namespace RSSFeedifyClientCore
+﻿namespace RSSFeedifyClientCore.Services.Networking
 {
     public class AuthenticationHeader : IAuthenticationHeader
     {

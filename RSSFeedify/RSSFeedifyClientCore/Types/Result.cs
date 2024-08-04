@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace RSSFeedifyClientCore
+namespace RSSFeedifyClientCore.Types
 {
     public class Result<TValue, TErrorValue>
     {
