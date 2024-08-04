@@ -21,14 +21,14 @@ namespace RSSFeedifyClientCore
             SignedIn = false;
         }
 
-        public Result<string, string> GetAccessToken()
+        public Result<string, ApplicationError> GetAccessToken()
         {
             if (!SignedIn)
             {
-                return Result.Error<string, string>("You're not logged in.");
+                return Result.Error<string, ApplicationError>(ApplicationError.UserNotLoggedIn);
             }
 
-            return Result.Ok<string, string>(_accessToken);
+            return Result.Ok<string, ApplicationError>(_accessToken);
         }
     }
 }
