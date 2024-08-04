@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace RSSFeedify.Controllers
 {
@@ -36,7 +37,11 @@ namespace RSSFeedify.Controllers
 
         public static ActionResult GetFormattedModelStateErrorMessage(ActionContext actionContext)
         {
-            return new BadRequestObjectResult(string.Join("\n", actionContext.ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+            return new BadRequestObjectResult(string.Join(" ", actionContext.ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));
+        }
+        public static ActionResult GetFormattedIdentityErrorMessage(IdentityResult identityResult)
+        {
+            return new BadRequestObjectResult(string.Join(" ", identityResult.Errors.Select(e => e.Description)));
         }
     }
 }

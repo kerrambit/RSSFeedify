@@ -37,13 +37,13 @@ namespace RSSFeedify.Controllers
 
                 if (!result.Succeeded)
                 {
-                    return BadRequest(result.Errors);
+                    return ControllersHelper.GetFormattedIdentityErrorMessage(result);
                 }
 
                 result = await _userManager.AddToRoleAsync(user, "RegularUser");
                 if (!result.Succeeded)
                 {
-                    return BadRequest(result.Errors);
+                    return ControllersHelper.GetFormattedIdentityErrorMessage(result);
                 }
 
                 return ControllersHelper.GetResultForSuccessfulRegistration();
