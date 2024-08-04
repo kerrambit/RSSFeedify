@@ -12,6 +12,15 @@ namespace RSSFeedify.Services.DataTypeConvertors
             switch (repositoryResult)
             {
                 case Success<T> success:
+                    if (IsSimpleType(typeof(T)))
+                    {
+                        return new ContentResult
+                        {
+                            StatusCode = 200,
+                            Content = success.Data is null ? "" : success.Data.ToString(),
+                            ContentType = "text/plain"
+                        };
+                    }
                     return new OkObjectResult(success.Data);
                 case Created<T> create:
                     return new CreatedAtActionResult(create.GetEndPoint, Controllername, new { guid = create.Guid }, create.Data);
@@ -23,6 +32,15 @@ namespace RSSFeedify.Services.DataTypeConvertors
                         ContentType = "text/plain"
                     };
             }
+        }
+
+        private static bool IsSimpleType(Type type)
+        {
+            return
+                type.IsPrimitive ||
+                type.IsEnum ||
+                type == typeof(string) ||
+                type == typeof(decimal);
         }
     }
 }
