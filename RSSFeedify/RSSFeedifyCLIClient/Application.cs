@@ -38,7 +38,7 @@ namespace RSSFeedifyCLIClient
 
             // Create HTTP service.
             var httpService = new HTTPService(client);
-            
+
             // Create AccountService for managing logged users.
             AccountService accountService = new(writer, reader, errorWriter, parser, httpService);
 

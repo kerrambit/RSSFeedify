@@ -25,7 +25,7 @@
         public NoAuth()
         {
             _payload = string.Empty;
-            _typeName = AuthenticationTypeName.NoAuth; 
+            _typeName = AuthenticationTypeName.NoAuth;
         }
     }
 

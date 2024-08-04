@@ -232,7 +232,7 @@ namespace RSSFeedifyCLIClient.Business
                 }
                 else if (key.Key == ConsoleKey.Backspace && password.Length > 0)
                 {
-                   password = password.Remove(password.Length - 1);
+                    password = password.Remove(password.Length - 1);
 
                     Console.CursorLeft--;
                     _writer.RenderBareText(" ", newLine: false);

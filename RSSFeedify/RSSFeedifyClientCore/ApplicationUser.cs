@@ -7,7 +7,7 @@ namespace RSSFeedifyClientCore
         private string _accessToken = string.Empty;
         public bool SignedIn { get; private set; } = false;
 
-        public ApplicationUser() {}
+        public ApplicationUser() { }
 
         public void Login(string accessToken)
         {
