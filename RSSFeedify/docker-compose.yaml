@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  database:
+    container_name: rssfeedify-db
+    image: postgres:16-alpine
+    networks:
+      - rssfeedify_inner
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${RSSFEEDIFY_PG_DB_USER}
+      POSTGRES_PASSWORD: ${RSSFEEDIFY_PG_DB_PASSWORD}
+      POSTGRES_DB: ${RSSFEEDIFY_PG_DB_NAME}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+
+  blacklist:
+    container_name: rssfeedify-blacklist-db
+    image: redis:latest
+    networks:
+      - rssfeedify_inner
+    ports:
+      - "6379:6379"
+
+  api:
+    container_name: rssfeedify-api
+    build:
+      context: .
+      dockerfile: RSSFeedify/Dockerfile
+    networks:
+      - rssfeedify_inner
+    depends_on:
+      - database
+      - blacklist
+    environment:
+      ASPNETCORE_ENVIRONMENT: Release
+      RSSFEEDIFY_PG_DB_USER: ${RSSFEEDIFY_PG_DB_USER}
+      RSSFEEDIFY_PG_DB_PASSWORD: ${RSSFEEDIFY_PG_DB_PASSWORD}
+      RSSFEEDIFY_PG_DB_NAME: ${RSSFEEDIFY_PG_DB_NAME}
+      RSSFEEDIFY_PG_DB_HOST: database
+      RSSFEEDIFY_PG_DB: "Host=database;Port=5432;Database=${RSSFEEDIFY_PG_DB_NAME};Username=${RSSFEEDIFY_PG_DB_USER};Password=${RSSFEEDIFY_PG_DB_PASSWORD}"
+      RSSFEEDIFY_REDIS_DB: blacklist:6379
+      RSSFEEDIFY_JWT_KEY: ${RSSFEEDIFY_JWT_KEY}
+    ports:
+
+      - "32000:8080"  # HTTP
+      - "32001:8081"  # HTTPS
+
+volumes:
+  pg-data:
+
+networks:
+  rssfeedify_inner:

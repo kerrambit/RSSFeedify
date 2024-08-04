@@ -4,7 +4,7 @@ using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.Business;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Repository;
-using RSSFeedifyClientCore;
+using RSSFeedifyClientCore.Services.Networking;
 
 namespace RSSFeedifyCLIClient
 {
@@ -114,9 +114,13 @@ namespace RSSFeedifyCLIClient
             }
         }
 
+        /// <summary>
+        /// ASCII text generation was made with the help of https://patorjk.com/software/taag/#p=display&h=3&v=0&f=Big&t=.
+        /// </summary>
+        /// <param name="writer">IWriter that renders the text.</param>
         private static void RenderASCIIPicture(IWriter writer)
         {
-            writer.RenderBareText("  _____   _____ _____ ______            _ _  __       \r\n |  __ \\ / ____/ ____|  ____|          | (_)/ _|      \r\n | |__) | (___| (___ | |__ ___  ___  __| |_| |_ _   _ \r\n |  _  / \\___ \\\\___ \\|  __/ _ \\/ _ \\/ _` | |  _| | | |\r\n | | \\ \\ ____) |___) | | |  __/  __/ (_| | | | | |_| |\r\n |_|  \\_\\_____/_____/|_|  \\___|\\___|\\__,_|_|_|  \\__, |\r\n                                                 __/ |\r\n                                                |___/ \r\n\r\n");
+            writer.RenderBareText("\r\n\r\n  _____   _____ _____ ______            _ _  __         __  __   ___  \r\n |  __ \\ / ____/ ____|  ____|          | (_)/ _|       /_ |/_ | / _ \\ \r\n | |__) | (___| (___ | |__ ___  ___  __| |_| |_ _   _   | | | || | | |\r\n |  _  / \\___ \\\\___ \\|  __/ _ \\/ _ \\/ _` | |  _| | | |  | | | || | | |\r\n | | \\ \\ ____) ____) | | |  __|  __| (_| | | | | |_| |  | |_| || |_| |\r\n |_|  \\_|_____|_____/|_|  \\___|\\___|\\__,_|_|_|  \\__, |  |_(_|_(_\\___/ \r\n                                                 __/ |                \r\n                                                |___/                 \r\n\r\n");
         }
     }
 }
