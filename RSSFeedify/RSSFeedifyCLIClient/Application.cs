@@ -104,6 +104,9 @@ namespace RSSFeedifyCLIClient
                         case "login":
                             await accountService.Login();
                             break;
+                        case "logout":
+                            await accountService.Logout();
+                            break;
                         default:
                             break;
                     }

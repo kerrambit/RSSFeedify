@@ -29,6 +29,11 @@ namespace RSSFeedify.Controllers
             return new OkObjectResult("You have been successfully logged out.");
         }
 
+        public static ActionResult GetResultForSuccessfulRegistration()
+        {
+            return new OkObjectResult("You have been successfully registered.");
+        }
+
         public static ActionResult GetFormattedModelStateErrorMessage(ActionContext actionContext)
         {
             return new BadRequestObjectResult(string.Join("\n", actionContext.ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage)));

@@ -17,6 +17,16 @@ namespace RSSFeedifyCLIClient.Business
         private CommandParser _parser;
         private HTTPService _httpService;
 
+        private HttpResponseMessageValidator _httpResponseMessageValidatorJson = new HttpResponseMessageValidatorBuilder()
+            .AddStatusCodeCheck(HTTPService.StatusCode.OK)
+            .AddContentTypeCheck(HTTPService.ContentType.AppJson)
+            .Build();
+
+        private HttpResponseMessageValidator _httpResponseMessageValidatorTxt = new HttpResponseMessageValidatorBuilder()
+            .AddStatusCodeCheck(HTTPService.StatusCode.OK)
+            .AddContentTypeCheck(HTTPService.ContentType.TxtPlain)
+            .Build();
+
         public ApplicationUser User { get; private set; } = new();
 
         public AccountService(IWriter writer, IReader reader, ApplicationErrorWriter errorWriter, CommandParser parser, HTTPService httpService)
@@ -32,41 +42,12 @@ namespace RSSFeedifyCLIClient.Business
         {
             var loginData = new LoginDTO();
             var email = GetEmail();
+
             loginData.Email = email;
             loginData.Password = GetPassword((6, 100));
             loginData.RememberMe = true;
 
-            var requestResult = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
-
-            if (requestResult.IsError)
-            {
-                _errorWriter.RenderErrorMessage(ApplicationError.Network, requestResult.GetError);
-                return;
-            }
-
-            var response = requestResult.GetValue;
-
-            Console.WriteLine(response);
-            string responseContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(responseContent);
-
-            // TODO: create system which will recognize different static codes and handle situation according to them.
-            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
-            {
-                //RenderErrorMessage(await data.response.Content.ReadAsStringAsync());
-                return;
-            }
-
-            var result = await JsonFromHttpResponseReader.ReadJson<LoginResponseDTO>(response);
-            if (result.IsError)
-            {
-                _errorWriter.RenderErrorMessage(result.GetError);
-            }
-
-            string bearerToken = result.GetValue.JWT;
-            _writer.RenderDebugMessage($"JWT: {bearerToken}");
-            User.Email = email;
-            User.Login(bearerToken);
+            await Login(loginData);
         }
 
         public async Task Register()
@@ -78,33 +59,117 @@ namespace RSSFeedifyCLIClient.Business
             registartionData.ConfirmPassword = password;
 
             var requestResult = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "register"), JsonConvertor.ConvertObjectToJsonString(registartionData));
-
             if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.Network, requestResult.GetError);
+                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
                 return;
             }
 
             var response = requestResult.GetValue;
 
-            if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+#if DEBUG
+            // TODO: log
+            Console.WriteLine(response);
+            string responseContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseContent);
+#endif
+
+            var validationResult = _httpResponseMessageValidatorTxt.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
+            if (validationResult.IsError)
             {
-                //RenderErrorMessage(await data.response.Content.ReadAsStringAsync());
-                Console.WriteLine(response);
-                Console.WriteLine("Response Content:");
-                string responseContent = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(responseContent);
+                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
                 return;
             }
 
-            Console.WriteLine(response);
+            var content = await HTTPService.RetrieveAndStringifyContent(response);
+            _writer.RenderMessage(content);
 
-            //var result = await ReadJson<RSSFeed>(data.response);
-            //if (result is not null)
-            //{
-            //    _writer.RenderBareText("New RSSFeed was registered:");
-            //    RenderRSSFeed(result);
-            //}
+            var loginData = new LoginDTO();
+            loginData.Email = registartionData.Email;
+            loginData.Password = registartionData.Password;
+            loginData.RememberMe = true;
+
+            await Login(loginData);
+        }
+
+        public async Task Logout()
+        {
+            var accessToken = User.GetAccessToken();
+            if (accessToken.IsError)
+            {
+                _errorWriter.RenderErrorMessage(accessToken.GetError);
+                return;
+            }
+
+            var logoutData = new LogoutDTO();
+            logoutData.JWT = accessToken.GetValue;
+
+            var requestResult = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "logout"), JsonConvertor.ConvertObjectToJsonString(logoutData));
+            if (requestResult.IsError)
+            {
+                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                return;
+            }
+
+            var response = requestResult.GetValue;
+
+#if DEBUG
+            // TODO: log
+            Console.WriteLine(response);
+            string responseContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseContent);
+#endif
+
+            var validationResult = _httpResponseMessageValidatorTxt.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
+            if (validationResult.IsError)
+            {
+                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                return;
+            }
+
+            var content = await HTTPService.RetrieveAndStringifyContent(response);
+            _writer.RenderMessage(content);
+
+            User.Logoff();
+        }
+
+        private async Task Login(LoginDTO loginData)
+        {
+
+            var requestResult = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
+            if (requestResult.IsError)
+            {
+                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                return;
+            }
+
+            var response = requestResult.GetValue;
+
+#if DEBUG
+            // TODO: log
+            Console.WriteLine(response);
+            string responseContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseContent);
+#endif
+
+            var validationResult = _httpResponseMessageValidatorJson.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
+            if (validationResult.IsError)
+            {
+                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                return;
+            }
+
+            var jsonResult = await JsonFromHttpResponseReader.ReadJson<LoginResponseDTO>(response);
+            if (jsonResult.IsError)
+            {
+                _errorWriter.RenderErrorMessage(jsonResult.GetError);
+            }
+
+            _writer.RenderMessage("You have been successfully logged in.");
+
+            string bearerToken = jsonResult.GetValue.JWT;
+            User.Email = loginData.Email;
+            User.Login(bearerToken);
         }
 
         private string GetConfirmedPassword((int minimalLength, int maximalLength) passwordRequierements)

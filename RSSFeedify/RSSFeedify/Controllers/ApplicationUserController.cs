@@ -46,7 +46,7 @@ namespace RSSFeedify.Controllers
                     return BadRequest(result.Errors);
                 }
 
-                return Ok();
+                return ControllersHelper.GetResultForSuccessfulRegistration();
             }
             return BadRequest(ModelState);
         }
