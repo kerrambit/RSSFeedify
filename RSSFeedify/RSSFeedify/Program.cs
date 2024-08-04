@@ -14,11 +14,15 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+// Load environment variables from .env file in development.
+DotNetEnv.Env.Load();
+
 // Add services to the container.
 builder.Services.AddControllers();
 
 // Configure PostgreSQL connection string
-var defaultConnectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var defaultConnectionString = Environment.GetEnvironmentVariable("RSSFEEDIFY_PG_DB");
 
 // Register your DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -32,7 +36,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
 // Configure Redis connection
 builder.Services.AddSingleton<IConnectionMultiplexer>(connectionMultiplexer =>
 {
-    var configuration = ConfigurationOptions.Parse(builder.Configuration.GetConnectionString("RedisConnection"), true);
+    var configuration = ConfigurationOptions.Parse(Environment.GetEnvironmentVariable("RSSFEEDIFY_REDIS_DB"), true);
     return ConnectionMultiplexer.Connect(configuration);
 }); // add LoggerFactory, see https://stackexchange.github.io/StackExchange.Redis/Configuration
 
@@ -45,7 +49,7 @@ builder.Services.AddAuthentication(x =>
 {
     x.TokenValidationParameters = new TokenValidationParameters
     {
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"])),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("RSSFEEDIFY_JWT_KEY"))),
         ValidateIssuer = false,
         ValidateAudience = false
     };

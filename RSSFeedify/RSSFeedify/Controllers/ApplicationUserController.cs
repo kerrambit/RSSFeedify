@@ -103,12 +103,12 @@ namespace RSSFeedify.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
 
-            if (_configuration["Jwt:Key"] is null)
+            if (Environment.GetEnvironmentVariable("RSSFEEDIFY_JWT_KEY") is null)
             {
                 return Result.Error<string, string>("Could not generate JWT Bearer.");
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("RSSFEEDIFY_JWT_KEY")));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             if (userRoles.Count <= 0)
