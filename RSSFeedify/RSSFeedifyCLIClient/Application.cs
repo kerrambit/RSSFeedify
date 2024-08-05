@@ -5,6 +5,7 @@ using RSSFeedifyCLIClient.Business;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Repository;
 using RSSFeedifyClientCore.Services.Networking;
+using System.IO;
 
 namespace RSSFeedifyCLIClient
 {
@@ -39,11 +40,35 @@ namespace RSSFeedifyCLIClient
             // Create HTTP service.
             var httpService = new HTTPService(client);
 
+            // Setup the base URL for API (URL can be loaded from environment variable).
+            Uri baseUri = new(@"http://localhost:32000/api/");
+            try
+            {
+                var projectDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
+                var envFilePath = Path.Combine(projectDirectory, ".env");
+                DotNetEnv.Env.Load(envFilePath);
+                var baseUriFromEnvVariable = Environment.GetEnvironmentVariable("RSSFEEDIFY_CLI_CLIENT_BASE_URL");
+                if (baseUriFromEnvVariable != null)
+                {
+                    baseUri = new Uri(baseUriFromEnvVariable);
+                }
+            }
+            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is ArgumentException || e is PathTooLongException || e is FileNotFoundException || e is DirectoryNotFoundException || e is NotSupportedException || e is System.Security.SecurityException)
+            {
+                writer.RenderErrorMessage("Exception occured when loading environment variable(s). Application continues with the default base URL.");
+                writer.RenderDebugMessage(e.Message); // Until the logging is finished.
+            }
+            catch (Exception e)
+            {
+                writer.RenderErrorMessage("Unexpected exception occured when loading environment variable(s). Application had to be terminated. Please, report the bug and send the logs to the support.");
+                writer.RenderDebugMessage(e.Message); // Until the logging is finished.
+            }
+
             // Create AccountService for managing logged users.
-            AccountService accountService = new(writer, reader, errorWriter, parser, httpService);
+            AccountService accountService = new(writer, reader, errorWriter, parser, httpService, baseUri);
 
             // Create RSSFeedService that runs all commands logic. Also, HTTPService must be initialized.
-            RSSFeedService rSSFeedService = new(writer, errorWriter, httpService, accountService);
+            RSSFeedService rSSFeedService = new(writer, errorWriter, httpService, accountService, baseUri);
 
             // And finally, run the application.
             try

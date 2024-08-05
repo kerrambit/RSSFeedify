@@ -14,8 +14,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Load environment variables from .env file in development.
+// Load environment variables from .env file.
 DotNetEnv.Env.Load();
 
 // Add services to the container.
