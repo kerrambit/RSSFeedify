@@ -30,15 +30,18 @@ namespace RSSFeedifyCLIClient.Business
             .AddContentTypeCheck(HTTPService.ContentType.TxtPlain)
             .Build();
 
+        private UriResourceCreator _uriResourceCreator;
+
         public ApplicationUser User { get; private set; } = new();
 
-        public AccountService(IWriter writer, IReader reader, ApplicationErrorWriter errorWriter, CommandParser parser, HTTPService httpService)
+        public AccountService(IWriter writer, IReader reader, ApplicationErrorWriter errorWriter, CommandParser parser, HTTPService httpService, Uri baseUri)
         {
             _writer = writer;
             _reader = reader;
             _errorWriter = errorWriter;
             _parser = parser;
             _httpService = httpService;
+            _uriResourceCreator = new(baseUri);
         }
 
         public async Task Login()
@@ -61,7 +64,7 @@ namespace RSSFeedifyCLIClient.Business
             registartionData.Password = password;
             registartionData.ConfirmPassword = password;
 
-            var requestResult = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "register"), JsonConvertor.ConvertObjectToJsonString(registartionData));
+            var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.ApplicationUser, "register"), JsonConvertor.ConvertObjectToJsonString(registartionData));
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
@@ -107,7 +110,7 @@ namespace RSSFeedifyCLIClient.Business
             var logoutData = new LogoutDTO();
             logoutData.JWT = accessToken.GetValue;
 
-            var requestResult = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "logout"), JsonConvertor.ConvertObjectToJsonString(logoutData));
+            var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.ApplicationUser, "logout"), JsonConvertor.ConvertObjectToJsonString(logoutData));
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
@@ -138,7 +141,7 @@ namespace RSSFeedifyCLIClient.Business
 
         private async Task Login(LoginDTO loginData)
         {
-            var requestResult = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.ApplicationUser, "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
+            var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.ApplicationUser, "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);

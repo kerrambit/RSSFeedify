@@ -36,6 +36,8 @@ namespace RSSFeedifyCLIClient.Business
             .AddContentTypeCheck(HTTPService.ContentType.TxtPlain)
             .Build();
 
+        private UriResourceCreator _uriResourceCreator;
+
         private enum ListingPage
         {
             RSSFeeds,
@@ -43,12 +45,14 @@ namespace RSSFeedifyCLIClient.Business
             None
         }
 
-        public RSSFeedService(IWriter writer, ApplicationErrorWriter errorWriter, HTTPService hTTPService, AccountService accountService)
+        public RSSFeedService(IWriter writer, ApplicationErrorWriter errorWriter, HTTPService hTTPService, AccountService accountService, Uri baseUri)
         {
             _writer = writer;
             _errorWriter = errorWriter;
             _httpService = hTTPService;
             _accountService = accountService;
+            _uriResourceCreator = new(baseUri);
+
             _pages["RSSFeeds"] = 1;
             _pages["RSSFeedItems"] = 1;
         }
@@ -63,7 +67,7 @@ namespace RSSFeedifyCLIClient.Business
             }
             var authenticationHeader = authResult.GetValue;
 
-            var countResult = await RetrieveCount(Endpoints.EndPoint.RSSFeeds, authenticationHeader);
+            var countResult = await RetrieveCount(UriResourceCreator.EndPoint.RSSFeeds, authenticationHeader);
             if (countResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(countResult.GetError);
@@ -76,7 +80,7 @@ namespace RSSFeedifyCLIClient.Business
                 _pages["RSSFeeds"] = 1;
             }
 
-            var requestResult = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, new List<(string, string)>() { ("page", $"{_pages["RSSFeeds"]}"), ("pageSize", $"{PageSize}") }), authenticationHeader);
+            var requestResult = await _httpService.GetAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeeds, new List<(string, string)>() { ("page", $"{_pages["RSSFeeds"]}"), ("pageSize", $"{PageSize}") }), authenticationHeader);
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
@@ -126,7 +130,7 @@ namespace RSSFeedifyCLIClient.Business
             var authenticationHeader = authResult.GetValue;
 
             string guid = parameters[0].String;
-            var requestResult = await _httpService.DeleteAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, guid), authenticationHeader);
+            var requestResult = await _httpService.DeleteAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeeds, guid), authenticationHeader);
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
@@ -172,7 +176,7 @@ namespace RSSFeedifyCLIClient.Business
             var authenticationHeader = authResult.GetValue;
 
             string guid = parameters[0].String;
-            var requestResult = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, guid), authenticationHeader);
+            var requestResult = await _httpService.GetAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeeds, guid), authenticationHeader);
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
@@ -205,7 +209,7 @@ namespace RSSFeedifyCLIClient.Business
             var originalFeed = result.GetValue;
 
             RSSFeedDTO feed = new(parameters[1].String, parameters[2].String, originalFeed.SourceUrl, parameters[3].Double);
-            requestResult = await _httpService.PutAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds, guid), JsonConvertor.ConvertObjectToJsonString(feed), authenticationHeader);
+            requestResult = await _httpService.PutAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeeds, guid), JsonConvertor.ConvertObjectToJsonString(feed), authenticationHeader);
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
@@ -247,7 +251,7 @@ namespace RSSFeedifyCLIClient.Business
             var authenticationHeader = authResult.GetValue;
 
             string guid = parameters[0].String;
-            var requestResult = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, guid), authenticationHeader);
+            var requestResult = await _httpService.GetAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeedItems, guid), authenticationHeader);
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
@@ -314,7 +318,7 @@ namespace RSSFeedifyCLIClient.Business
             var authenticationHeader = authResult.GetValue;
 
             string guid = parameters[0].String;
-            var countResult = await RetrieveCount(Endpoints.EndPoint.RSSFeedItems, ("byRSSFeedGuid", guid), authenticationHeader);
+            var countResult = await RetrieveCount(UriResourceCreator.EndPoint.RSSFeedItems, ("byRSSFeedGuid", guid), authenticationHeader);
             if (countResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(countResult.GetError);
@@ -327,7 +331,7 @@ namespace RSSFeedifyCLIClient.Business
                 _pages["RSSFeedItems"] = 1;
             }
 
-            var requestResult = await _httpService.GetAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeedItems, new List<(string, string)>() { ("byRSSFeedGuid", guid), ("page", $"{_pages["RSSFeedItems"]}"), ("pageSize", $"{PageSize}") }), authenticationHeader);
+            var requestResult = await _httpService.GetAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeedItems, new List<(string, string)>() { ("byRSSFeedGuid", guid), ("page", $"{_pages["RSSFeedItems"]}"), ("pageSize", $"{PageSize}") }), authenticationHeader);
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
@@ -378,7 +382,7 @@ namespace RSSFeedifyCLIClient.Business
             var authenticationHeader = authResult.GetValue;
 
             RSSFeedDTO feed = new(parameters[0].String, parameters[1].String, parameters[2].Uri, parameters[3].Double);
-            var requestResult = await _httpService.PostAsync(Endpoints.BuildUri(Endpoints.EndPoint.RSSFeeds), JsonConvertor.ConvertObjectToJsonString(feed), authenticationHeader);
+            var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeeds), JsonConvertor.ConvertObjectToJsonString(feed), authenticationHeader);
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
@@ -428,7 +432,7 @@ namespace RSSFeedifyCLIClient.Business
         public void Settings()
         {
             _writer.RenderBareText("\n>General");
-            _writer.RenderBareText($"\t>KEY: 'http-host-port'\t\tVALUE: '{Endpoints.BaseUrl}'");
+            _writer.RenderBareText($"\t>KEY: 'http-host-port'\t\tVALUE: '{_uriResourceCreator.BaseUrl}'");
         }
 
         private Result<IAuthenticationHeader, ApplicationError> CreateAuthHeader()
@@ -449,15 +453,15 @@ namespace RSSFeedifyCLIClient.Business
             return (int)Math.Ceiling(count / (double)PageSize);
         }
 
-        private async Task<Result<int, DetailedApplicationError>> RetrieveCount(Endpoints.EndPoint endpoint, (string key, string value) queryString, IAuthenticationHeader authenticationHeader)
+        private async Task<Result<int, DetailedApplicationError>> RetrieveCount(UriResourceCreator.EndPoint endpoint, (string key, string value) queryString, IAuthenticationHeader authenticationHeader)
         {
-            var count = await _httpService.GetAsync(Endpoints.BuildUri(endpoint, "count", queryString), authenticationHeader);
+            var count = await _httpService.GetAsync(_uriResourceCreator.BuildUri(endpoint, "count", queryString), authenticationHeader);
             return await ParseRetrievedCountResponse(count);
         }
 
-        private async Task<Result<int, DetailedApplicationError>> RetrieveCount(Endpoints.EndPoint endpoint, IAuthenticationHeader authenticationHeader)
+        private async Task<Result<int, DetailedApplicationError>> RetrieveCount(UriResourceCreator.EndPoint endpoint, IAuthenticationHeader authenticationHeader)
         {
-            var count = await _httpService.GetAsync(Endpoints.BuildUri(endpoint, "count"), authenticationHeader);
+            var count = await _httpService.GetAsync(_uriResourceCreator.BuildUri(endpoint, "count"), authenticationHeader);
             return await ParseRetrievedCountResponse(count);
         }
 
