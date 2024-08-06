@@ -42,6 +42,11 @@ namespace RSSFeedify.Repository
         {
             using (var context = new ApplicationDbContext(_configuration))
             {
+                if (await context.Set<RSSFeed>().FindAsync(guid) is null)
+                {
+                    return new NotFoundError<int>();
+                }
+
                 var result = await context.Set<RSSFeedItem>().Where(item => item.RSSFeedId == guid).CountAsync();
                 return new Success<int>(result);
             }

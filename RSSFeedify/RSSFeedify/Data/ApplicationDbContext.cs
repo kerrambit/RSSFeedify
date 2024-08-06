@@ -1,9 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using RSSFeedify.Models;
 
 namespace PostgreSQL.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         protected readonly IConfiguration Configuration;
 
@@ -14,10 +15,12 @@ namespace PostgreSQL.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
-            options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"));
+            options.UseNpgsql(Environment.GetEnvironmentVariable("RSSFEEDIFY_PG_DB"));
         }
 
         public DbSet<RSSFeed> RSSFeeds { get; set; }
         public DbSet<RSSFeedItem> RSSFeedsItems { get; set; }
     }
 }
+
+

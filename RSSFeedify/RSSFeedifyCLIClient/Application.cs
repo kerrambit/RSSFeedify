@@ -4,7 +4,7 @@ using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.Business;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Repository;
-using RSSFeedifyCLIClient.Services;
+using RSSFeedifyClientCore.Services.Networking;
 
 namespace RSSFeedifyCLIClient
 {
@@ -24,6 +24,9 @@ namespace RSSFeedifyCLIClient
             IWriter writer = new Writer();
             IReader reader = new Reader();
 
+            // Initialize application error writer.
+            ApplicationErrorWriter errorWriter = new ApplicationErrorWriter(writer);
+
             // Create CommandParser and fill it with commands from the commands repository.
             var parser = new CommandParser(writer, reader);
             parser.AddCommands(commands.Values.ToList());
@@ -33,21 +36,52 @@ namespace RSSFeedifyCLIClient
             clientHandler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => { return true; };
             var client = new HttpClient(clientHandler);
 
+            // Create HTTP service.
+            var httpService = new HTTPService(client);
+
+            // Setup the base URL for API (URL can be loaded from environment variable).
+            Uri baseUri = new(@"http://localhost:32000/api/");
+            try
+            {
+                var projectDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
+                var envFilePath = Path.Combine(projectDirectory, ".env");
+                DotNetEnv.Env.Load(envFilePath);
+                var baseUriFromEnvVariable = Environment.GetEnvironmentVariable("RSSFEEDIFY_CLI_CLIENT_BASE_URL");
+                if (baseUriFromEnvVariable != null)
+                {
+                    baseUri = new Uri(baseUriFromEnvVariable);
+                }
+            }
+            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is ArgumentException || e is PathTooLongException || e is FileNotFoundException || e is DirectoryNotFoundException || e is NotSupportedException || e is System.Security.SecurityException)
+            {
+                writer.RenderErrorMessage("Exception occured when loading environment variable(s). Application continues with the default base URL.");
+                writer.RenderDebugMessage(e.Message); // Until the logging is finished.
+            }
+            catch (Exception e)
+            {
+                writer.RenderErrorMessage("Unexpected exception occured when loading environment variable(s). Application had to be terminated. Please, report the bug and send the logs to the support.");
+                writer.RenderDebugMessage(e.Message); // Until the logging is finished.
+            }
+
+            // Create AccountService for managing logged users.
+            AccountService accountService = new(writer, reader, errorWriter, parser, httpService, baseUri);
+
             // Create RSSFeedService that runs all commands logic. Also, HTTPService must be initialized.
-            RSSFeedService rSSFeedService = new(writer, new HTTPService(client));
+            RSSFeedService rSSFeedService = new(writer, errorWriter, httpService, accountService, baseUri);
 
             // And finally, run the application.
             try
             {
-                await StartAndRunApplicationAsync(writer, parser, rSSFeedService);
+                await StartAndRunApplicationAsync(writer, parser, rSSFeedService, accountService);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 writer.RenderErrorMessage("Unhandled exception occured. Application had to be terminated. Please, report the bug and send the logs to the support.");
+                writer.RenderDebugMessage(e.Message); // Until the logging is finished.
             }
         }
 
-        private static async Task StartAndRunApplicationAsync(IWriter writer, CommandParser parser, RSSFeedService rSSFeedService)
+        private static async Task StartAndRunApplicationAsync(IWriter writer, CommandParser parser, RSSFeedService rSSFeedService, AccountService accountService)
         {
             RenderASCIIPicture(writer);
 
@@ -88,6 +122,15 @@ namespace RSSFeedifyCLIClient
                         case "settings":
                             rSSFeedService.Settings();
                             break;
+                        case "register":
+                            await accountService.Register();
+                            break;
+                        case "login":
+                            await accountService.Login();
+                            break;
+                        case "logout":
+                            await accountService.Logout();
+                            break;
                         default:
                             break;
                     }
@@ -95,9 +138,13 @@ namespace RSSFeedifyCLIClient
             }
         }
 
+        /// <summary>
+        /// ASCII text generation was made with the help of https://patorjk.com/software/taag/#p=display&h=3&v=0&f=Big&t=.
+        /// </summary>
+        /// <param name="writer">IWriter that renders the text.</param>
         private static void RenderASCIIPicture(IWriter writer)
         {
-            writer.RenderBareText("  _____   _____ _____ ______            _ _  __       \r\n |  __ \\ / ____/ ____|  ____|          | (_)/ _|      \r\n | |__) | (___| (___ | |__ ___  ___  __| |_| |_ _   _ \r\n |  _  / \\___ \\\\___ \\|  __/ _ \\/ _ \\/ _` | |  _| | | |\r\n | | \\ \\ ____) |___) | | |  __/  __/ (_| | | | | |_| |\r\n |_|  \\_\\_____/_____/|_|  \\___|\\___|\\__,_|_|_|  \\__, |\r\n                                                 __/ |\r\n                                                |___/ \r\n\r\n");
+            writer.RenderBareText("\r\n\r\n  _____   _____ _____ ______            _ _  __         __  __   ___  \r\n |  __ \\ / ____/ ____|  ____|          | (_)/ _|       /_ |/_ | / _ \\ \r\n | |__) | (___| (___ | |__ ___  ___  __| |_| |_ _   _   | | | || | | |\r\n |  _  / \\___ \\\\___ \\|  __/ _ \\/ _ \\/ _` | |  _| | | |  | | | || | | |\r\n | | \\ \\ ____) ____) | | |  __|  __| (_| | | | | |_| |  | |_| || |_| |\r\n |_|  \\_|_____|_____/|_|  \\___|\\___|\\__,_|_|_|  \\__, |  |_(_|_(_\\___/ \r\n                                                 __/ |                \r\n                                                |___/                 \r\n\r\n");
         }
     }
 }

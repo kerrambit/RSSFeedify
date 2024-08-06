@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using RSSFeedify.Controllers.HelperTypes;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types;
@@ -21,84 +23,151 @@ namespace RSSFeedify.Controllers
             _rSSFeedItemRepository = rSSFeedItemRepository;
         }
 
-        // GET: api/RSSFeeds
+        // GET: api/RSSFeeds?page=1&pageSize=10
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RSSFeed>>> GetRSSFeeds(int page, int pageSize)
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<IEnumerable<RSSFeed>>> GetRSSFeeds([FromQuery] ControllerPaginationQuery paginationQuery)
         {
-            var result = await _rSSFeedRepository.GetSortedByNameAsync(new PaginationQuery(page, pageSize));
-            return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeed>>.Convert(result);
+            if (ModelState.IsValid)
+            {
+                var result = await _rSSFeedRepository.GetSortedByNameAsync(new PaginationQuery(paginationQuery.Page, paginationQuery.PageSize));
+                return RepositoryResultToActionResultConvertor<IEnumerable<RSSFeed>>.Convert(result);
+            }
+            return BadRequest(ModelState);
         }
 
         // GET: api/RSSFeeds/5
         [HttpGet("{guid}")]
-        public async Task<ActionResult<RSSFeed>> GetRSSFeed(string guid)
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<RSSFeed>> GetRSSFeed([FromRoute] string guid)
         {
-            var result = await _rSSFeedRepository.GetAsync(new Guid(guid));
-            return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
+            if (ModelState.IsValid)
+            {
+                if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
+                {
+                    return ControllersHelper.GetResultForInvalidGuid<RSSFeed>();
+                }
+
+                var result = await _rSSFeedRepository.GetAsync(rssFeedGuid);
+                return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
+            }
+            return BadRequest(ModelState);
         }
 
         // GET: api/RSSFeeds/count
         [HttpGet("count")]
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
         public async Task<ActionResult<int>> GetRSSFeedsCount()
         {
-            var result = await _rSSFeedRepository.GetTotalCountAsync();
-            return RepositoryResultToActionResultConvertor<int>.Convert(result);
+            if (ModelState.IsValid)
+            {
+                var result = await _rSSFeedRepository.GetTotalCountAsync();
+                return RepositoryResultToActionResultConvertor<int>.Convert(result);
+            }
+            return BadRequest(ModelState);
         }
 
         // PUT: api/RSSFeeds/5
         [HttpPut("{guid}")]
-        public async Task<ActionResult<RSSFeed>> PutRSSFeed(string guid, RSSFeedDTO rSSFeedDto)
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<RSSFeed>> PutRSSFeed([FromRoute] string guid, [FromBody] RSSFeedDTO rSSFeedDto)
         {
-            var result = await _rSSFeedRepository.UpdateAsync(new Guid(guid), rSSFeedDto);
-            return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
+            if (ModelState.IsValid)
+            {
+                if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
+                {
+                    return ControllersHelper.GetResultForInvalidGuid<RSSFeed>();
+                }
+
+                var result = await _rSSFeedRepository.UpdateAsync(rssFeedGuid, rSSFeedDto);
+                return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
+            }
+            return BadRequest(ModelState);
         }
 
         // POST: api/RSSFeeds
         [HttpPost]
-        public async Task<ActionResult<RSSFeed>> PostRSSFeed(RSSFeedDTO rSSFeedDTO)
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        public async Task<ActionResult<RSSFeed>> PostRSSFeed([FromBody] RSSFeedDTO rSSFeedDTO)
         {
-            var rSSFeed = RSSFeedDTOToRSSFeed.Convert(rSSFeedDTO);
-
-            var originalRssFeeds = await _rSSFeedRepository.GetAsync();
-            if (originalRssFeeds is Success<IEnumerable<RSSFeed>>)
+            if (ModelState.IsValid)
             {
-                if (originalRssFeeds.Data.Where(feed => feed.SourceUrl == rSSFeedDTO.SourceUrl).Count() != 0)
+                var rSSFeed = RSSFeedDTOToRSSFeed.Convert(rSSFeedDTO);
+
+                var originalRssFeeds = await _rSSFeedRepository.GetAsync();
+                if (originalRssFeeds is Success<IEnumerable<RSSFeed>>)
                 {
-                    return ControllersHelper.GetResultForDuplicatedSourcerUrl<RSSFeed>(rSSFeedDTO.SourceUrl);
+                    if (originalRssFeeds.Data.Where(feed => feed.SourceUrl == rSSFeedDTO.SourceUrl).Count() != 0)
+                    {
+                        return ControllersHelper.GetResultForDuplicatedSourcerUrl<RSSFeed>(rSSFeedDTO.SourceUrl);
+                    }
                 }
-            }
 
-            var data = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
-            if (!data.success)
-            {
-                rSSFeed.LastPoll = DateTime.UtcNow;
-            }
-            else
-            {
-                rSSFeed.LastPoll = DateTime.UtcNow;
-                rSSFeed.LastSuccessfullPoll = rSSFeed.LastPoll;
-            }
+                var data = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
+                if (!data.success)
+                {
+                    rSSFeed.LastPoll = DateTime.UtcNow;
+                }
+                else
+                {
+                    rSSFeed.LastPoll = DateTime.UtcNow;
+                    rSSFeed.LastSuccessfullPoll = rSSFeed.LastPoll;
+                }
 
-            var result = await _rSSFeedRepository.InsertAsync(rSSFeed);
+                var result = await _rSSFeedRepository.InsertAsync(rSSFeed);
 
-            IList<RSSFeedItem> items = new List<RSSFeedItem>();
-            foreach (var item in data.items)
-            {
-                var rSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(item.dto, item.hash);
-                rSSFeedItem.RSSFeedId = rSSFeed.Guid;
-                items.Add(rSSFeedItem);
+                IList<RSSFeedItem> items = new List<RSSFeedItem>();
+                foreach (var item in data.items)
+                {
+                    var rSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(item.dto, item.hash);
+                    rSSFeedItem.RSSFeedId = rSSFeed.Guid;
+                    items.Add(rSSFeedItem);
+                }
+                _ = await _rSSFeedItemRepository.InsertMultipleAsync(items);
+
+                return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
             }
-            _ = await _rSSFeedItemRepository.InsertMultipleAsync(items);
-
-            return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
+            return BadRequest(ModelState);
         }
 
         // DELETE: api/RSSFeeds/5
         [HttpDelete("{guid}")]
-        public async Task<ActionResult<RSSFeed>> DeleteRSSFeed(string guid)
+        [Authorize]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<RSSFeed>> DeleteRSSFeed([FromRoute] string guid)
         {
-            var result = await _rSSFeedRepository.DeleteAsync(new Guid(guid));
-            return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
+            if (ModelState.IsValid)
+            {
+                if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
+                {
+                    return ControllersHelper.GetResultForInvalidGuid<RSSFeed>();
+                }
+
+                var result = await _rSSFeedRepository.DeleteAsync(rssFeedGuid);
+                return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
+            }
+            return BadRequest(ModelState);
         }
 
         private bool RSSFeedExists(Guid id)

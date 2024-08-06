@@ -1,18 +1,29 @@
 ﻿using System.Text;
 
-namespace RSSFeedifyCLIClient.Settings
+namespace RSSFeedifyClientCore.Services.Networking
 {
-    public static class Endpoints
+    public class UriResourceCreator
     {
-        public static Uri BaseUrl { get; set; } = new(@"https://localhost:32001/api/");
+        public Uri BaseUrl { get; private set; }
 
         public enum EndPoint
         {
             RSSFeeds,
-            RSSFeedItems
+            RSSFeedItems,
+            ApplicationUser
         };
 
-        public static Uri BuildUri(EndPoint endPoint)
+        public UriResourceCreator(string baseUrl)
+        {
+            BaseUrl = new(baseUrl);
+        }
+
+        public UriResourceCreator(Uri baseUrl)
+        {
+            BaseUrl = baseUrl;
+        }
+
+        public Uri BuildUri(EndPoint endPoint)
         {
             UriBuilder uriBuilder = new UriBuilder(BaseUrl);
 
@@ -24,33 +35,36 @@ namespace RSSFeedifyCLIClient.Settings
                 case EndPoint.RSSFeedItems:
                     uriBuilder.Path += "RSSFeedItems";
                     break;
+                case EndPoint.ApplicationUser:
+                    uriBuilder.Path += "ApplicationUser";
+                    break;
             }
 
             return uriBuilder.Uri;
         }
 
-        public static Uri BuildUri(EndPoint endpoint, string resourcePath)
+        public Uri BuildUri(EndPoint endpoint, string resourcePath)
         {
             string baseUriString = BuildUri(endpoint).ToString();
             string completeUriString = baseUriString + "/" + resourcePath;
             return new Uri(completeUriString);
         }
 
-        public static Uri BuildUri(EndPoint endpoint, (string key, string value) queryString)
+        public Uri BuildUri(EndPoint endpoint, (string key, string value) queryString)
         {
             string baseUriString = BuildUri(endpoint).ToString();
             string completeUriString = baseUriString + $"?{queryString.key}={queryString.value}";
             return new Uri(completeUriString);
         }
 
-        public static Uri BuildUri(EndPoint endpoint, string resourcePath, (string key, string value) queryString)
+        public Uri BuildUri(EndPoint endpoint, string resourcePath, (string key, string value) queryString)
         {
             string baseUriString = BuildUri(endpoint).ToString();
             string completeUriString = baseUriString + "/" + resourcePath + $"?{queryString.key}={queryString.value}";
             return new Uri(completeUriString);
         }
 
-        public static Uri BuildUri(EndPoint endpoint, string resourcePath, IList<(string key, string value)> queryStrings)
+        public Uri BuildUri(EndPoint endpoint, string resourcePath, IList<(string key, string value)> queryStrings)
         {
             string baseUriString = BuildUri(endpoint).ToString();
             StringBuilder completeUriString = new StringBuilder(baseUriString + "/" + resourcePath);
@@ -70,7 +84,7 @@ namespace RSSFeedifyCLIClient.Settings
             return new Uri(completeUriString.ToString());
         }
 
-        public static Uri BuildUri(EndPoint endpoint, IList<(string key, string value)> queryStrings)
+        public Uri BuildUri(EndPoint endpoint, IList<(string key, string value)> queryStrings)
         {
             return BuildUri(endpoint, "", queryStrings);
         }
