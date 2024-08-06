@@ -1,5 +1,5 @@
-﻿using System.Text;
-using RSSFeedifyClientCore.Types;
+﻿using RSSFeedifyClientCore.Types;
+using System.Text;
 
 namespace RSSFeedifyClientCore.Services.Networking
 {

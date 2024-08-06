@@ -5,7 +5,6 @@ using RSSFeedifyCLIClient.Business;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Repository;
 using RSSFeedifyClientCore.Services.Networking;
-using System.IO;
 
 namespace RSSFeedifyCLIClient
 {

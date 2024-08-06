@@ -1,7 +1,7 @@
-﻿using System.Net.Http.Json;
-using System.Text.Json;
-using RSSFeedifyClientCore.Business.Errors;
+﻿using RSSFeedifyClientCore.Business.Errors;
 using RSSFeedifyClientCore.Types;
+using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace RSSFeedifyClientCore.Services.Networking
 {
