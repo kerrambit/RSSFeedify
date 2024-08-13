@@ -2,9 +2,12 @@
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Services.DataTypeConvertors;
-using RSSFeedify.Types;
+using RSSFeedifyCommon.Types;
 using System.ServiceModel.Syndication;
 using System.Xml;
+
+using RSSFeed = RSSFeedify.Models.RSSFeed;
+using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
 
 namespace RSSFeedify.Services
 {

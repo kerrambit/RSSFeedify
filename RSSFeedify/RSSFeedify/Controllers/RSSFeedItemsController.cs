@@ -6,6 +6,9 @@ using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedify.Services.DataTypeConvertors;
 
+using RSSFeed = RSSFeedify.Models.RSSFeed;
+using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
+
 namespace RSSFeedify.Controllers
 {
     [Route("api/[controller]")]

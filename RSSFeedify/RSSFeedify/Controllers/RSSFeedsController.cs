@@ -1,13 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller;
+using RSSFeedifyCommon.Models;
 using RSSFeedify.Controllers.HelperTypes;
-using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedify.Services;
 using RSSFeedify.Services.DataTypeConvertors;
+
+using RSSFeed = RSSFeedify.Models.RSSFeed;
+using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
 
 namespace RSSFeedify.Controllers
 {

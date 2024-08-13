@@ -14,6 +14,9 @@ using System.Text;
 using Serilog;
 using Serilog.Enrichers.WithCaller;
 
+using RSSFeed = RSSFeedify.Models.RSSFeed;
+using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure logging.

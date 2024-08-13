@@ -2,6 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using RSSFeedify.Models;
 
+using RSSFeed = RSSFeedify.Models.RSSFeed;
+using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
+
 namespace PostgreSQL.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>

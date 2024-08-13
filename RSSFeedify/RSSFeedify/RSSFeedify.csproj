@@ -31,4 +31,8 @@
     <PackageReference Include="System.ServiceModel.Syndication" Version="8.0.0" />
   </ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\RSSFeedifyCommon\RSSFeedifyCommon.csproj" />
+	</ItemGroup>
+
 </Project>

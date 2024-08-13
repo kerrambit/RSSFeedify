@@ -2,11 +2,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using RSSFeedify.Models;
-using RSSFeedify.Types;
+using RSSFeedifyCommon.Models;
+using RSSFeedifyCommon.Types;
 using StackExchange.Redis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
+using RSSFeed = RSSFeedify.Models.RSSFeed;
+using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
 
 namespace RSSFeedify.Controllers
 {

@@ -1,5 +1,5 @@
 ﻿using RSSFeedifyClientCore.Business.Errors;
-using RSSFeedifyClientCore.Types;
+using RSSFeedifyCommon.Types;
 using static RSSFeedifyClientCore.Services.Networking.HTTPService;
 
 namespace RSSFeedifyClientCore.Services.Networking

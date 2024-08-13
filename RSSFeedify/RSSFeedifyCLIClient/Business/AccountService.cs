@@ -1,7 +1,7 @@
 ﻿using CommandParsonaut.CommandHewAwayTool;
 using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.IO;
-using RSSFeedifyCLIClient.Models;
+using RSSFeedifyCommon.Models;
 using RSSFeedifyClientCore.Business;
 using RSSFeedifyClientCore.Business.Errors;
 using RSSFeedifyClientCore.Services;

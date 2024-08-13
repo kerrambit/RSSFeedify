@@ -1,9 +1,12 @@
 ﻿using PostgreSQL.Data;
-using RSSFeedify.Models;
+using RSSFeedifyCommon.Models;
 using RSSFeedify.Repositories;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.Pagination;
 using RSSFeedify.Repository.Types.PaginationQuery;
+
+using RSSFeed = RSSFeedify.Models.RSSFeed;
+using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
 
 namespace RSSFeedify.Repository
 {
