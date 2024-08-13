@@ -11,8 +11,18 @@ using RSSFeedify.Repository;
 using RSSFeedify.Services;
 using StackExchange.Redis;
 using System.Text;
+using Serilog;
+using Serilog.Enrichers.WithCaller;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure logging.
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.WithCaller()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 // Load environment variables from .env file.
 DotNetEnv.Env.Load();
@@ -134,8 +144,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Use exceptions and errors middleware (COMMENTED OUT UNTIL LOGGING IS ADDED)
-// app.UseExceptionHandler("/api/Error/error");
+// Use exceptions and errors middleware.
+app.UseExceptionHandler("/api/Error/error");
 
 // Register JWT blacklisting middleware.
 app.UseMiddleware<JWTBlacklistService>();
