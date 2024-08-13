@@ -2,6 +2,7 @@
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Services.DataTypeConvertors;
+using RSSFeedify.Types;
 using System.ServiceModel.Syndication;
 using System.Xml;
 
@@ -11,10 +12,24 @@ namespace RSSFeedify.Services
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly TimeSpan _pollingInterval = TimeSpan.FromMinutes(10);
+        private readonly ILogger<RSSFeedPollingService> _logger;
 
-        public RSSFeedPollingService(IServiceScopeFactory scopeFactory)
+        public struct HashedRSSFeedItemDTO
+        {
+            public string Hash;
+            public RSSFeedItemDTO Item;
+
+            public HashedRSSFeedItemDTO(string hash, RSSFeedItemDTO item)
+            {
+                Hash = hash;
+                Item = item;
+            }
+        }
+
+        public RSSFeedPollingService(IServiceScopeFactory scopeFactory, ILogger<RSSFeedPollingService> logger)
         {
             _scopeFactory = scopeFactory;
+            _logger = logger;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -31,7 +46,7 @@ namespace RSSFeedify.Services
                 firstRun = false;
                 using (var scope = _scopeFactory.CreateScope())
                 {
-                    Console.WriteLine("[RSSFeedPollingService]: service wakes up...");
+                    _logger.LogInformation("Service wakes up.");
 
                     var rSSRepository = scope.ServiceProvider.GetRequiredService<IRSSFeedRepository>();
                     var rSSItemsRepository = scope.ServiceProvider.GetRequiredService<IRSSFeedItemRepository>();
@@ -39,7 +54,7 @@ namespace RSSFeedify.Services
                     var feeds = await rSSRepository.GetAsync();
                     if (feeds is not Success<IEnumerable<RSSFeed>>)
                     {
-                        Console.WriteLine("[RSSFeedPollingService]: failure. Unable to get access to RSSFeeds!");
+                        _logger.LogError("Unable to get access to RSSFeeds repository!");
                         continue;
                     }
 
@@ -47,85 +62,87 @@ namespace RSSFeedify.Services
                     {
                         if (!CheckTimeStampsForUpdate(feed))
                         {
-                            Console.WriteLine($"[RSSFeedPollingService]: feed must be updated: {false}");
+                            _logger.LogInformation("Feed '{Guid}' won't be updated.", feed.Guid);
                             continue;
                         }
-                        Console.WriteLine($"[RSSFeedPollingService]: feed must be updated: {true}");
+                        _logger.LogInformation("Feed '{Guid}' will be updated.", feed.Guid);
 
-                        (bool success, DateTime lastUpdate, List<(string hash, RSSFeedItemDTO dto)> items) = LoadRSSFeedItemsFromUri(feed.SourceUrl);
-                        if (!success)
+                        var result = LoadRSSFeedItemsFromUri(feed.SourceUrl);
+                        if (result.IsError)
                         {
-                            Console.WriteLine($"[RSSFeedPollingService]: poll was not successfull so only LastPoll time stamp will be updated.");
+                            _logger.LogWarning("Poll from '{Url}' was not successfull. Only 'LastPoll' timestamp will be updated. Failure details: '{Details}'", feed.SourceUrl, result.GetError);
                             await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: false);
                             continue;
                         }
 
-                        if (feed.LastPoll > lastUpdate)
+                        if (feed.LastPoll > result.GetValue.lastUpdate)
                         {
-                            Console.WriteLine($"[RSSFeedPollingService]: feed was not updated so our RSSFeed can be left as it is and only time stamps are going to be updated.");
+                            _logger.LogInformation("Nothing new to poll from '{Url}'. Only timestamps will be updated.", feed.SourceUrl);
                             await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: true);
                             continue;
                         }
-                        Console.WriteLine($"[RSSFeedPollingService]: feed was updated so the database must be also updated ({feed.LastPoll} < {lastUpdate})");
 
                         var originalItems = await rSSItemsRepository.GetFilteredByForeignKeyAsync(feed.Guid);
                         if (originalItems is not Success<IEnumerable<RSSFeedItem>>)
                         {
-                            Console.WriteLine($"[RSSFeedPollingService]: failure. Unable to get access to RSSFeedsItems for feed: {feed.Guid}!");
+                            _logger.LogError("Unable to get access to RSSFeedsItems repository for feed '{Guid}'!", feed.Guid);
                             await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: false);
                             continue;
                         }
 
-                        UpdateRSSFeedItems(rSSItemsRepository, feed, items, originalItems);
+                        UpdateRSSFeedItems(rSSItemsRepository, feed, result.GetValue.items, originalItems);
                         await rSSRepository.UpdatePollingTimeAsync(feed.Guid, successfullPolling: true);
+                        _logger.LogInformation("Feed '{Guid}' was succesfully updated from '{Url}'.", feed.Guid, feed.SourceUrl);
                     }
                 }
             }
         }
 
-        private static void UpdateRSSFeedItems(IRSSFeedItemRepository rSSItemsRepository, RSSFeed feed, List<(string hash, RSSFeedItemDTO dto)> items, RepositoryResult<IEnumerable<RSSFeedItem>> originalItems)
+        private void UpdateRSSFeedItems(IRSSFeedItemRepository rSSItemsRepository, RSSFeed feed, List<HashedRSSFeedItemDTO> items, RepositoryResult<IEnumerable<RSSFeedItem>> originalItems)
         {
             foreach (var newFeedItem in items)
             {
                 bool isUnique = true;
                 foreach (var feedItem in originalItems.Data)
                 {
-                    if (newFeedItem.hash == feedItem.Hash)
+                    if (newFeedItem.Hash == feedItem.Hash)
                     {
                         isUnique = false;
                         break;
                     }
                 }
+
                 if (isUnique)
                 {
-                    var newRSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(newFeedItem.dto, newFeedItem.hash);
+                    var newRSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(newFeedItem.Item, newFeedItem.Hash);
                     newRSSFeedItem.RSSFeedId = feed.Guid;
                     _ = rSSItemsRepository.InsertAsync(newRSSFeedItem);
-                    Console.WriteLine($"[RSSFeedPollingService]: new RSSFeedItem should be inserted {newRSSFeedItem.Title}.");
+                    _logger.LogInformation("New item '{Title}' from feed '{Guid}' will be inserted into database.", newRSSFeedItem.Title, feed.Guid);
                 }
             }
         }
 
-        private static bool CheckTimeStampsForUpdate(RSSFeed feed)
+        private bool CheckTimeStampsForUpdate(RSSFeed feed)
         {
+            _logger.LogDebug("Checking timestamps of '{Guid}'; 'LastPoll': {LastPoll}, 'LastSuccessfullPoll': {LastSuccessfullPoll}, 'PollingInterval': {PollingInterval}.", feed.Guid, feed.LastPoll, feed.LastSuccessfullPoll, feed.PollingInterval);
+
             bool readyToUpdate = false;
-            Console.WriteLine($"\n\n[RSSFeedPollingService]: checking time stamps of {feed.Guid} - {feed.Name}, LastPoll: {feed.LastPoll}, LastSuccessfullPoll: {feed.LastSuccessfullPoll}, PollingInterval: {feed.PollingInterval}");
             if (feed.LastPoll == DateTime.MinValue && feed.LastSuccessfullPoll == DateTime.MinValue || feed.LastSuccessfullPoll != feed.LastPoll)
             {
                 readyToUpdate = true;
                 if (feed.LastPoll == DateTime.MinValue && feed.LastSuccessfullPoll == DateTime.MinValue)
                 {
-                    Console.WriteLine("[RSSFeedPollingService]: polling times were not initialized.");
+                    _logger.LogDebug("Polling times for feed '{Guid}' were not ititialized.", feed.Guid);
                 }
                 else
                 {
-                    Console.WriteLine("[RSSFeedPollingService]: polling times are not equal. It seems that the last poll was not successfull.");
+                    _logger.LogDebug("Polling times for feed '{Guid}' are not equal. The last poll was not successfull.", feed.Guid);
                 }
             }
             else if (DateTime.UtcNow - feed.LastSuccessfullPoll >= TimeSpan.FromMinutes(feed.PollingInterval))
             {
                 readyToUpdate = true;
-                Console.WriteLine($"[RSSFeedPollingService]: last polling time is greater than the polling interval. See {DateTime.UtcNow - feed.LastSuccessfullPoll} >= {TimeSpan.FromMinutes(feed.PollingInterval)}.");
+                _logger.LogDebug("Last polling time for feed '{Guid}' is greater than the polling interval. See {TimeElapsed} >= {PollingInterval}.", feed.Guid, (int)(DateTime.UtcNow - feed.LastSuccessfullPoll).TotalMinutes, (int)TimeSpan.FromMinutes(feed.PollingInterval).TotalMinutes);
             }
 
             return readyToUpdate;
@@ -136,7 +153,7 @@ namespace RSSFeedify.Services
             return HashingService.GetHash($"{title},{publishDate}");
         }
 
-        public static (bool success, DateTime lastUpdate, List<(string hash, RSSFeedItemDTO dto)> items) LoadRSSFeedItemsFromUri(Uri uri)
+        public static Result<(DateTime lastUpdate, List<HashedRSSFeedItemDTO> items), string> LoadRSSFeedItemsFromUri(Uri uri)
         {
             XmlReader? reader = null;
             SyndicationFeed feed;
@@ -147,8 +164,7 @@ namespace RSSFeedify.Services
             }
             catch (Exception e)
             {
-                Console.WriteLine($"[RSSFeedPollingService]: failure. {e.Message}");
-                return (false, new DateTime(), []);
+                return Result.Error<(DateTime lastUpdate, List<HashedRSSFeedItemDTO> items), string>(e.Message);
             }
             finally
             {
@@ -158,7 +174,7 @@ namespace RSSFeedify.Services
                 }
             }
 
-            List<(string hash, RSSFeedItemDTO dto)> items = [];
+            List<HashedRSSFeedItemDTO> items = [];
             foreach (SyndicationItem item in feed.Items)
             {
                 RSSFeedItemDTO newItem = new RSSFeedItemDTO
@@ -175,10 +191,10 @@ namespace RSSFeedify.Services
                 };
 
                 string hash = GenerateRSSFeedItemHash(newItem.Title, newItem.PublishDate);
-                items.Add((hash, newItem));
+                items.Add(new(hash, newItem));
             }
 
-            return (true, feed.LastUpdatedTime.DateTime, items);
+            return Result.Ok<(DateTime lastUpdate, List<HashedRSSFeedItemDTO> items), string>((feed.LastUpdatedTime.DateTime, items));
         }
     }
 }
