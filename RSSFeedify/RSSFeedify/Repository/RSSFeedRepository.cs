@@ -26,13 +26,13 @@ namespace RSSFeedify.Repository
             {
                 using (var dbContextTransaction = context.Database.BeginTransaction())
                 {
-                    var result = await GetAsync(guid);
-                    if (result is Success<RSSFeed>)
+                    var result = context.RSSFeeds.SingleOrDefault(feed => feed.Guid == guid);
+                    if (result is not null)
                     {
-                        result.Data.LastPoll = DateTime.UtcNow;
+                        result.LastPoll = DateTime.UtcNow;
                         if (successfullPolling)
                         {
-                            result.Data.LastSuccessfullPoll = result.Data.LastPoll;
+                            result.LastSuccessfullPoll = result.LastPoll;
                         }
                     }
 
