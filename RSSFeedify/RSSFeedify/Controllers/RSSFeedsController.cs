@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Controller;
 using RSSFeedify.Controllers.HelperTypes;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
@@ -16,11 +17,13 @@ namespace RSSFeedify.Controllers
     {
         private readonly IRSSFeedRepository _rSSFeedRepository;
         private readonly IRSSFeedItemRepository _rSSFeedItemRepository;
+        private readonly ILogger<RSSFeedsController> _logger;
 
-        public RSSFeedsController(IRSSFeedRepository rSSFeedRepository, IRSSFeedItemRepository rSSFeedItemRepository)
+        public RSSFeedsController(IRSSFeedRepository rSSFeedRepository, IRSSFeedItemRepository rSSFeedItemRepository, ILogger<RSSFeedsController> logger)
         {
             _rSSFeedRepository = rSSFeedRepository;
             _rSSFeedItemRepository = rSSFeedItemRepository;
+            _logger = logger;
         }
 
         // GET: api/RSSFeeds?page=1&pageSize=10
@@ -121,10 +124,12 @@ namespace RSSFeedify.Controllers
                     }
                 }
 
-                var data = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
-                if (!data.success)
+                _logger.LogInformation("RSSFeedItems for new feed will be loaded from '{Url}'.", rSSFeed.SourceUrl);    
+                var pollResult = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
+                if (pollResult.IsError)
                 {
                     rSSFeed.LastPoll = DateTime.UtcNow;
+                    _logger.LogError("RSSFeedItems for new feed could not be loaded from '{Url}'. Detailed message: '{Message}'.", rSSFeed.SourceUrl, pollResult.GetError);
                 }
                 else
                 {
@@ -135,9 +140,9 @@ namespace RSSFeedify.Controllers
                 var result = await _rSSFeedRepository.InsertAsync(rSSFeed);
 
                 IList<RSSFeedItem> items = new List<RSSFeedItem>();
-                foreach (var item in data.items)
+                foreach (var item in pollResult.GetValue.items)
                 {
-                    var rSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(item.dto, item.hash);
+                    var rSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(item.Item, item.Hash);
                     rSSFeedItem.RSSFeedId = rSSFeed.Guid;
                     items.Add(rSSFeedItem);
                 }
