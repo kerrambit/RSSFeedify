@@ -2,9 +2,6 @@
 using PostgreSQL.Data;
 using RSSFeedify.Models;
 
-using RSSFeed = RSSFeedify.Models.RSSFeed;
-using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
-
 namespace RSSFeedify.Services
 {
     public class Seeder

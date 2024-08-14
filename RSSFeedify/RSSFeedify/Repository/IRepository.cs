@@ -2,9 +2,6 @@
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.PaginationQuery;
 
-using RSSFeed = RSSFeedify.Models.RSSFeed;
-using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
-
 namespace RSSFeedify.Repositories
 {
     public interface IRepository<T> where T : Reposable

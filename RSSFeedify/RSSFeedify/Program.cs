@@ -9,13 +9,10 @@ using RSSFeedify.Controllers;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Services;
-using StackExchange.Redis;
-using System.Text;
 using Serilog;
 using Serilog.Enrichers.WithCaller;
-
-using RSSFeed = RSSFeedify.Models.RSSFeed;
-using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
+using StackExchange.Redis;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 

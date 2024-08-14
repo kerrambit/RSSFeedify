@@ -9,9 +9,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-using RSSFeed = RSSFeedify.Models.RSSFeed;
-using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
-
 namespace RSSFeedify.Controllers
 {
     [Route("api/[controller]")]

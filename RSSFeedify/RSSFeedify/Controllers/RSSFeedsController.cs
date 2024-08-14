@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RSSFeedifyCommon.Models;
 using RSSFeedify.Controllers.HelperTypes;
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedify.Services;
 using RSSFeedify.Services.DataTypeConvertors;
-
+using RSSFeedifyCommon.Models;
 using RSSFeed = RSSFeedify.Models.RSSFeed;
 using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
 
@@ -126,7 +125,7 @@ namespace RSSFeedify.Controllers
                     }
                 }
 
-                _logger.LogInformation("RSSFeedItems for new feed will be loaded from '{Url}'.", rSSFeed.SourceUrl);    
+                _logger.LogInformation("RSSFeedItems for new feed will be loaded from '{Url}'.", rSSFeed.SourceUrl);
                 var pollResult = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
                 if (pollResult.IsError)
                 {

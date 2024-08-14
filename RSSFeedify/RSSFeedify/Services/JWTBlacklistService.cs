@@ -1,8 +1,5 @@
 ﻿using StackExchange.Redis;
 
-using RSSFeed = RSSFeedify.Models.RSSFeed;
-using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
-
 namespace RSSFeedify.Services
 {
     public class JWTBlacklistService

@@ -1,11 +1,11 @@
 ﻿using CommandParsonaut.CommandHewAwayTool;
 using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.IO;
-using RSSFeedifyCommon.Models;
 using RSSFeedifyClientCore.Business;
 using RSSFeedifyClientCore.Business.Errors;
 using RSSFeedifyClientCore.Services;
 using RSSFeedifyClientCore.Services.Networking;
+using RSSFeedifyCommon.Models;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
