@@ -1,4 +1,4 @@
-﻿using CommandParsonaut.CommandHewAwayTool;
+﻿using CommandParsonaut.Core;
 using CommandParsonaut.Core.Types;
 using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.Business;

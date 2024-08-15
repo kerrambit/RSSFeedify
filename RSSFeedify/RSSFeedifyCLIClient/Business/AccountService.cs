@@ -1,5 +1,5 @@
 ﻿using CommandParsonaut;
-using CommandParsonaut.CommandHewAwayTool;
+using CommandParsonaut.Core;
 using CommandParsonaut.Interfaces;
 using CommandParsonaut.OtherToolkit;
 using RSSFeedifyCLIClient.IO;
