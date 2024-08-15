@@ -1,36 +1,37 @@
-﻿using CommandParsonaut.CommandHewAwayTool;
+﻿using CommandParsonaut;
+using CommandParsonaut.CommandHewAwayTool;
 using CommandParsonaut.Interfaces;
+using CommandParsonaut.OtherToolkit;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyClientCore.Business;
 using RSSFeedifyClientCore.Business.Errors;
 using RSSFeedifyClientCore.Services;
 using RSSFeedifyClientCore.Services.Networking;
 using RSSFeedifyCommon.Models;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace RSSFeedifyCLIClient.Business
 {
     public class AccountService
     {
-        private IWriter _writer;
-        private IReader _reader;
-        private ApplicationErrorWriter _errorWriter;
+        private readonly IWriter _writer;
+        private readonly IReader _reader;
+        private readonly ApplicationErrorWriter _errorWriter;
+        private readonly PasswordReader _passwordReader;
 
-        private CommandParser _parser;
-        private HTTPService _httpService;
+        private readonly CommandParser _parser;
+        private readonly HTTPService _httpService;
 
-        private HttpResponseMessageValidator _httpResponseMessageValidatorJson = new HttpResponseMessageValidatorBuilder()
+        private readonly HttpResponseMessageValidator _httpResponseMessageValidatorJson = new HttpResponseMessageValidatorBuilder()
             .AddStatusCodeCheck(HTTPService.StatusCode.OK)
             .AddContentTypeCheck(HTTPService.ContentType.AppJson)
             .Build();
 
-        private HttpResponseMessageValidator _httpResponseMessageValidatorTxt = new HttpResponseMessageValidatorBuilder()
+        private readonly HttpResponseMessageValidator _httpResponseMessageValidatorTxt = new HttpResponseMessageValidatorBuilder()
             .AddStatusCodeCheck(HTTPService.StatusCode.OK)
             .AddContentTypeCheck(HTTPService.ContentType.TxtPlain)
             .Build();
 
-        private UriResourceCreator _uriResourceCreator;
+        private readonly UriResourceCreator _uriResourceCreator;
 
         public ApplicationUser User { get; private set; } = new();
 
@@ -38,6 +39,7 @@ namespace RSSFeedifyCLIClient.Business
         {
             _writer = writer;
             _reader = reader;
+            _passwordReader = new(_reader, _writer);
             _errorWriter = errorWriter;
             _parser = parser;
             _httpService = httpService;
@@ -214,6 +216,7 @@ namespace RSSFeedifyCLIClient.Business
                     _writer.RenderBareText($"Enter password: ");
                 }
 
+                _writer.RenderBareText(_parser.TerminalPromt, newLine: false);
                 password = ReadPassword();
                 firstAttempt = false;
             } while (password.Length > passwordRequierements.maximalLength || password.Length < passwordRequierements.minimalLength);
@@ -223,32 +226,7 @@ namespace RSSFeedifyCLIClient.Business
 
         private string ReadPassword()
         {
-            string password = string.Empty;
-            ConsoleKeyInfo key;
-
-            _writer.RenderBareText(">>> ", false);
-            do
-            {
-                key = Console.ReadKey(true);
-
-                if (key.Key != ConsoleKey.Enter && key.Key != ConsoleKey.Backspace)
-                {
-                    password += key.KeyChar;
-                    _writer.RenderBareText("*", newLine: false);
-                }
-                else if (key.Key == ConsoleKey.Backspace && password.Length > 0)
-                {
-                    password = password.Remove(password.Length - 1);
-
-                    Console.CursorLeft--;
-                    _writer.RenderBareText(" ", newLine: false);
-                    Console.CursorLeft--;
-                }
-
-            } while (key.Key != ConsoleKey.Enter);
-
-            _writer.RenderBareText("");
-            return password;
+            return _passwordReader.ReadPassword();
         }
 
         private bool ConfirmPassword(string password)
@@ -268,51 +246,12 @@ namespace RSSFeedifyCLIClient.Business
                     _writer.RenderErrorMessage("Invalid email format!");
                 }
                 _writer.RenderBareText($"Enter your email: ");
+                _writer.RenderBareText(_parser.TerminalPromt, newLine: false);
                 _parser.GetUnprocessedInput(out email);
 
                 firstAttempt = false;
-            } while (!IsEmailValid(email));
-
+            } while (!InputParser.ParseEmail(email, out _));
             return email;
-        }
-
-        // Implementation from https://learn.microsoft.com/en-us/dotnet/standard/base-types/how-to-verify-that-strings-are-in-valid-email-format.
-        private bool IsEmailValid(string email)
-        {
-            if (string.IsNullOrWhiteSpace(email))
-                return false;
-
-            try
-            {
-                email = Regex.Replace(email, @"(@)(.+)$", DomainMapper,
-                                      RegexOptions.None, TimeSpan.FromMilliseconds(200));
-
-                string DomainMapper(Match match)
-                {
-                    var idn = new IdnMapping();
-                    string domainName = idn.GetAscii(match.Groups[2].Value);
-                    return match.Groups[1].Value + domainName;
-                }
-            }
-            catch (RegexMatchTimeoutException e)
-            {
-                return false;
-            }
-            catch (ArgumentException e)
-            {
-                return false;
-            }
-
-            try
-            {
-                return Regex.IsMatch(email,
-                    @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
-                    RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
-            }
-            catch (RegexMatchTimeoutException)
-            {
-                return false;
-            }
         }
     }
 }

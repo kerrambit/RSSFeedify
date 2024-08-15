@@ -16,5 +16,35 @@ namespace RSSFeedifyCLIClient.IO
         {
             return (int)Console.ReadKey().Key;
         }
+
+        ConsoleKeyInfo IReader.ReadKey()
+        {
+            return Console.ReadKey();
+        }
+
+        public ConsoleKeyInfo ReadSecretKey()
+        {
+            return Console.ReadKey(intercept: true);
+        }
+
+        public void CursorLeft()
+        {
+            Console.CursorLeft--;
+        }
+
+        public void CursorRight()
+        {
+            Console.CursorLeft++;
+        }
+
+        public bool IsAnyKeyAvailable()
+        {
+            return Console.KeyAvailable;
+        }
+
+        public int GetCursorLeftPosition()
+        {
+            return Console.CursorLeft;
+        }
     }
 }

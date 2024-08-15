@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommandParsonaut" Version="1.1.0" />
+    <PackageReference Include="CommandParsonaut" Version="1.2.0" />
     <PackageReference Include="DotNetEnv" Version="3.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
