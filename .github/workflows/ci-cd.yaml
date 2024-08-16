@@ -1,0 +1,64 @@
+name: RSSFeedidy-API-CI
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Restore dependencies for RSSFeedify
+      run: dotnet restore ./RSSFeedify/RSSFeedidy/RSSFeedify.csproj
+
+    - name: Build the RSSFeedify API
+      run: dotnet build --configuration Release --no-restore dotnet restore ./RSSFeedify/RSSFeedidy/RSSFeedify.csproj
+
+    - name: Restore dependencies for RSSFeedifyCommon
+      run: dotnet restore ./RSSFeedify/RSSFeedidyCommon/RSSFeedifyCommon.csproj
+
+    - name: Build the RSSFeedifyCommon library
+      run: dotnet build --configuration Release --no-restore dotnet restore ./RSSFeedify/RSSFeedidyCommon/RSSFeedidyCommon.csproj
+
+  qa:
+    name: Code Quality Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: 'csharp'
+      
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        output: sarif
+        upload: true
+        category: "/csharp"
+
+    #- name: Run tests (optional)
+    #  run: dotnet test --no-restore --verbosity normal ./path/to/your/API/project/RSSFeedify.API.csproj
+
+    # Docker build step (optional, commented out for now)
+    # - name: Build Docker image
+    #   run: docker-compose build
+
+    # - name: Run Docker container
+    #   run: docker-compose up -d
