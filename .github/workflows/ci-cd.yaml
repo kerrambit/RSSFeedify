@@ -19,16 +19,16 @@ jobs:
         dotnet-version: '8.x'
 
     - name: Restore dependencies for RSSFeedify
-      run: dotnet restore ./RSSFeedify/RSSFeedidy/RSSFeedify.csproj
+      run: dotnet restore ./RSSFeedify/RSSFeedify/RSSFeedify.csproj
 
     - name: Build the RSSFeedify API
-      run: dotnet build --configuration Release --no-restore dotnet restore ./RSSFeedify/RSSFeedidy/RSSFeedify.csproj
+      run: dotnet build --configuration Release --no-restore ./RSSFeedify/RSSFeedify/RSSFeedify.csproj
 
     - name: Restore dependencies for RSSFeedifyCommon
-      run: dotnet restore ./RSSFeedify/RSSFeedidyCommon/RSSFeedifyCommon.csproj
+      run: dotnet restore ./RSSFeedify/RSSFeedifyCommon/RSSFeedifyCommon.csproj
 
     - name: Build the RSSFeedifyCommon library
-      run: dotnet build --configuration Release --no-restore dotnet restore ./RSSFeedify/RSSFeedidyCommon/RSSFeedidyCommon.csproj
+      run: dotnet build --configuration Release --no-restore ./RSSFeedify/RSSFeedifyCommon/RSSFeedifyCommon.csproj
 
   qa:
     name: Code Quality Analysis
@@ -39,7 +39,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
+      uses: github/codeql-action/init@v3
       with:
         languages: 'csharp'
       
