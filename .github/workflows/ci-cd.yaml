@@ -30,8 +30,30 @@ jobs:
     - name: Build the RSSFeedifyCommon library
       run: dotnet build --configuration Release --no-restore ./RSSFeedify/RSSFeedifyCommon/RSSFeedifyCommon.csproj
 
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Restore dependencies for RSSFeedifyAPI tests
+      run: dotnet restore ./RSSFeedify/RSSFeedifyTests/RSSFeedifyTests.csproj
+
+    - name: Build the test project
+      run: dotnet build --configuration Release ./RSSFeedify/RSSFeedifyTests/RSSFeedifyTests.csproj
+
+    - name: Run tests
+      run: dotnet test ./RSSFeedify/RSSFeedifyTests/RSSFeedifyTests.csproj --no-restore --configuration Release
+
   analyze:
-    name: Analyze (${{ matrix.language }})
+    name: analyze
     runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
     timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
     permissions:
@@ -69,13 +91,3 @@ jobs:
       uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
-
-    #- name: Run tests (optional)
-    #  run: dotnet test --no-restore --verbosity normal ./path/to/your/API/project/RSSFeedify.API.csproj
-
-    # Docker build step (optional, commented out for now)
-    # - name: Build Docker image
-    #   run: docker-compose build
-
-    # - name: Run Docker container
-    #   run: docker-compose up -d
