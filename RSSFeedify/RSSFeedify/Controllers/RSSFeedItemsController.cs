@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RSSFeedify.Controllers.HelperTypes;
+using RSSFeedify.Controllers.Helpers;
+using RSSFeedify.Controllers.Types;
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedify.Services.DataTypeConvertors;
@@ -38,7 +39,7 @@ namespace RSSFeedify.Controllers
 
                 if (!QueryStringParser.ParseGuid(byRSSFeedGuid, out Guid rssFeedGuid))
                 {
-                    return ControllersHelper.GetResultForInvalidGuid<IEnumerable<RSSFeedItem>>();
+                    return ControllersHelper.GetResultForInvalidGuid();
                 }
 
                 var result = await _repository.GetFilteredByForeignKeyAsync(rssFeedGuid, new PaginationQuery(paginationQuery.Page, paginationQuery.PageSize));
@@ -61,7 +62,7 @@ namespace RSSFeedify.Controllers
             {
                 if (!QueryStringParser.ParseGuid(byRSSFeedGuid, out Guid rssFeedGuid))
                 {
-                    return ControllersHelper.GetResultForInvalidGuid<int>();
+                    return ControllersHelper.GetResultForInvalidGuid();
                 }
 
                 var result = await _repository.GetTotalCountAsync(rssFeedGuid);
@@ -83,7 +84,7 @@ namespace RSSFeedify.Controllers
             {
                 if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
                 {
-                    return ControllersHelper.GetResultForInvalidGuid<RSSFeedItem>();
+                    return ControllersHelper.GetResultForInvalidGuid();
                 }
                 var result = await _repository.GetAsync(rssFeedGuid);
                 return RepositoryResultToActionResultConvertor<RSSFeedItem>.Convert(result);
@@ -127,7 +128,7 @@ namespace RSSFeedify.Controllers
             {
                 if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
                 {
-                    return ControllersHelper.GetResultForInvalidGuid<RSSFeedItem>();
+                    return ControllersHelper.GetResultForInvalidGuid();
                 }
 
                 var result = await _repository.DeleteAsync(rssFeedGuid);

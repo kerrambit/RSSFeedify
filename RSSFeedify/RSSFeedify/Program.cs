@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PostgreSQL.Data;
-using RSSFeedify.Controllers;
+using RSSFeedify.Controllers.Helpers;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Services;

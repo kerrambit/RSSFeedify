@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RSSFeedify.Controllers.HelperTypes;
+using RSSFeedify.Controllers.Helpers;
+using RSSFeedify.Controllers.Types;
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.PaginationQuery;
@@ -57,7 +58,7 @@ namespace RSSFeedify.Controllers
             {
                 if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
                 {
-                    return ControllersHelper.GetResultForInvalidGuid<RSSFeed>();
+                    return ControllersHelper.GetResultForInvalidGuid();
                 }
 
                 var result = await _rSSFeedRepository.GetAsync(rssFeedGuid);
@@ -95,7 +96,7 @@ namespace RSSFeedify.Controllers
             {
                 if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
                 {
-                    return ControllersHelper.GetResultForInvalidGuid<RSSFeed>();
+                    return ControllersHelper.GetResultForInvalidGuid();
                 }
 
                 var result = await _rSSFeedRepository.UpdateAsync(rssFeedGuid, rSSFeedDto);
@@ -167,7 +168,7 @@ namespace RSSFeedify.Controllers
             {
                 if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
                 {
-                    return ControllersHelper.GetResultForInvalidGuid<RSSFeed>();
+                    return ControllersHelper.GetResultForInvalidGuid();
                 }
 
                 var result = await _rSSFeedRepository.DeleteAsync(rssFeedGuid);

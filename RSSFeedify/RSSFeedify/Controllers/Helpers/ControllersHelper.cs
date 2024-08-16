@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace RSSFeedify.Controllers
+namespace RSSFeedify.Controllers.Helpers
 {
     public static class ControllersHelper
     {
-        public static ActionResult<T> GetResultForInvalidGuid<T>()
+        public static ActionResult GetResultForInvalidGuid()
         {
             return new BadRequestObjectResult("Invalid RSSFeedGuid format.");
         }
