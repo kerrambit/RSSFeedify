@@ -4,7 +4,10 @@ using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.Business;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Repository;
+using RSSFeedifyClientCore.Services;
 using RSSFeedifyClientCore.Services.Networking;
+using RSSFeedifyCommon.Services;
+using Serilog;
 
 namespace RSSFeedifyCLIClient
 {
@@ -24,6 +27,37 @@ namespace RSSFeedifyCLIClient
             IWriter writer = new Writer();
             IReader reader = new Reader();
 
+            // Load directory for .env files and for other setting files.
+            var configFilesDirectoryResult = ConfigDirectoryService.GetConfigFilesDirectory();
+            if (configFilesDirectoryResult.IsError)
+            {
+                writer.RenderErrorMessage(configFilesDirectoryResult.GetError);
+                return;
+            }
+
+            // Create logging service.
+            LoggingService loggerService = new LoggingService(configFilesDirectoryResult.GetValue);
+            Serilog.ILogger logger = loggerService.Logger.ForContext<Application>();
+
+            // Load .env file.
+            var envFilePathResult = ConfigDirectoryService.GetEnvironmentFilePath(configFilesDirectoryResult.GetValue);
+            if (envFilePathResult.IsError)
+            {
+                logger.Fatal(envFilePathResult.GetError);
+                writer.RenderErrorMessage(configFilesDirectoryResult.GetError);
+                return;
+            }
+            logger.Information("Loaded .env file from '{Path}'.", envFilePathResult.GetValue);
+
+            // Setup the base URL for API.
+            Uri baseUri = new(@"http://localhost:32000/api/");
+            var envResult = EnvironmentVariablesLoader.LoadEnvironmentVariable(envFilePathResult.GetValue, "RSSFEEDIFY_CLI_CLIENT_BASE_URL");
+            if (envResult.IsError)
+            {
+                logger.Warning($"Using default base URL '{baseUri}' because the custom URL was not found. Detailed message: '{envResult.GetError}'");
+            }
+            logger.Information("The base URL is '{URL}'.", baseUri.ToString());
+
             // Initialize application error writer.
             ApplicationErrorWriter errorWriter = new ApplicationErrorWriter(writer);
 
@@ -39,32 +73,8 @@ namespace RSSFeedifyCLIClient
             // Create HTTP service.
             var httpService = new HTTPService(client);
 
-            // Setup the base URL for API (URL can be loaded from environment variable).
-            Uri baseUri = new(@"http://localhost:32000/api/");
-            try
-            {
-                var projectDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
-                var envFilePath = Path.Combine(projectDirectory, ".env");
-                DotNetEnv.Env.Load(envFilePath);
-                var baseUriFromEnvVariable = Environment.GetEnvironmentVariable("RSSFEEDIFY_CLI_CLIENT_BASE_URL");
-                if (baseUriFromEnvVariable != null)
-                {
-                    baseUri = new Uri(baseUriFromEnvVariable);
-                }
-            }
-            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is ArgumentException || e is PathTooLongException || e is FileNotFoundException || e is DirectoryNotFoundException || e is NotSupportedException || e is System.Security.SecurityException)
-            {
-                writer.RenderErrorMessage("Exception occured when loading environment variable(s). Application continues with the default base URL.");
-                writer.RenderDebugMessage(e.Message); // Until the logging is finished.
-            }
-            catch (Exception e)
-            {
-                writer.RenderErrorMessage("Unexpected exception occured when loading environment variable(s). Application had to be terminated. Please, report the bug and send the logs to the support.");
-                writer.RenderDebugMessage(e.Message); // Until the logging is finished.
-            }
-
             // Create AccountService for managing logged users.
-            AccountService accountService = new(writer, reader, errorWriter, parser, httpService, baseUri);
+            AccountService accountService = new(writer, reader, errorWriter, parser, httpService, baseUri, loggerService.Logger);
 
             // Create RSSFeedService that runs all commands logic. Also, HTTPService must be initialized.
             RSSFeedService rSSFeedService = new(writer, errorWriter, httpService, accountService, baseUri);
@@ -72,26 +82,29 @@ namespace RSSFeedifyCLIClient
             // And finally, run the application.
             try
             {
-                await StartAndRunApplicationAsync(writer, parser, rSSFeedService, accountService);
+                logger.Information("Application has started.");
+                await StartAndRunApplicationAsync(writer, parser, rSSFeedService, accountService, loggerService);
             }
             catch (Exception e)
             {
+                logger.Fatal("Unhandled exception occured. Application had to be terminated. Detailed message: '{Message}'", e.Message);
                 writer.RenderErrorMessage("Unhandled exception occured. Application had to be terminated. Please, report the bug and send the logs to the support.");
-                writer.RenderDebugMessage(e.Message); // Until the logging is finished.
             }
         }
 
-        private static async Task StartAndRunApplicationAsync(IWriter writer, CommandParser parser, RSSFeedService rSSFeedService, AccountService accountService)
+        private static async Task StartAndRunApplicationAsync(IWriter writer, CommandParser parser, RSSFeedService rSSFeedService, AccountService accountService, LoggingService loggerService)
         {
             RenderASCIIPicture(writer);
+
+            parser.InputGiven += (sender, data) => loggerService.Logger.ForContext<CommandParser>().Information(data);
 
             bool appRunning = true;
             while (appRunning)
             {
                 Command receivedCommand;
                 IList<ParameterResult> parameters;
-                string _;
-                if (parser.GetCommand(out receivedCommand, out parameters, out _))
+                string rawInput;
+                if (parser.GetCommand(out receivedCommand, out parameters, out rawInput))
                 {
                     switch (receivedCommand.Name)
                     {

@@ -8,6 +8,7 @@ using RSSFeedifyClientCore.Business.Errors;
 using RSSFeedifyClientCore.Services;
 using RSSFeedifyClientCore.Services.Networking;
 using RSSFeedifyCommon.Models;
+using Serilog;
 
 namespace RSSFeedifyCLIClient.Business
 {
@@ -33,9 +34,11 @@ namespace RSSFeedifyCLIClient.Business
 
         private readonly UriResourceCreator _uriResourceCreator;
 
+        private readonly ILogger _logger;
+
         public ApplicationUser User { get; private set; } = new();
 
-        public AccountService(IWriter writer, IReader reader, ApplicationErrorWriter errorWriter, CommandParser parser, HTTPService httpService, Uri baseUri)
+        public AccountService(IWriter writer, IReader reader, ApplicationErrorWriter errorWriter, CommandParser parser, HTTPService httpService, Uri baseUri, ILogger logger)
         {
             _writer = writer;
             _reader = reader;
@@ -44,6 +47,7 @@ namespace RSSFeedifyCLIClient.Business
             _parser = parser;
             _httpService = httpService;
             _uriResourceCreator = new(baseUri);
+            _logger = logger.ForContext<AccountService>();
         }
 
         public async Task Login()
