@@ -9,19 +9,15 @@ using RSSFeedify.Controllers.Helpers;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Services;
+using RSSFeedifyCommon.Services;
 using Serilog;
-using Serilog.Enrichers.WithCaller;
 using StackExchange.Redis;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure logging.
-Log.Logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .Enrich.WithCaller()
-    .CreateLogger();
-
+Log.Logger = new LoggingService(builder.Configuration).Logger;
 builder.Host.UseSerilog();
 
 // Load environment variables from .env file.
