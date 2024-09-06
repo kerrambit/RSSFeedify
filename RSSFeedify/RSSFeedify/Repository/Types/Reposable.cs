@@ -10,5 +10,10 @@ namespace RSSFeedify.Repository.Types
         public Guid Guid { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+
+        public override string ToString()
+        {
+            return $"Guid: '{Guid}', CreatedAt: '{CreatedAt}', UpdatedAt: '{UpdatedAt}'";
+        }
     }
 }

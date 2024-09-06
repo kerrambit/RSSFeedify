@@ -11,5 +11,11 @@ namespace RSSFeedify.Models
         public double PollingInterval { get; set; }
         public DateTime LastPoll { get; set; }
         public DateTime LastSuccessfullPoll { get; set; }
+
+        public override string ToString()
+        {
+            return $"{base.ToString()}, Name: '{Name}', Description: '{Description}', SourceUrl: '{SourceUrl}', " +
+                   $"PollingInterval: {PollingInterval}, LastPoll: {LastPoll}, LastSuccessfullPoll: {LastSuccessfullPoll}";
+        }
     }
 }
