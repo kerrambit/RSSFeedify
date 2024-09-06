@@ -12,7 +12,12 @@ namespace RSSFeedify.Controllers.Helpers
 
         public static ActionResult<T> GetResultForDuplicatedSourcerUrl<T>(Uri uri)
         {
-            return new BadRequestObjectResult($"Source URL has to be unique. Source URL '{uri}' is duplicated!");
+            return new BadRequestObjectResult(GetMessageForDuplicatedSourcerUr(uri));
+        }
+
+        public static string GetMessageForDuplicatedSourcerUr(Uri uri)
+        {
+            return $"Source URL has to be unique. Source URL '{uri}' is duplicated!";
         }
 
         public static ActionResult GetResultForInvalidLoginAttempt()
