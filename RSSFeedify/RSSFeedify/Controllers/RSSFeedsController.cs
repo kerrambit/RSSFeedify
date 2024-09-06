@@ -123,12 +123,10 @@ namespace RSSFeedify.Controllers
                     return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
                 }
 
-                _logger.LogInformation("RSSFeedItems for new feed will be loaded from '{Url}'.", rSSFeed.SourceUrl);
                 var pollResult = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
                 if (pollResult.IsError)
                 {
                     rSSFeed.LastPoll = DateTime.UtcNow;
-                    _logger.LogError("RSSFeedItems for new feed could not be loaded from '{Url}'. Detailed message: '{Message}'.", rSSFeed.SourceUrl, pollResult.GetError);
                 }
                 else
                 {

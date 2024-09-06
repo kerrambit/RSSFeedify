@@ -114,7 +114,6 @@ namespace RSSFeedify.Repository
                     }
                     batch.CreatedAt = DateTime.UtcNow;
                     batch.UpdatedAt = batch.CreatedAt;
-                    Thread.Sleep(4000);
                     context.Set<RSSFeed>().Add(batch);
                     await SaveAsync(context);
 
