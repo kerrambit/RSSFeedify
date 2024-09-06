@@ -24,6 +24,10 @@ namespace RSSFeedify.Services.DataTypeConvertors
                     return new OkObjectResult(success.Data);
                 case Created<T> create:
                     return new CreatedAtActionResult(create.GetEndPoint, Controllername, new { guid = create.Guid }, create.Data);
+                case Duplicate<T> duplicate:
+                    return new BadRequestObjectResult(duplicate.Info);
+                case RepositoryConcurrencyError<T>:
+                    return new StatusCodeResult(500);
                 default:
                     return new ContentResult
                     {

@@ -30,10 +30,31 @@ namespace RSSFeedify.Repository.Types
             GetEndPoint = getEndPoint;
             Guid = guid;
         }
+
+        public Created(T data, Guid guid) : base(data)
+        {
+            GetEndPoint = string.Empty;
+            Guid = guid;
+        }
     }
 
     public class NotFoundError<T> : RepositoryResult<T>
     {
         public NotFoundError() { }
+    }
+
+    public class Duplicate<T> : RepositoryResult<T>
+    {
+        public string Info { get; }
+
+        public Duplicate(string info)
+        {
+            Info = info;
+        }
+    }
+
+    public class RepositoryConcurrencyError<T> : RepositoryResult<T>
+    {
+        public RepositoryConcurrencyError() { }
     }
 }
