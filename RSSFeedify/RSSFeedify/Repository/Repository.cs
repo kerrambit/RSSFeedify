@@ -81,7 +81,7 @@ namespace RSSFeedify.Repositories
                     await SaveAsync(context);
 
                     transaction.Commit();
-                    return new Created<T>("GetRSSFeed", batch, batch.Guid);
+                    return new Created<T>(batch, batch.Guid);
                 }
             }
         }

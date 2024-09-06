@@ -25,7 +25,7 @@ namespace RSSFeedify.Repository.Types
         public string GetEndPoint { get; }
         public Guid Guid { get; }
 
-        public Created(string getEndPoint, T data, Guid guid) : base(data)
+        public Created(T data, Guid guid, string getEndPoint) : base(data)
         {
             GetEndPoint = getEndPoint;
             Guid = guid;
