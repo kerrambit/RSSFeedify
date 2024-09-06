@@ -1,4 +1,6 @@
-﻿using RSSFeedify.Models;
+﻿using RSSFeedifyCommon.Models;
+
+using RSSFeed = RSSFeedify.Models.RSSFeed;
 
 namespace RSSFeedify.Services.DataTypeConvertors
 {

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using RSSFeedify.Controllers.Helpers;
 using RSSFeedify.Models;
-using RSSFeedify.Types;
+using RSSFeedifyCommon.Models;
+using RSSFeedifyCommon.Types;
 using StackExchange.Redis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;

@@ -6,16 +6,9 @@
       "Override": {
         "Microsoft": "Information",
         "Microsoft.Hosting.Lifetime": "Information",
-        "RSSFeedify.Services": "Debug"
       }
     },
     "WriteTo": [
-      {
-        "Name": "Console",
-        "Args": {
-          "outputTemplate": "[{Timestamp:yyyy-MM-dd HH:mm:ss}][{Level:u3}][{SourceContext}]: {Message:lj}{NewLine}{Exception}"
-        }
-      },
       {
         "Name": "File",
         "Args": {
@@ -25,11 +18,5 @@
         }
       }
     ]
-  },
-  "AllowedHosts": "*",
-  "Jwt": {
-    "Issuer": "https://github.com/kerrambit/RSSFeedify",
-    "Audience": "RSSFeedify API",
-    "ExpireMinutes": 60
   }
 }

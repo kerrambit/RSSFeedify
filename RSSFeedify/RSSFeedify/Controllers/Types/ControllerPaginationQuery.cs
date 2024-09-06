@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RSSFeedify.Controllers.HelperTypes
+namespace RSSFeedify.Controllers.Types
 {
     public record ControllerPaginationQuery
     {

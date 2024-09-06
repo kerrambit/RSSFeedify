@@ -1,9 +1,10 @@
 ﻿using PostgreSQL.Data;
-using RSSFeedify.Models;
 using RSSFeedify.Repositories;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.Pagination;
 using RSSFeedify.Repository.Types.PaginationQuery;
+using RSSFeedifyCommon.Models;
+using RSSFeed = RSSFeedify.Models.RSSFeed;
 
 namespace RSSFeedify.Repository
 {
@@ -26,13 +27,13 @@ namespace RSSFeedify.Repository
             {
                 using (var dbContextTransaction = context.Database.BeginTransaction())
                 {
-                    var result = await GetAsync(guid);
-                    if (result is Success<RSSFeed>)
+                    var result = context.RSSFeeds.SingleOrDefault(feed => feed.Guid == guid);
+                    if (result is not null)
                     {
-                        result.Data.LastPoll = DateTime.UtcNow;
+                        result.LastPoll = DateTime.UtcNow;
                         if (successfullPolling)
                         {
-                            result.Data.LastSuccessfullPoll = result.Data.LastPoll;
+                            result.LastSuccessfullPoll = result.LastPoll;
                         }
                     }
 
@@ -66,6 +67,58 @@ namespace RSSFeedify.Repository
                         return new NotFoundError<RSSFeed>();
                     }
                 }
+            }
+        }
+
+        public async Task<RepositoryResult<RSSFeed>> UpdateAsync(RSSFeed batch)
+        {
+            using (var context = new ApplicationDbContext(_configuration))
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    var feed = context.RSSFeeds.SingleOrDefault(feed => feed.Guid == batch.Guid);
+                    if (feed is not null)
+                    {
+                        feed.Name = batch.Name;
+                        feed.Description = batch.Description;
+                        feed.SourceUrl = batch.SourceUrl;
+                        feed.PollingInterval = batch.PollingInterval;
+                        feed.LastPoll = batch.LastPoll;
+                        feed.LastSuccessfullPoll = batch.LastSuccessfullPoll;
+
+                        feed.UpdatedAt = DateTime.UtcNow;
+
+                        await SaveAsync(context);
+
+                        transaction.Commit();
+                        return new Success<RSSFeed>(feed);
+                    }
+                    else
+                    {
+                        return new NotFoundError<RSSFeed>();
+                    }
+                }
+            }
+        }
+
+        public new async Task<RepositoryResult<RSSFeed>> InsertAsync(RSSFeed batch)
+        {
+            using (var context = new ApplicationDbContext(_configuration))
+            {
+                return await RepositoryConcurrentReplyExecutor.ExecuteWithRetryAsync<RSSFeed>(async (context) =>
+                {
+                    var count = context.Set<RSSFeed>().Where(feed => feed.SourceUrl == batch.SourceUrl).Count();
+                    if (count != 0)
+                    {
+                        return new Duplicate<RSSFeed>(Controllers.Helpers.ControllersHelper.GetMessageForDuplicatedSourcerUr(batch.SourceUrl));
+                    }
+                    batch.CreatedAt = DateTime.UtcNow;
+                    batch.UpdatedAt = batch.CreatedAt;
+                    context.Set<RSSFeed>().Add(batch);
+                    await SaveAsync(context);
+
+                    return new Created<RSSFeed>(batch, batch.Guid, "GetRSSFeed");
+                }, context);
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace RSSFeedifyCLIClient.Models
+﻿namespace RSSFeedifyCommon.Models
 {
     public class RSSFeedDTO
     {

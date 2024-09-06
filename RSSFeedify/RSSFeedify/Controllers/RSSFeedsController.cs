@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using RSSFeedify.Controllers.HelperTypes;
-using RSSFeedify.Models;
+using RSSFeedify.Controllers.Helpers;
+using RSSFeedify.Controllers.Types;
 using RSSFeedify.Repository;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedify.Services;
 using RSSFeedify.Services.DataTypeConvertors;
+using RSSFeedifyCommon.Models;
+using RSSFeed = RSSFeedify.Models.RSSFeed;
+using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
 
 namespace RSSFeedify.Controllers
 {
@@ -16,11 +19,13 @@ namespace RSSFeedify.Controllers
     {
         private readonly IRSSFeedRepository _rSSFeedRepository;
         private readonly IRSSFeedItemRepository _rSSFeedItemRepository;
+        private readonly ILogger<RSSFeedsController> _logger;
 
-        public RSSFeedsController(IRSSFeedRepository rSSFeedRepository, IRSSFeedItemRepository rSSFeedItemRepository)
+        public RSSFeedsController(IRSSFeedRepository rSSFeedRepository, IRSSFeedItemRepository rSSFeedItemRepository, ILogger<RSSFeedsController> logger)
         {
             _rSSFeedRepository = rSSFeedRepository;
             _rSSFeedItemRepository = rSSFeedItemRepository;
+            _logger = logger;
         }
 
         // GET: api/RSSFeeds?page=1&pageSize=10
@@ -53,7 +58,7 @@ namespace RSSFeedify.Controllers
             {
                 if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
                 {
-                    return ControllersHelper.GetResultForInvalidGuid<RSSFeed>();
+                    return ControllersHelper.GetResultForInvalidGuid();
                 }
 
                 var result = await _rSSFeedRepository.GetAsync(rssFeedGuid);
@@ -91,7 +96,7 @@ namespace RSSFeedify.Controllers
             {
                 if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
                 {
-                    return ControllersHelper.GetResultForInvalidGuid<RSSFeed>();
+                    return ControllersHelper.GetResultForInvalidGuid();
                 }
 
                 var result = await _rSSFeedRepository.UpdateAsync(rssFeedGuid, rSSFeedDto);
@@ -112,17 +117,14 @@ namespace RSSFeedify.Controllers
             {
                 var rSSFeed = RSSFeedDTOToRSSFeed.Convert(rSSFeedDTO);
 
-                var originalRssFeeds = await _rSSFeedRepository.GetAsync();
-                if (originalRssFeeds is Success<IEnumerable<RSSFeed>>)
+                var result = await _rSSFeedRepository.InsertAsync(rSSFeed);
+                if (result is Duplicate<RSSFeed> || result is RepositoryConcurrencyError<RSSFeed>)
                 {
-                    if (originalRssFeeds.Data.Where(feed => feed.SourceUrl == rSSFeedDTO.SourceUrl).Count() != 0)
-                    {
-                        return ControllersHelper.GetResultForDuplicatedSourcerUrl<RSSFeed>(rSSFeedDTO.SourceUrl);
-                    }
+                    return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
                 }
 
-                var data = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
-                if (!data.success)
+                var pollResult = RSSFeedPollingService.LoadRSSFeedItemsFromUri(rSSFeed.SourceUrl);
+                if (pollResult.IsError)
                 {
                     rSSFeed.LastPoll = DateTime.UtcNow;
                 }
@@ -132,12 +134,12 @@ namespace RSSFeedify.Controllers
                     rSSFeed.LastSuccessfullPoll = rSSFeed.LastPoll;
                 }
 
-                var result = await _rSSFeedRepository.InsertAsync(rSSFeed);
+                await _rSSFeedRepository.UpdateAsync(rSSFeed);
 
                 IList<RSSFeedItem> items = new List<RSSFeedItem>();
-                foreach (var item in data.items)
+                foreach (var item in pollResult.GetValue.items)
                 {
-                    var rSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(item.dto, item.hash);
+                    var rSSFeedItem = RSSFeedItemDTOToRssFeedItem.Convert(item.Item, item.Hash);
                     rSSFeedItem.RSSFeedId = rSSFeed.Guid;
                     items.Add(rSSFeedItem);
                 }
@@ -161,7 +163,7 @@ namespace RSSFeedify.Controllers
             {
                 if (!QueryStringParser.ParseGuid(guid, out Guid rssFeedGuid))
                 {
-                    return ControllersHelper.GetResultForInvalidGuid<RSSFeed>();
+                    return ControllersHelper.GetResultForInvalidGuid();
                 }
 
                 var result = await _rSSFeedRepository.DeleteAsync(rssFeedGuid);

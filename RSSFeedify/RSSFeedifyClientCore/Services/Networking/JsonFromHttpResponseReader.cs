@@ -1,5 +1,5 @@
 ﻿using RSSFeedifyClientCore.Business.Errors;
-using RSSFeedifyClientCore.Types;
+using RSSFeedifyCommon.Types;
 using System.Net.Http.Json;
 using System.Text.Json;
 

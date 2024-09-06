@@ -1,7 +1,7 @@
-﻿using RSSFeedify.Models;
-using RSSFeedify.Repositories;
+﻿using RSSFeedify.Repositories;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.PaginationQuery;
+using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
 
 namespace RSSFeedify.Repository
 {

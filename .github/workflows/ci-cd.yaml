@@ -1,0 +1,93 @@
+name: RSSFeedidy-API-CI
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Restore dependencies for RSSFeedify
+      run: dotnet restore ./RSSFeedify/RSSFeedify/RSSFeedify.csproj
+
+    - name: Build the RSSFeedify API
+      run: dotnet build --configuration Release --no-restore ./RSSFeedify/RSSFeedify/RSSFeedify.csproj
+
+    - name: Restore dependencies for RSSFeedifyCommon
+      run: dotnet restore ./RSSFeedify/RSSFeedifyCommon/RSSFeedifyCommon.csproj
+
+    - name: Build the RSSFeedifyCommon library
+      run: dotnet build --configuration Release --no-restore ./RSSFeedify/RSSFeedifyCommon/RSSFeedifyCommon.csproj
+
+  tests:
+    name: tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.x'
+
+    - name: Restore dependencies for RSSFeedifyAPI tests
+      run: dotnet restore ./RSSFeedify/RSSFeedifyTests/RSSFeedifyTests.csproj
+
+    - name: Build the test project
+      run: dotnet build --configuration Release ./RSSFeedify/RSSFeedifyTests/RSSFeedifyTests.csproj
+
+    - name: Run tests
+      run: dotnet test ./RSSFeedify/RSSFeedifyTests/RSSFeedifyTests.csproj --no-restore --configuration Release
+
+  analyze:
+    name: analyze
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: csharp
+          build-mode: none
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+    - if: matrix.build-mode == 'manual'
+      shell: bash
+      run: |
+        echo 'If you are using a "manual" build mode for one or more of the' \
+          'languages you are analyzing, replace this with the commands to build' \
+          'your code, for example:'
+        echo '  make bootstrap'
+        echo '  make release'
+        exit 1
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"

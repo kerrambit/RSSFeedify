@@ -1,4 +1,4 @@
-﻿namespace RSSFeedifyCLIClient.Models
+﻿namespace RSSFeedifyCommon.Models
 {
     public class RSSFeed
     {
@@ -11,5 +11,18 @@
         public double PollingInterval { get; set; }
         public DateTime LastPoll { get; set; }
         public DateTime LastSuccessfullPoll { get; set; }
+    }
+
+    public interface IRSSFeed
+    {
+        Guid Guid { get; set; }
+        DateTime CreatedAt { get; set; }
+        DateTime UpdatedAt { get; set; }
+        string Name { get; set; }
+        string Description { get; set; }
+        Uri SourceUrl { get; set; }
+        double PollingInterval { get; set; }
+        DateTime LastPoll { get; set; }
+        DateTime LastSuccessfullPoll { get; set; }
     }
 }

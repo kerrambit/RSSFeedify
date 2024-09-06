@@ -1,4 +1,4 @@
-﻿using RSSFeedifyClientCore.Types;
+﻿using RSSFeedifyCommon.Types;
 using System.Text;
 
 namespace RSSFeedifyClientCore.Services.Networking

@@ -1,5 +1,23 @@
-﻿namespace RSSFeedifyCLIClient.Models
+﻿namespace RSSFeedifyCommon.Models
 {
+    public interface IRSSFeedItem
+    {
+        Guid Guid { get; set; }
+        DateTime CreatedAt { get; set; }
+        DateTime UpdatedAt { get; set; }
+        string Hash { get; set; }
+        string Title { get; set; }
+        string Summary { get; set; }
+        DateTime PublishDate { get; set; }
+        List<Uri> Links { get; set; }
+        List<string> Categories { get; set; }
+        List<string> Authors { get; set; }
+        List<string> Contributors { get; set; }
+        string Content { get; set; }
+        string Id { get; set; }
+        Guid RSSFeedId { get; set; }
+    }
+
     public class RSSFeedItem
     {
         public Guid Guid { get; set; }

@@ -1,4 +1,5 @@
 ﻿using RSSFeedify.Models;
+using RSSFeedItem = RSSFeedify.Models.RSSFeedItem;
 
 namespace RSSFeedify.Services.DataTypeConvertors
 {

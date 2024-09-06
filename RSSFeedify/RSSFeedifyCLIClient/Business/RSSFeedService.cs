@@ -1,11 +1,11 @@
 ﻿using CommandParsonaut.Core.Types;
 using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.IO;
-using RSSFeedifyCLIClient.Models;
 using RSSFeedifyClientCore.Business.Errors;
 using RSSFeedifyClientCore.Services;
 using RSSFeedifyClientCore.Services.Networking;
-using RSSFeedifyClientCore.Types;
+using RSSFeedifyCommon.Models;
+using RSSFeedifyCommon.Types;
 using System.Diagnostics;
 
 namespace RSSFeedifyCLIClient.Business

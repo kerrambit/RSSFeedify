@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace RSSFeedify.Models
+namespace RSSFeedifyCommon.Models
 {
     public class LoginDTO
     {

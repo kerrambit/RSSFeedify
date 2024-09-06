@@ -1,4 +1,4 @@
-﻿namespace RSSFeedify.Models
+﻿namespace RSSFeedifyCommon.Models
 {
     public class LoginResponseDTO
     {

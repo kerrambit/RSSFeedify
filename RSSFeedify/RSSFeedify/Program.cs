@@ -5,14 +5,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PostgreSQL.Data;
-using RSSFeedify.Controllers;
+using RSSFeedify.Controllers.Helpers;
 using RSSFeedify.Models;
 using RSSFeedify.Repository;
 using RSSFeedify.Services;
+using RSSFeedifyCommon.Services;
+using Serilog;
 using StackExchange.Redis;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure logging.
+Log.Logger = new LoggingService(builder.Configuration).Logger;
+builder.Host.UseSerilog();
 
 // Load environment variables from .env file.
 DotNetEnv.Env.Load();
@@ -134,8 +140,8 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Use exceptions and errors middleware (COMMENTED OUT UNTIL LOGGING IS ADDED)
-// app.UseExceptionHandler("/api/Error/error");
+// Use exceptions and errors middleware.
+app.UseExceptionHandler("/api/Error/error");
 
 // Register JWT blacklisting middleware.
 app.UseMiddleware<JWTBlacklistService>();

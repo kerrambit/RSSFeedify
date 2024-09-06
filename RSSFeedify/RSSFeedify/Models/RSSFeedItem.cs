@@ -1,8 +1,9 @@
 ﻿using RSSFeedify.Repository.Types;
+using RSSFeedifyCommon.Models;
 
 namespace RSSFeedify.Models
 {
-    public class RSSFeedItem : Reposable
+    public class RSSFeedItem : Reposable, IRSSFeedItem
     {
         public string Hash { get; set; }
         public string Title { get; set; }

@@ -13,15 +13,7 @@ namespace RSSFeedify.Controllers
         public ActionResult HandleError()
         {
             var context = HttpContext.Features.Get<IExceptionHandlerFeature>();
-            // var exception = context?.Error;
-
-            var problemDetails = new ProblemDetails
-            {
-                Status = (int)HttpStatusCode.InternalServerError,
-                Title = "An error occurred while processing your request.",
-            };
-
-            return StatusCode(problemDetails.Status.Value, problemDetails);
+            return StatusCode((int)HttpStatusCode.InternalServerError, "An error occurred while processing your request.");
         }
     }
 }
