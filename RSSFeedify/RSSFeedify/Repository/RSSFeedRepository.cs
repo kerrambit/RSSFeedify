@@ -6,6 +6,7 @@ using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.Pagination;
 using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedifyCommon.Models;
+using System.Runtime.InteropServices;
 using RSSFeed = RSSFeedify.Models.RSSFeed;
 
 namespace RSSFeedify.Repository
@@ -105,48 +106,24 @@ namespace RSSFeedify.Repository
 
         public new async Task<RepositoryResult<RSSFeed>> InsertAsync(RSSFeed batch)
         {
-            const int MaxRetry = 3;
-            const int DelayInMs = 1000;
-
-            int retry = 0;
-            while (retry < MaxRetry)
+            using (var context = new ApplicationDbContext(_configuration))
             {
-                try
+                return await RepositoryConcurrentReplyExecutor.ExecuteWithRetryAsync<RSSFeed>(async (context) =>
                 {
-                    using (var context = new ApplicationDbContext(_configuration))
+                    var count = context.Set<RSSFeed>().Where(feed => feed.SourceUrl == batch.SourceUrl).Count();
+                    if (count != 0)
                     {
-                        using (var transaction = context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
-                        {
-                            var count = context.Set<RSSFeed>().Where(feed => feed.SourceUrl == batch.SourceUrl).Count();
-                            if (count != 0)
-                            {
-                                return new Duplicate<RSSFeed>(Controllers.Helpers.ControllersHelper.GetMessageForDuplicatedSourcerUr(batch.SourceUrl));
-                            }
-                            batch.CreatedAt = DateTime.UtcNow;
-                            batch.UpdatedAt = batch.CreatedAt;
-                            context.Set<RSSFeed>().Add(batch);
-                            await SaveAsync(context);
-
-                            transaction.Commit();
-                            return new Created<RSSFeed>(batch, batch.Guid, "GetRSSFeed");
-                        }
+                        return new Duplicate<RSSFeed>(Controllers.Helpers.ControllersHelper.GetMessageForDuplicatedSourcerUr(batch.SourceUrl));
                     }
-                }
-                catch (InvalidOperationException ex)
-                {
-                    if (ex.InnerException is not null && ex.InnerException is DbUpdateException && ex.InnerException.InnerException is not null && ex.InnerException.InnerException is PostgresException && ((PostgresException)(ex.InnerException.InnerException)).SqlState == "40001")
-                    {
-                        retry++;
-                        await Task.Delay(DelayInMs);
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                    batch.CreatedAt = DateTime.UtcNow;
+                    batch.UpdatedAt = batch.CreatedAt;
+                    Thread.Sleep(4000);
+                    context.Set<RSSFeed>().Add(batch);
+                    await SaveAsync(context);
+                
+                    return new Created<RSSFeed>(batch, batch.Guid, "GetRSSFeed");
+                }, context);
             }
-
-            return new RepositoryConcurrencyError<RSSFeed>();
         }
     }
 }
