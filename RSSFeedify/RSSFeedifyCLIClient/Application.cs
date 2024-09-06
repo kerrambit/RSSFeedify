@@ -54,6 +54,9 @@ namespace RSSFeedifyCLIClient
             if (envResult.IsError)
             {
                 logger.Warning($"Using default base URL '{baseUri}' because the custom URL was not found. Detailed message: '{envResult.GetError}'");
+            } else
+            {
+                baseUri = new(envResult.GetValue);
             }
             logger.Information("The base URL is '{URL}'.", baseUri.ToString());
 

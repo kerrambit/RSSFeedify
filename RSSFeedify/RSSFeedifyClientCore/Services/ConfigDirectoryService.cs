@@ -9,11 +9,11 @@ namespace RSSFeedifyClientCore.Services
             string configFilesDirectory = string.Empty;
             try
             {
-                configFilesDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
+                configFilesDirectory = AppDomain.CurrentDomain.BaseDirectory;
             }
-            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is ArgumentException || e is PathTooLongException || e is FileNotFoundException || e is DirectoryNotFoundException || e is NotSupportedException || e is System.Security.SecurityException)
+            catch (Exception e) when (e is AppDomainUnloadedException)
             {
-                return Result.Error<string, string>($"Exception occured when loading environment variable(s): '{e.Message}'.");
+                return Result.Error<string, string>($"Exception occured when loading config files directory: '{e.Message}'.");
             }
 
             return Result.Ok<string, string>(configFilesDirectory);
