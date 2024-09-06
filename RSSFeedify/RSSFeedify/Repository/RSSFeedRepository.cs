@@ -1,12 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using PostgreSQL.Data;
+﻿using PostgreSQL.Data;
 using RSSFeedify.Repositories;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.Pagination;
 using RSSFeedify.Repository.Types.PaginationQuery;
 using RSSFeedifyCommon.Models;
-using System.Runtime.InteropServices;
 using RSSFeed = RSSFeedify.Models.RSSFeed;
 
 namespace RSSFeedify.Repository
@@ -120,7 +117,7 @@ namespace RSSFeedify.Repository
                     Thread.Sleep(4000);
                     context.Set<RSSFeed>().Add(batch);
                     await SaveAsync(context);
-                
+
                     return new Created<RSSFeed>(batch, batch.Guid, "GetRSSFeed");
                 }, context);
             }

@@ -7,7 +7,6 @@ using RSSFeedifyCLIClient.Repository;
 using RSSFeedifyClientCore.Services;
 using RSSFeedifyClientCore.Services.Networking;
 using RSSFeedifyCommon.Services;
-using Serilog;
 
 namespace RSSFeedifyCLIClient
 {

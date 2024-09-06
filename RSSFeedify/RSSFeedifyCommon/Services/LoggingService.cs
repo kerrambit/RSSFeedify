@@ -2,7 +2,6 @@
 using Serilog;
 using Serilog.Core;
 using Serilog.Enrichers.WithCaller;
-using Serilog.Events;
 
 namespace RSSFeedifyCommon.Services
 {

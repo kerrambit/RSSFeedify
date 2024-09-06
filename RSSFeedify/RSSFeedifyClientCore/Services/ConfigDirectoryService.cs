@@ -11,7 +11,7 @@ namespace RSSFeedifyClientCore.Services
             {
                 configFilesDirectory = Directory.GetParent(AppDomain.CurrentDomain.BaseDirectory).Parent.Parent.Parent.FullName;
             }
-            catch (Exception e) when(e is IOException || e is UnauthorizedAccessException || e is ArgumentException || e is PathTooLongException || e is FileNotFoundException || e is DirectoryNotFoundException || e is NotSupportedException || e is System.Security.SecurityException)
+            catch (Exception e) when (e is IOException || e is UnauthorizedAccessException || e is ArgumentException || e is PathTooLongException || e is FileNotFoundException || e is DirectoryNotFoundException || e is NotSupportedException || e is System.Security.SecurityException)
             {
                 return Result.Error<string, string>($"Exception occured when loading environment variable(s): '{e.Message}'.");
             }
