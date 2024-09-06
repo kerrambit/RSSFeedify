@@ -69,6 +69,23 @@ namespace RSSFeedify.Repositories
             }
         }
 
+        public async Task<RepositoryResult<T>> InsertAsync(T batch, string endPoint)
+        {
+            using (var context = new ApplicationDbContext(_configuration))
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    batch.CreatedAt = DateTime.UtcNow;
+                    batch.UpdatedAt = batch.CreatedAt;
+                    context.Set<T>().Add(batch);
+                    await SaveAsync(context);
+
+                    transaction.Commit();
+                    return new Created<T>(batch, batch.Guid, endPoint);
+                }
+            }
+        }
+
         public async Task<RepositoryResult<T>> InsertAsync(T batch)
         {
             using (var context = new ApplicationDbContext(_configuration))
