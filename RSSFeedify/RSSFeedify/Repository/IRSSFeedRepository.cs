@@ -12,5 +12,7 @@ namespace RSSFeedify.Repository
         Task UpdatePollingTimeAsync(Guid guid, bool successfullPolling);
         Task<RepositoryResult<IEnumerable<RSSFeed>>> GetSortedByNameAsync(PaginationQuery paginationQuery);
         Task<RepositoryResult<RSSFeed>> UpdateAsync(Guid guid, RSSFeedDTO batch);
+        new Task<RepositoryResult<RSSFeed>> InsertAsync(RSSFeed batch);
+        Task<RepositoryResult<RSSFeed>> UpdateAsync(RSSFeed batch);
     }
 }

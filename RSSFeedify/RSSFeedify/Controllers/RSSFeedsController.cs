@@ -117,13 +117,10 @@ namespace RSSFeedify.Controllers
             {
                 var rSSFeed = RSSFeedDTOToRSSFeed.Convert(rSSFeedDTO);
 
-                var originalRssFeeds = await _rSSFeedRepository.GetAsync();
-                if (originalRssFeeds is Success<IEnumerable<RSSFeed>>)
+                var result = await _rSSFeedRepository.InsertAsync(rSSFeed);
+                if (result is Duplicate<RSSFeed> || result is RepositoryConcurrencyError<RSSFeed>)
                 {
-                    if (originalRssFeeds.Data.Where(feed => feed.SourceUrl == rSSFeedDTO.SourceUrl).Count() != 0)
-                    {
-                        return ControllersHelper.GetResultForDuplicatedSourcerUrl<RSSFeed>(rSSFeedDTO.SourceUrl);
-                    }
+                    return RepositoryResultToActionResultConvertor<RSSFeed>.Convert(result);
                 }
 
                 _logger.LogInformation("RSSFeedItems for new feed will be loaded from '{Url}'.", rSSFeed.SourceUrl);
@@ -139,7 +136,7 @@ namespace RSSFeedify.Controllers
                     rSSFeed.LastSuccessfullPoll = rSSFeed.LastPoll;
                 }
 
-                var result = await _rSSFeedRepository.InsertAsync(rSSFeed);
+                await _rSSFeedRepository.UpdateAsync(rSSFeed);
 
                 IList<RSSFeedItem> items = new List<RSSFeedItem>();
                 foreach (var item in pollResult.GetValue.items)

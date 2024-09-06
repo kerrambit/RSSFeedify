@@ -10,6 +10,7 @@ namespace RSSFeedify.Repositories
         Task<RepositoryResult<IEnumerable<T>>> GetAsync(PaginationQuery paginationQuery);
         Task<RepositoryResult<int>> GetTotalCountAsync();
         Task<RepositoryResult<T>> GetAsync(Guid feedGUID);
+        Task<RepositoryResult<T>> InsertAsync(T feed, string getEndPoint);
         Task<RepositoryResult<T>> InsertAsync(T feed);
         Task<RepositoryResult<T>> DeleteAsync(Guid feedGUID);
         Task SaveAsync(ApplicationDbContext context);

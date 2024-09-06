@@ -1,4 +1,6 @@
-﻿using PostgreSQL.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using PostgreSQL.Data;
 using RSSFeedify.Repositories;
 using RSSFeedify.Repository.Types;
 using RSSFeedify.Repository.Types.Pagination;
@@ -68,6 +70,83 @@ namespace RSSFeedify.Repository
                     }
                 }
             }
+        }
+
+        public async Task<RepositoryResult<RSSFeed>> UpdateAsync(RSSFeed batch)
+        {
+            using (var context = new ApplicationDbContext(_configuration))
+            {
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    var feed = context.RSSFeeds.SingleOrDefault(feed => feed.Guid == batch.Guid);
+                    if (feed is not null)
+                    {
+                        feed.Name = batch.Name;
+                        feed.Description = batch.Description;
+                        feed.SourceUrl = batch.SourceUrl;
+                        feed.PollingInterval = batch.PollingInterval;
+                        feed.LastPoll = batch.LastPoll;
+                        feed.LastSuccessfullPoll = batch.LastSuccessfullPoll;
+
+                        feed.UpdatedAt = DateTime.UtcNow;
+
+                        await SaveAsync(context);
+
+                        transaction.Commit();
+                        return new Success<RSSFeed>(feed);
+                    }
+                    else
+                    {
+                        return new NotFoundError<RSSFeed>();
+                    }
+                }
+            }
+        }
+
+        public new async Task<RepositoryResult<RSSFeed>> InsertAsync(RSSFeed batch)
+        {
+            const int MaxRetry = 3;
+            const int DelayInMs = 1000;
+
+            int retry = 0;
+            while (retry < MaxRetry)
+            {
+                try
+                {
+                    using (var context = new ApplicationDbContext(_configuration))
+                    {
+                        using (var transaction = context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
+                        {
+                            var count = context.Set<RSSFeed>().Where(feed => feed.SourceUrl == batch.SourceUrl).Count();
+                            if (count != 0)
+                            {
+                                return new Duplicate<RSSFeed>(Controllers.Helpers.ControllersHelper.GetMessageForDuplicatedSourcerUr(batch.SourceUrl));
+                            }
+                            batch.CreatedAt = DateTime.UtcNow;
+                            batch.UpdatedAt = batch.CreatedAt;
+                            context.Set<RSSFeed>().Add(batch);
+                            await SaveAsync(context);
+
+                            transaction.Commit();
+                            return new Created<RSSFeed>(batch, batch.Guid, "GetRSSFeed");
+                        }
+                    }
+                }
+                catch (InvalidOperationException ex)
+                {
+                    if (ex.InnerException is not null && ex.InnerException is DbUpdateException && ex.InnerException.InnerException is not null && ex.InnerException.InnerException is PostgresException && ((PostgresException)(ex.InnerException.InnerException)).SqlState == "40001")
+                    {
+                        retry++;
+                        await Task.Delay(DelayInMs);
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+
+            return new RepositoryConcurrencyError<RSSFeed>();
         }
     }
 }
