@@ -11,7 +11,7 @@ namespace RSSFeedifyCommon.Services
 
         public LoggingService(string basePath, string configFilePath = "loggingsettings.json")
         {
-            Logger = Initialize(basePath);
+            Logger = Initialize(basePath, configFilePath);
         }
 
         public LoggingService(ConfigurationManager configuration)
@@ -22,7 +22,7 @@ namespace RSSFeedifyCommon.Services
             .CreateLogger();
         }
 
-        private Logger Initialize(string basePath, string configFilePath = "loggingsettings.json")
+        private Logger Initialize(string basePath, string configFilePath)
         {
             IConfigurationRoot configuration;
             try
@@ -42,7 +42,7 @@ namespace RSSFeedifyCommon.Services
 
                 return toReturn;
             }
-            catch (InvalidDataException e)
+            catch (Exception e) when (e is InvalidDataException || e is FileNotFoundException)
             {
                 var toReturn = GetDefaultRescueLogger();
 
