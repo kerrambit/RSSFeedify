@@ -1,4 +1,6 @@
 ﻿
+using System.IO;
+
 namespace RSSFeedifyCLIClient.Business
 {
     public class ApplicationError
@@ -63,6 +65,9 @@ namespace RSSFeedifyCLIClient.Business
                     ClientNetLib.Business.Errors.Error.NetworkNotSupported => "Operation not supported!",
                     ClientNetLib.Business.Errors.Error.NetworkUnexpectedDataType => "Wrong data type received!",
                     ClientNetLib.Business.Errors.Error.InvalidJsonFormat => "Invalid Json format!",
+                    ClientNetLib.Business.Errors.Error.UnkownEnvironmentVariable => $"Error occured when loading environment variable. Key does not exist or the path is invalid!",
+                    ClientNetLib.Business.Errors.Error.ConfigFileDirectoryLoadingError => "Error occured when loading config files directory!",
+                    ClientNetLib.Business.Errors.Error.EnvironmentFileLoadingError => "Error occured when loading the .env file!",
                     _ => "Error occurred!"
                 };
             } else

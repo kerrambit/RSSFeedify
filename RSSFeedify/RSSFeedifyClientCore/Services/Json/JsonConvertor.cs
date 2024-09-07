@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace ClientNetLib.Services
+namespace ClientNetLib.Services.Json
 {
     public static class JsonConvertor
     {

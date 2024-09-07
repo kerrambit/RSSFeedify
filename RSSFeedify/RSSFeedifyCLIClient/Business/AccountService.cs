@@ -1,6 +1,6 @@
 ﻿using ClientNetLib.Business;
 using ClientNetLib.Business.Errors;
-using ClientNetLib.Services;
+using ClientNetLib.Services.Json;
 using ClientNetLib.Services.Networking;
 using CommandParsonaut;
 using CommandParsonaut.Core;
@@ -70,7 +70,7 @@ namespace RSSFeedifyCLIClient.Business
             registartionData.Password = password;
             registartionData.ConfirmPassword = password;
 
-            var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.ApplicationUser, "register"), JsonConvertor.ConvertObjectToJsonString(registartionData));
+            var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(EndPoint.ApplicationUser.ConvertToString(), "register"), JsonConvertor.ConvertObjectToJsonString(registartionData));
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(new ApplicationError(Error.NetworkGeneral, requestResult.GetError));
@@ -116,7 +116,7 @@ namespace RSSFeedifyCLIClient.Business
             var logoutData = new LogoutDTO();
             logoutData.JWT = accessToken.GetValue;
 
-            var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.ApplicationUser, "logout"), JsonConvertor.ConvertObjectToJsonString(logoutData));
+            var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(EndPoint.ApplicationUser.ConvertToString(), "logout"), JsonConvertor.ConvertObjectToJsonString(logoutData));
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(new ApplicationError(Error.NetworkGeneral, requestResult.GetError));
@@ -147,7 +147,7 @@ namespace RSSFeedifyCLIClient.Business
 
         private async Task Login(LoginDTO loginData)
         {
-            var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.ApplicationUser, "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
+            var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(EndPoint.ApplicationUser.ConvertToString(), "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
             if (requestResult.IsError)
             {
                 _errorWriter.RenderErrorMessage(new ApplicationError(Error.NetworkGeneral, requestResult.GetError));

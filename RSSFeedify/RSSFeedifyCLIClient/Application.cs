@@ -1,4 +1,4 @@
-﻿using ClientNetLib.Services;
+﻿using ClientNetLib.Services.EnvironmentUtils;
 using ClientNetLib.Services.Networking;
 using CommandParsonaut.Core;
 using CommandParsonaut.Core.Types;
@@ -30,7 +30,7 @@ namespace RSSFeedifyCLIClient
             var configFilesDirectoryResult = ConfigDirectoryService.GetConfigFilesDirectory();
             if (configFilesDirectoryResult.IsError)
             {
-                writer.RenderErrorMessage(configFilesDirectoryResult.GetError);
+                writer.RenderErrorMessage(new ApplicationError(configFilesDirectoryResult.GetError).GetErrorMessage());
                 return;
             }
 
@@ -42,8 +42,8 @@ namespace RSSFeedifyCLIClient
             var envFilePathResult = ConfigDirectoryService.GetEnvironmentFilePath(configFilesDirectoryResult.GetValue);
             if (envFilePathResult.IsError)
             {
-                logger.Fatal(envFilePathResult.GetError);
-                writer.RenderErrorMessage(configFilesDirectoryResult.GetError);
+                logger.Fatal(new ApplicationError(envFilePathResult.GetError).GetErrorMessage());
+                writer.RenderErrorMessage(new ApplicationError(envFilePathResult.GetError).GetErrorMessage());
                 return;
             }
             logger.Information("Loaded .env file from '{Path}'.", envFilePathResult.GetValue);

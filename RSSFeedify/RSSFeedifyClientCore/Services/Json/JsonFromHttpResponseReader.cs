@@ -3,7 +3,7 @@ using ClientNetLib.Types;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace ClientNetLib.Services.Networking
+namespace ClientNetLib.Services.Json
 {
     public static class JsonFromHttpResponseReader
     {

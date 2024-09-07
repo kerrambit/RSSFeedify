@@ -1,6 +1,5 @@
 ﻿namespace ClientNetLib.Business.Errors
 {
-    [Flags]
     public enum Error
     {
         General,
@@ -13,7 +12,10 @@
         NetworkNotSupported,
         NetworkServerError,
         NetworkUnexpectedDataType,
-        InvalidJsonFormat
+        InvalidJsonFormat,
+        ConfigFileDirectoryLoadingError,
+        EnvironmentFileLoadingError,
+        UnkownEnvironmentVariable
     }
 
     public static class ApplicationErrorExtensions
