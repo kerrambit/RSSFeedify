@@ -1,8 +1,8 @@
-﻿using RSSFeedifyClientCore.Business.Errors;
-using RSSFeedifyCommon.Types;
-using static RSSFeedifyClientCore.Services.Networking.HTTPService;
+﻿using ClientNetLib.Business.Errors;
+using ClientNetLib.Types;
+using static ClientNetLib.Services.Networking.HTTPService;
 
-namespace RSSFeedifyClientCore.Services.Networking
+namespace ClientNetLib.Services.Networking
 {
     public class HttpResponseMessageValidator
     {
@@ -27,33 +27,33 @@ namespace RSSFeedifyClientCore.Services.Networking
             _exptectedContentType = contentType;
         }
 
-        public Result<string, DetailedApplicationError> Validate(HttpServiceResponseMessageMetaData httpResponseMessage)
+        public Result<string, DetailedError> Validate(HttpServiceResponseMessageMetaData httpResponseMessage)
         {
             switch (httpResponseMessage.StatusCode)
             {
                 case StatusCode.BadRequest:
-                    return Result.Error<string, DetailedApplicationError>(ApplicationError.NetworkBadRequest.ConvertToDetailedApplicationError());
+                    return Result.Error<string, DetailedError>(Error.NetworkBadRequest.ConvertToDetailedApplicationError());
                 case StatusCode.Unauthorized:
-                    return Result.Error<string, DetailedApplicationError>(ApplicationError.NetworkUnauthorized.ConvertToDetailedApplicationError());
+                    return Result.Error<string, DetailedError>(Error.NetworkUnauthorized.ConvertToDetailedApplicationError());
                 case StatusCode.Forbidden:
-                    return Result.Error<string, DetailedApplicationError>(ApplicationError.NetworkForbidden.ConvertToDetailedApplicationError());
+                    return Result.Error<string, DetailedError>(Error.NetworkForbidden.ConvertToDetailedApplicationError());
                 case StatusCode.NotFound:
-                    return Result.Error<string, DetailedApplicationError>(ApplicationError.NetworkNotFound.ConvertToDetailedApplicationError());
+                    return Result.Error<string, DetailedError>(Error.NetworkNotFound.ConvertToDetailedApplicationError());
                 case StatusCode.InternalServerError:
-                    return Result.Error<string, DetailedApplicationError>(ApplicationError.NetworkServerError.ConvertToDetailedApplicationError());
+                    return Result.Error<string, DetailedError>(Error.NetworkServerError.ConvertToDetailedApplicationError());
             }
 
             if (httpResponseMessage.StatusCode != _exptectedStatusCode)
             {
-                return Result.Error<string, DetailedApplicationError>(ApplicationError.NetworkUnexpectedStatusCode.ConvertToDetailedApplicationError($"Expected status code {_exptectedStatusCode}, actual: {httpResponseMessage.StatusCode}."));
+                return Result.Error<string, DetailedError>(Error.NetworkUnexpectedStatusCode.ConvertToDetailedApplicationError($"Expected status code {_exptectedStatusCode}, actual: {httpResponseMessage.StatusCode}."));
             }
 
             if (httpResponseMessage.ContentType != _exptectedContentType)
             {
-                return Result.Error<string, DetailedApplicationError>(ApplicationError.NetworkUnexpectedDataType.ConvertToDetailedApplicationError($"Expected content type {_exptectedContentType}, actual: {httpResponseMessage.ContentType}."));
+                return Result.Error<string, DetailedError>(Error.NetworkUnexpectedDataType.ConvertToDetailedApplicationError($"Expected content type {_exptectedContentType}, actual: {httpResponseMessage.ContentType}."));
             }
 
-            return Result.Ok<string, DetailedApplicationError>($"HttpResponseMessage is valid (StatusCode: {_exptectedStatusCode}, ContentType: {_exptectedContentType}).");
+            return Result.Ok<string, DetailedError>($"HttpResponseMessage is valid (StatusCode: {_exptectedStatusCode}, ContentType: {_exptectedContentType}).");
         }
     }
 

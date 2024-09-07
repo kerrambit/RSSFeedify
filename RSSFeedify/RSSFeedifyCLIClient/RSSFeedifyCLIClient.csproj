@@ -32,7 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RSSFeedifyClientCore\RSSFeedifyClientCore.csproj" />
+    <ProjectReference Include="..\RSSFeedifyClientCore\ClientNetLib.csproj" />
   </ItemGroup>
 
 </Project>
