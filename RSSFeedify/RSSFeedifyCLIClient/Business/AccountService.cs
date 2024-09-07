@@ -1,12 +1,12 @@
-﻿using CommandParsonaut;
+﻿using ClientNetLib.Business;
+using ClientNetLib.Business.Errors;
+using ClientNetLib.Services;
+using ClientNetLib.Services.Networking;
+using CommandParsonaut;
 using CommandParsonaut.Core;
 using CommandParsonaut.Interfaces;
 using CommandParsonaut.OtherToolkit;
 using RSSFeedifyCLIClient.IO;
-using RSSFeedifyClientCore.Business;
-using RSSFeedifyClientCore.Business.Errors;
-using RSSFeedifyClientCore.Services;
-using RSSFeedifyClientCore.Services.Networking;
 using RSSFeedifyCommon.Models;
 using Serilog;
 
@@ -73,7 +73,7 @@ namespace RSSFeedifyCLIClient.Business
             var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.ApplicationUser, "register"), JsonConvertor.ConvertObjectToJsonString(registartionData));
             if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(Error.NetworkGeneral, requestResult.GetError));
                 return;
             }
 
@@ -89,7 +89,7 @@ namespace RSSFeedifyCLIClient.Business
             var validationResult = _httpResponseMessageValidatorTxt.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
             if (validationResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                _errorWriter.RenderErrorMessage(new ApplicationError(validationResult.GetError), await HTTPService.RetrieveAndStringifyContent(response));
                 return;
             }
 
@@ -119,7 +119,7 @@ namespace RSSFeedifyCLIClient.Business
             var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.ApplicationUser, "logout"), JsonConvertor.ConvertObjectToJsonString(logoutData));
             if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(Error.NetworkGeneral, requestResult.GetError));
                 return;
             }
 
@@ -135,7 +135,7 @@ namespace RSSFeedifyCLIClient.Business
             var validationResult = _httpResponseMessageValidatorTxt.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
             if (validationResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                _errorWriter.RenderErrorMessage(new ApplicationError(validationResult.GetError), await HTTPService.RetrieveAndStringifyContent(response));
                 return;
             }
 
@@ -150,7 +150,7 @@ namespace RSSFeedifyCLIClient.Business
             var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.ApplicationUser, "login"), JsonConvertor.ConvertObjectToJsonString(loginData));
             if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(Error.NetworkGeneral, requestResult.GetError));
                 return;
             }
 
@@ -166,14 +166,14 @@ namespace RSSFeedifyCLIClient.Business
             var validationResult = _httpResponseMessageValidatorJson.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
             if (validationResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                _errorWriter.RenderErrorMessage(new ApplicationError(validationResult.GetError), await HTTPService.RetrieveAndStringifyContent(response));
                 return;
             }
 
             var jsonResult = await JsonFromHttpResponseReader.ReadJson<LoginResponseDTO>(response);
             if (jsonResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(jsonResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(jsonResult.GetError));
             }
 
             _writer.RenderMessage("You have been successfully logged in.");

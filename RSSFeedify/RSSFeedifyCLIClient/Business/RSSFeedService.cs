@@ -1,9 +1,9 @@
-﻿using CommandParsonaut.Core.Types;
+﻿using ClientNetLib.Business.Errors;
+using ClientNetLib.Services;
+using ClientNetLib.Services.Networking;
+using CommandParsonaut.Core.Types;
 using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.IO;
-using RSSFeedifyClientCore.Business.Errors;
-using RSSFeedifyClientCore.Services;
-using RSSFeedifyClientCore.Services.Networking;
 using RSSFeedifyCommon.Models;
 using RSSFeedifyCommon.Types;
 using System.Diagnostics;
@@ -83,7 +83,7 @@ namespace RSSFeedifyCLIClient.Business
             var requestResult = await _httpService.GetAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeeds, new List<(string, string)>() { ("page", $"{_pages["RSSFeeds"]}"), ("pageSize", $"{PageSize}") }), authenticationHeader);
             if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(new DetailedError(Error.NetworkGeneral, requestResult.GetError)));
                 return;
             }
 
@@ -99,14 +99,14 @@ namespace RSSFeedifyCLIClient.Business
             var validationResult = _httpResponseMessageValidatorJson.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
             if (validationResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                _errorWriter.RenderErrorMessage(new ApplicationError(validationResult.GetError), await HTTPService.RetrieveAndStringifyContent(response));
                 return;
             }
 
             var result = await JsonFromHttpResponseReader.ReadJson<List<RSSFeed>>(response);
             if (result.IsError)
             {
-                _errorWriter.RenderErrorMessage(result.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(result.GetError));
                 return;
             }
             foreach (var feed in result.GetValue)
@@ -133,7 +133,7 @@ namespace RSSFeedifyCLIClient.Business
             var requestResult = await _httpService.DeleteAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeeds, guid), authenticationHeader);
             if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(new DetailedError(Error.NetworkGeneral, requestResult.GetError)));
                 return;
             }
 
@@ -149,14 +149,14 @@ namespace RSSFeedifyCLIClient.Business
             var validationResult = _httpResponseMessageValidatorJson.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
             if (validationResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                _errorWriter.RenderErrorMessage(new ApplicationError(validationResult.GetError), await HTTPService.RetrieveAndStringifyContent(response));
                 return;
             }
 
             var result = await JsonFromHttpResponseReader.ReadJson<RSSFeed>(response);
             if (result.IsError)
             {
-                _errorWriter.RenderErrorMessage(result.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(result.GetError));
                 return;
             }
 
@@ -179,7 +179,7 @@ namespace RSSFeedifyCLIClient.Business
             var requestResult = await _httpService.GetAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeeds, guid), authenticationHeader);
             if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(new DetailedError(Error.NetworkGeneral, requestResult.GetError)));
                 return;
             }
 
@@ -195,14 +195,14 @@ namespace RSSFeedifyCLIClient.Business
             var validationResult = _httpResponseMessageValidatorJson.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
             if (validationResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                _errorWriter.RenderErrorMessage(new ApplicationError(validationResult.GetError), await HTTPService.RetrieveAndStringifyContent(response));
                 return;
             }
 
             var result = await JsonFromHttpResponseReader.ReadJson<RSSFeed>(response);
             if (result.IsError)
             {
-                _errorWriter.RenderErrorMessage(result.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(result.GetError));
                 return;
             }
 
@@ -212,7 +212,7 @@ namespace RSSFeedifyCLIClient.Business
             requestResult = await _httpService.PutAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeeds, guid), JsonConvertor.ConvertObjectToJsonString(feed), authenticationHeader);
             if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(new DetailedError(Error.NetworkGeneral, requestResult.GetError)));
                 return;
             }
 
@@ -228,7 +228,7 @@ namespace RSSFeedifyCLIClient.Business
             validationResult = _httpResponseMessageValidatorJson.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
             if (validationResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                _errorWriter.RenderErrorMessage(new ApplicationError(validationResult.GetError), await HTTPService.RetrieveAndStringifyContent(response));
                 return;
             }
 
@@ -254,7 +254,7 @@ namespace RSSFeedifyCLIClient.Business
             var requestResult = await _httpService.GetAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeedItems, guid), authenticationHeader);
             if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(new DetailedError(Error.NetworkGeneral, requestResult.GetError)));
                 return;
             }
 
@@ -270,14 +270,14 @@ namespace RSSFeedifyCLIClient.Business
             var validationResult = _httpResponseMessageValidatorJson.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
             if (validationResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                _errorWriter.RenderErrorMessage(new ApplicationError(validationResult.GetError), await HTTPService.RetrieveAndStringifyContent(response));
                 return;
             }
 
             var jsonResult = await JsonFromHttpResponseReader.ReadJson<RSSFeedItem>(response);
             if (jsonResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(jsonResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(jsonResult.GetError));
                 return;
             }
 
@@ -287,7 +287,7 @@ namespace RSSFeedifyCLIClient.Business
                 string link = article.Id;
                 if (!IsValidUrl(link))
                 {
-                    _errorWriter.RenderInvalidUrlWarningMessage(link);
+                    _errorWriter.RenderErrorMessage(new ApplicationError(Errors.Error.InvalidUrl, $"Provided invalid URL: '{link}'"));
                     return;
                 }
 
@@ -334,7 +334,7 @@ namespace RSSFeedifyCLIClient.Business
             var requestResult = await _httpService.GetAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeedItems, new List<(string, string)>() { ("byRSSFeedGuid", guid), ("page", $"{_pages["RSSFeedItems"]}"), ("pageSize", $"{PageSize}") }), authenticationHeader);
             if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(new DetailedError(Error.NetworkGeneral, requestResult.GetError)));
                 return;
             }
 
@@ -350,7 +350,7 @@ namespace RSSFeedifyCLIClient.Business
             var validationResult = _httpResponseMessageValidatorJson.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
             if (validationResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                _errorWriter.RenderErrorMessage(new ApplicationError(validationResult.GetError), await HTTPService.RetrieveAndStringifyContent(response));
                 return;
             }
 
@@ -385,7 +385,7 @@ namespace RSSFeedifyCLIClient.Business
             var requestResult = await _httpService.PostAsync(_uriResourceCreator.BuildUri(UriResourceCreator.EndPoint.RSSFeeds), JsonConvertor.ConvertObjectToJsonString(feed), authenticationHeader);
             if (requestResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(ApplicationError.NetworkGeneral, requestResult.GetError);
+                _errorWriter.RenderErrorMessage(new ApplicationError(new DetailedError(Error.NetworkGeneral, requestResult.GetError)));
                 return;
             }
 
@@ -401,7 +401,7 @@ namespace RSSFeedifyCLIClient.Business
             var validationResult = _httpResponseMessageValidatorCreate.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
             if (validationResult.IsError)
             {
-                _errorWriter.RenderErrorMessage(validationResult.GetError, await HTTPService.RetrieveAndStringifyContent(response));
+                _errorWriter.RenderErrorMessage(new ApplicationError(validationResult.GetError), await HTTPService.RetrieveAndStringifyContent(response));
                 return;
             }
 
@@ -453,23 +453,23 @@ namespace RSSFeedifyCLIClient.Business
             return (int)Math.Ceiling(count / (double)PageSize);
         }
 
-        private async Task<Result<int, DetailedApplicationError>> RetrieveCount(UriResourceCreator.EndPoint endpoint, (string key, string value) queryString, IAuthenticationHeader authenticationHeader)
+        private async Task<Result<int, ApplicationError>> RetrieveCount(UriResourceCreator.EndPoint endpoint, (string key, string value) queryString, IAuthenticationHeader authenticationHeader)
         {
             var count = await _httpService.GetAsync(_uriResourceCreator.BuildUri(endpoint, "count", queryString), authenticationHeader);
             return await ParseRetrievedCountResponse(count);
         }
 
-        private async Task<Result<int, DetailedApplicationError>> RetrieveCount(UriResourceCreator.EndPoint endpoint, IAuthenticationHeader authenticationHeader)
+        private async Task<Result<int, ApplicationError>> RetrieveCount(UriResourceCreator.EndPoint endpoint, IAuthenticationHeader authenticationHeader)
         {
             var count = await _httpService.GetAsync(_uriResourceCreator.BuildUri(endpoint, "count"), authenticationHeader);
             return await ParseRetrievedCountResponse(count);
         }
 
-        private async Task<Result<int, DetailedApplicationError>> ParseRetrievedCountResponse(Result<HttpResponseMessage, string> count)
+        private async Task<Result<int, ApplicationError>> ParseRetrievedCountResponse(ClientNetLib.Types.Result<HttpResponseMessage, string> count)
         {
             if (count.IsError)
             {
-                return Result.Error<int, DetailedApplicationError>(new(ApplicationError.NetworkGeneral, count.GetError));
+                return Result.Error<int, ApplicationError>(new ApplicationError(new DetailedError(Error.NetworkGeneral, count.GetError)));
             }
             var response = count.GetValue;
 
@@ -483,17 +483,17 @@ namespace RSSFeedifyCLIClient.Business
             var validationResult = _httpResponseMessageValidatorTxt.Validate(new HTTPService.HttpServiceResponseMessageMetaData(HTTPService.RetrieveContentType(response), HTTPService.RetrieveStatusCode(response)));
             if (validationResult.IsError)
             {
-                var error = new DetailedApplicationError(validationResult.GetError.Error, await HTTPService.RetrieveAndStringifyContent(response));
-                return Result.Error<int, DetailedApplicationError>(error);
+                var error = new DetailedError(validationResult.GetError.Error, await HTTPService.RetrieveAndStringifyContent(response));
+                return Result.Error<int, ApplicationError>(new(error));
             }
 
             var result = await JsonFromHttpResponseReader.ReadJson<int>(response);
             if (result.IsError)
             {
-                return Result.Error<int, DetailedApplicationError>(result.GetError.ConvertToDetailedApplicationError());
+                return Result.Error<int, ApplicationError>(new(result.GetError.ConvertToDetailedApplicationError()));
             }
 
-            return Result.Ok<int, DetailedApplicationError>(result.GetValue);
+            return Result.Ok<int, ApplicationError>(result.GetValue);
         }
 
         private void RenderRSSFeed(RSSFeed feed)

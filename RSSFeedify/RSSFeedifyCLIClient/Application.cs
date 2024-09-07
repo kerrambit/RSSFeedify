@@ -1,11 +1,11 @@
-﻿using CommandParsonaut.Core;
+﻿using ClientNetLib.Services;
+using ClientNetLib.Services.Networking;
+using CommandParsonaut.Core;
 using CommandParsonaut.Core.Types;
 using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.Business;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Repository;
-using RSSFeedifyClientCore.Services;
-using RSSFeedifyClientCore.Services.Networking;
 using RSSFeedifyCommon.Services;
 
 namespace RSSFeedifyCLIClient

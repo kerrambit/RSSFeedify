@@ -1,6 +1,6 @@
-﻿using RSSFeedifyCommon.Types;
+﻿using ClientNetLib.Types;
 
-namespace RSSFeedifyClientCore.Services
+namespace ClientNetLib.Services
 {
     public static class ConfigDirectoryService
     {
