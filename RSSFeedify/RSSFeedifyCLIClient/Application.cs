@@ -53,7 +53,7 @@ namespace RSSFeedifyCLIClient
             var envResult = EnvironmentVariablesLoader.LoadEnvironmentVariable(envFilePathResult.GetValue, "RSSFEEDIFY_CLI_CLIENT_BASE_URL");
             if (envResult.IsError)
             {
-                logger.Warning($"Using default base URL '{baseUri}' because the custom URL was not found. Detailed message: '{envResult.GetError}'");
+                logger.Warning($"Using default base URL '{baseUri}' because the custom URL was not found. {new ApplicationError(envResult.GetError).GetErrorMessage()}. Details: '{new ApplicationError(envResult.GetError).Details}'.");
             }
             else
             {
