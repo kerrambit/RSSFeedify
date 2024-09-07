@@ -1,7 +1,4 @@
-﻿
-using System.IO;
-
-namespace RSSFeedifyCLIClient.Business
+﻿namespace RSSFeedifyCLIClient.Business
 {
     public class ApplicationError
     {
@@ -37,7 +34,7 @@ namespace RSSFeedifyCLIClient.Business
         public ApplicationError(Errors.Error error, string details)
         {
             _applicationError = error;
-            _chosenError= ChosenError.Application;
+            _chosenError = ChosenError.Application;
             Details = details;
         }
 
@@ -70,7 +67,8 @@ namespace RSSFeedifyCLIClient.Business
                     ClientNetLib.Business.Errors.Error.EnvironmentFileLoadingError => "Error occured when loading the .env file!",
                     _ => "Error occurred!"
                 };
-            } else
+            }
+            else
             {
                 message = _applicationError switch
                 {

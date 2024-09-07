@@ -14,7 +14,7 @@ namespace ClientNetLib.Services.EnvironmentUtils
             }
             catch (Exception e) when (e is AppDomainUnloadedException)
             {
-                return Result.Error<string, DetailedError>(new (Error.ConfigFileDirectoryLoadingError, e.Message));
+                return Result.Error<string, DetailedError>(new(Error.ConfigFileDirectoryLoadingError, e.Message));
             }
 
             return Result.Ok<string, DetailedError>(configFilesDirectory);

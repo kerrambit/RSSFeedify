@@ -11,7 +11,7 @@ namespace ClientNetLib.Services.EnvironmentUtils
             var variable = Environment.GetEnvironmentVariable(key);
             if (variable == null)
             {
-                return Result.Error<string, DetailedError>(new (Error.UnkownEnvironmentVariable, $"Key: {key}, path: {path}"));
+                return Result.Error<string, DetailedError>(new(Error.UnkownEnvironmentVariable, $"Key: {key}, path: {path}"));
             }
 
             return Result.Ok<string, DetailedError>(variable);
