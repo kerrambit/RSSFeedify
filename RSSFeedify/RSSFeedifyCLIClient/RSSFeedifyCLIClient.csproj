@@ -31,7 +31,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ClientNetLib\ClientNetLib.csproj" />
-    <ProjectReference Include="..\RSSFeedifyClientCore\ClientNetLib.csproj" />
   </ItemGroup>
 
 </Project>
