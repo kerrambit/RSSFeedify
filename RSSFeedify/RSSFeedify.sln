@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RSSFeedify", "RSSFeedify\RS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RSSFeedifyCLIClient", "RSSFeedifyCLIClient\RSSFeedifyCLIClient.csproj", "{1E1EAE05-CBDA-4D34-A0B2-5F920A9CAFE7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientNetLib", "RSSFeedifyClientCore\ClientNetLib.csproj", "{64E98F0C-0854-4573-807D-C2651E9BAB7E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientNetLib", "ClientNetLib\ClientNetLib.csproj", "{64E98F0C-0854-4573-807D-C2651E9BAB7E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RSSFeedifyCommon", "RSSFeedifyCommon\RSSFeedifyCommon.csproj", "{A0985B8F-9175-4845-98BA-BE455B6D6DD4}"
 EndProject
