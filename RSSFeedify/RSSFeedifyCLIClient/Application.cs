@@ -1,11 +1,11 @@
-﻿using CommandParsonaut.Core;
+﻿using ClientNetLib.Services.EnvironmentUtils;
+using ClientNetLib.Services.Networking;
+using CommandParsonaut.Core;
 using CommandParsonaut.Core.Types;
 using CommandParsonaut.Interfaces;
 using RSSFeedifyCLIClient.Business;
 using RSSFeedifyCLIClient.IO;
 using RSSFeedifyCLIClient.Repository;
-using RSSFeedifyClientCore.Services;
-using RSSFeedifyClientCore.Services.Networking;
 using RSSFeedifyCommon.Services;
 
 namespace RSSFeedifyCLIClient
@@ -30,7 +30,7 @@ namespace RSSFeedifyCLIClient
             var configFilesDirectoryResult = ConfigDirectoryService.GetConfigFilesDirectory();
             if (configFilesDirectoryResult.IsError)
             {
-                writer.RenderErrorMessage(configFilesDirectoryResult.GetError);
+                writer.RenderErrorMessage(new ApplicationError(configFilesDirectoryResult.GetError).GetErrorMessage());
                 return;
             }
 
@@ -42,8 +42,8 @@ namespace RSSFeedifyCLIClient
             var envFilePathResult = ConfigDirectoryService.GetEnvironmentFilePath(configFilesDirectoryResult.GetValue);
             if (envFilePathResult.IsError)
             {
-                logger.Fatal(envFilePathResult.GetError);
-                writer.RenderErrorMessage(configFilesDirectoryResult.GetError);
+                logger.Fatal(new ApplicationError(envFilePathResult.GetError).GetErrorMessage());
+                writer.RenderErrorMessage(new ApplicationError(envFilePathResult.GetError).GetErrorMessage());
                 return;
             }
             logger.Information("Loaded .env file from '{Path}'.", envFilePathResult.GetValue);
@@ -53,7 +53,7 @@ namespace RSSFeedifyCLIClient
             var envResult = EnvironmentVariablesLoader.LoadEnvironmentVariable(envFilePathResult.GetValue, "RSSFEEDIFY_CLI_CLIENT_BASE_URL");
             if (envResult.IsError)
             {
-                logger.Warning($"Using default base URL '{baseUri}' because the custom URL was not found. Detailed message: '{envResult.GetError}'");
+                logger.Warning($"Using default base URL '{baseUri}' because the custom URL was not found. {new ApplicationError(envResult.GetError).GetErrorMessage()}. Details: '{new ApplicationError(envResult.GetError).Details}'.");
             }
             else
             {

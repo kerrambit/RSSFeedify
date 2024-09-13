@@ -1,22 +1,12 @@
 ﻿using System.Text;
 
-namespace RSSFeedifyClientCore.Services.Networking
+namespace ClientNetLib.Services.Networking
 {
+    using EndPoint = string;
+
     public class UriResourceCreator
     {
         public Uri BaseUrl { get; private set; }
-
-        public enum EndPoint
-        {
-            RSSFeeds,
-            RSSFeedItems,
-            ApplicationUser
-        };
-
-        public UriResourceCreator(string baseUrl)
-        {
-            BaseUrl = new(baseUrl);
-        }
 
         public UriResourceCreator(Uri baseUrl)
         {
@@ -26,20 +16,7 @@ namespace RSSFeedifyClientCore.Services.Networking
         public Uri BuildUri(EndPoint endPoint)
         {
             UriBuilder uriBuilder = new UriBuilder(BaseUrl);
-
-            switch (endPoint)
-            {
-                case EndPoint.RSSFeeds:
-                    uriBuilder.Path += "RSSFeeds";
-                    break;
-                case EndPoint.RSSFeedItems:
-                    uriBuilder.Path += "RSSFeedItems";
-                    break;
-                case EndPoint.ApplicationUser:
-                    uriBuilder.Path += "ApplicationUser";
-                    break;
-            }
-
+            uriBuilder.Path += endPoint;
             return uriBuilder.Uri;
         }
 

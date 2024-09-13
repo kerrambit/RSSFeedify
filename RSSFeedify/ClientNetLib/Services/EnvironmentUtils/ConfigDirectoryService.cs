@@ -1,10 +1,11 @@
-﻿using RSSFeedifyCommon.Types;
+﻿using ClientNetLib.Business.Errors;
+using ClientNetLib.Types;
 
-namespace RSSFeedifyClientCore.Services
+namespace ClientNetLib.Services.EnvironmentUtils
 {
     public static class ConfigDirectoryService
     {
-        public static Result<string, string> GetConfigFilesDirectory()
+        public static Result<string, DetailedError> GetConfigFilesDirectory()
         {
             string configFilesDirectory = string.Empty;
             try
@@ -13,13 +14,13 @@ namespace RSSFeedifyClientCore.Services
             }
             catch (Exception e) when (e is AppDomainUnloadedException)
             {
-                return Result.Error<string, string>($"Exception occured when loading config files directory: '{e.Message}'.");
+                return Result.Error<string, DetailedError>(new(Error.ConfigFileDirectoryLoadingError, e.Message));
             }
 
-            return Result.Ok<string, string>(configFilesDirectory);
+            return Result.Ok<string, DetailedError>(configFilesDirectory);
         }
 
-        public static Result<string, string> GetEnvironmentFilePath()
+        public static Result<string, DetailedError> GetEnvironmentFilePath()
         {
             var configFilesDirectoryResult = GetConfigFilesDirectory();
             if (configFilesDirectoryResult.IsSuccess)
@@ -28,28 +29,28 @@ namespace RSSFeedifyClientCore.Services
                 try
                 {
                     envFilePath = Path.Combine(configFilesDirectoryResult.GetValue, ".env");
-                    return Result.Ok<string, string>(envFilePath);
+                    return Result.Ok<string, DetailedError>(envFilePath);
                 }
                 catch (Exception e) when (e is ArgumentException || e is ArgumentNullException)
                 {
-                    return Result.Error<string, string>($"Exception occured when loading environment variable(s): '{e.Message}'.");
+                    return Result.Error<string, DetailedError>(new(Error.EnvironmentFileLoadingError, e.Message));
                 }
             }
 
             return configFilesDirectoryResult;
         }
 
-        public static Result<string, string> GetEnvironmentFilePath(string basePath)
+        public static Result<string, DetailedError> GetEnvironmentFilePath(string basePath)
         {
             string envFilePath = string.Empty;
             try
             {
                 envFilePath = Path.Combine(basePath, ".env");
-                return Result.Ok<string, string>(envFilePath);
+                return Result.Ok<string, DetailedError>(envFilePath);
             }
             catch (Exception e) when (e is ArgumentException || e is ArgumentNullException)
             {
-                return Result.Error<string, string>($"Exception occured when loading the .env file: '{e.Message}'.");
+                return Result.Error<string, DetailedError>(new(Error.EnvironmentFileLoadingError, e.Message));
             }
         }
     }

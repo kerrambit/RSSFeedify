@@ -1,4 +1,4 @@
-# RSSFeedify - version 1.2.0
+# RSSFeedify - version 1.2.1
 Simple RSS proxy server with a REST API for storing, uploading and updating RSS feeds with easy-to-use CLI client.
 
 ## Setup - API
@@ -23,7 +23,7 @@ docker ps
 ```
 
 ## Setup - CLI client
-- **RSSFeedify version 1.2.0** offers also CLI client. The easist way to run it is via Visual Studio. Open the whole solution and run (preferably in *Release* mode) the RSSFeedifyCLIClient project.
+- **RSSFeedify version 1.2.1** offers also CLI client. The easist way to run it is via Visual Studio. Open the whole solution and run (preferably in *Release* mode) the RSSFeedifyCLIClient project.
 
 ## Setup - For developers
 - The following information can be handy for developers. You might have noticed also another two environment files, one in *RSSFeedify/RSSFeedify/RSSFeedify* (we will refer to it simply as *RSSFeedify* project) and in *RSSFeedify/RSSFeedify/RSSFeedifyCLIClient* (*RSSFeedifyCLIClient* project). The first mentioned is used when you run API via Visual Studio (no docker compose file), basically it holds very similiar data as the *.env* file for production. The last *.env* can be used to set URL inside the CLI client (development API runs under HTTPS - different URL needed than with docker compose file).
@@ -79,3 +79,5 @@ For Redis, you can use application such as RedisInsight: https://redis.io/insigh
 - **1.1.0** - This version brought authentication and authorization support via JWT. Three new endpoints were added to allow user registration, login, and logout, significantly improving security. The entire API underwent thorough testing, and multiple bugs were resolved, ensuring smooth operation. Also, all API responses were standardized with unified warning and error messages. One major improvement was the introduction of a Docker Compose file, making deployment much simpler for end users—requiring just a single command to run the entire API setup.
 
 - **1.2.0** - Implemented logging enhancements across various components, enabling better monitoring and troubleshooting. Fixed multiple bugs, including a critical race condition issue during the creation of RSS feeds, ensuring more reliable operation under concurrent scenarios. Integrated a continuous integration and deployment (CI/CD) pipeline, automating the build and deployment process. Added basic unit tests to improve test coverage and ensure code stability. Introduced a new RSSFeedifyCommon project to centralize common functionalities. Updated to CommandParsonaut version 1.3.0, improving command parsing capabilities. Various other improvements and optimizations across the project.
+
+- **1.2.1** - Release mainly focused on the development side. The project RSSFeedifyClientCore was renamed to ClientNetLib, and significant refactoring, including file restructuring, was performed. Additionally, unused NuGet packages were removed, resolving related issues.

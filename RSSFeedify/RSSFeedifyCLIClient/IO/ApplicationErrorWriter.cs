@@ -1,5 +1,6 @@
 ﻿using CommandParsonaut.Interfaces;
-using RSSFeedifyClientCore.Business.Errors;
+using RSSFeedifyCLIClient.Business;
+using RSSFeedifyCLIClient.Business.Errors;
 
 namespace RSSFeedifyCLIClient.IO
 {
@@ -13,7 +14,7 @@ namespace RSSFeedifyCLIClient.IO
         }
         public void RenderErrorMessage()
         {
-            RenderErrorMessage(ApplicationError.General);
+            RenderErrorMessage(new ApplicationError(Error.General));
         }
 
         public void RenderErrorMessage(string error)
@@ -21,60 +22,27 @@ namespace RSSFeedifyCLIClient.IO
             _writer.RenderErrorMessage(error);
         }
 
-        public void RenderErrorMessage(ApplicationError error, string details)
-        {
-            _writer.RenderErrorMessage(CreateErrorMessage(error, details));
-        }
-
         public void RenderErrorMessage(ApplicationError error)
         {
             _writer.RenderErrorMessage(CreateErrorMessage(error));
         }
 
-        public void RenderErrorMessage(DetailedApplicationError error)
+        public void RenderErrorMessage(ApplicationError error, string? overrideDetails = null)
         {
-            _writer.RenderErrorMessage(CreateErrorMessage(error.Error, error.Details));
-        }
-
-        public void RenderErrorMessage(DetailedApplicationError error, string? overrideDetails = null)
-        {
-            var details = error.Details;
-            if (!error.HasDetails() && overrideDetails is not null)
+            if (error.Details.Length != 0 && overrideDetails is not null)
             {
-                details = overrideDetails;
+                error.Details = overrideDetails;
             }
 
-            _writer.RenderErrorMessage(CreateErrorMessage(error.Error, details));
+            _writer.RenderErrorMessage(CreateErrorMessage(error));
         }
 
-        // TODO: should be replaces by DetailedApplicationError
-        public void RenderInvalidUrlWarningMessage(string link)
+        private string CreateErrorMessage(ApplicationError error)
         {
-            _writer.RenderWarningMessage($"Provided URL '{link}' does not seem to be valid URL and thus the link was refused to be opened in a browser.");
-        }
-
-        private string CreateErrorMessage(ApplicationError error, string? details = null)
-        {
-            string message = error switch
+            string message = error.GetErrorMessage();
+            if (!string.IsNullOrEmpty(error.Details))
             {
-                ApplicationError.General => "Error occurred!",
-                ApplicationError.NetworkGeneral => "Unable to send the request!",
-                ApplicationError.NetworkUnexpectedStatusCode => "Unexpected status code received!",
-                ApplicationError.NetworkBadRequest => "Bad request!",
-                ApplicationError.NetworkForbidden => "Access forbidden!",
-                ApplicationError.NetworkNotFound => "Not found!",
-                ApplicationError.NetworkUnauthorized => "Unauthorized access!",
-                ApplicationError.NetworkNotSupported => "Operation not supported!",
-                ApplicationError.NetworkServerError => "Server error!",
-                ApplicationError.NetworkUnexpectedDataType => "Wrong data type received!",
-                ApplicationError.InvalidJsonFormat => "Invalid Json format!",
-                ApplicationError.UserNotLoggedIn => "You are not logged in!",
-                _ => "Error occurred!"
-            };
-
-            if (!string.IsNullOrEmpty(details))
-            {
-                message += $" Detailed message: '{details}'.";
+                message += $" Detailed message: '{error.Details}'.";
             }
 
             return message;

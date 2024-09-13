@@ -1,7 +1,7 @@
-﻿using RSSFeedifyCommon.Types;
+﻿using ClientNetLib.Types;
 using System.Text;
 
-namespace RSSFeedifyClientCore.Services.Networking
+namespace ClientNetLib.Services.Networking
 {
     public class HTTPService : IDisposable
     {

@@ -1,7 +1,8 @@
-﻿using RSSFeedifyClientCore.Business.Errors;
+﻿using RSSFeedifyCLIClient.Business;
+using RSSFeedifyCLIClient.Business.Errors;
 using RSSFeedifyCommon.Types;
 
-namespace RSSFeedifyClientCore.Business
+namespace ClientNetLib.Business
 {
     public class ApplicationUser
     {
@@ -27,7 +28,7 @@ namespace RSSFeedifyClientCore.Business
         {
             if (!SignedIn)
             {
-                return Result.Error<string, ApplicationError>(ApplicationError.UserNotLoggedIn);
+                return Result.Error<string, ApplicationError>(new(Error.UserNotLoggedIn));
             }
 
             return Result.Ok<string, ApplicationError>(_accessToken);
